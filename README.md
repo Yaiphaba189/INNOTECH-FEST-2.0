@@ -34,12 +34,18 @@ Complete project specifications are located in the [`Docs/`](Docs/) directory:
 ```
 .
 ├── Docs/                    # Project specifications & competition blueprints
-├── backend/                 # FastAPI application, SQLAlchemy, PostGIS & PyTorch
+├── intelligence_layer/      # Dedicated AI/ML models, phenology rules & OR-Tools
+│   ├── module_a_disease/    # Computer vision screening, weights, triage
+│   ├── module_b_harvest/    # Phenological GDD rules & weather risk alerts
+│   ├── module_c_pricing/    # Transparent net-return deductions & ranking
+│   ├── module_d_logistics/  # Google OR-Tools CVRPTW vehicle route solver
+│   ├── pipelines/           # Unified inference and calculation interfaces
+│   ├── notebooks/           # Training notebooks & exploratory analysis
+│   └── tests/               # Model and algorithmic unit tests
+├── backend/                 # FastAPI application, SQLAlchemy, PostGIS & JWT
 │   ├── app/
 │   │   ├── api/             # REST API endpoint routers
-│   │   ├── services/        # Business logic orchestration
-│   │   ├── ml/              # PyTorch model loading and inference
-│   │   └── optimisation/    # Google OR-Tools vehicle routing solver
+│   │   └── services/        # Business logic orchestration & DB transactions
 │   ├── tests/               # Backend automated test suite
 │   ├── alembic/             # PostgreSQL database migrations
 │   └── scripts/             # Demonstration seed data scripts
@@ -63,9 +69,9 @@ Complete project specifications are located in the [`Docs/`](Docs/) directory:
 
 ## Team Execution Roles (3-Member Allocation)
 
-- **Member 1 (AI / ML Engineer):** Computer vision pipeline, phenology rules engine, net pricing model, OR-Tools routing solver.
-- **Member 2 (Backend & Systems Engineer):** PostgreSQL/PostGIS database, FastAPI service layer, JWT auth & RBAC, Docker deployment.
-- **Member 3 (Frontend & UI/UX Engineer):** Next.js 14 responsive application, agrarian design system, camera compression, trilingual Meiteilon engine, live pitch flow.
+- **Member 1 (AI / ML Engineer):** Owns `intelligence_layer/` (computer vision pipeline, phenology rules engine, net pricing model, OR-Tools routing solver).
+- **Member 2 (Backend & Systems Engineer):** Owns `backend/` (PostgreSQL/PostGIS database, FastAPI service layer, JWT auth & RBAC, Docker deployment).
+- **Member 3 (Frontend & UI/UX Engineer):** Owns `frontend/` (Next.js 14 responsive application, agrarian design system, camera compression, trilingual Meiteilon engine, live pitch flow).
 
 ---
 

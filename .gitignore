@@ -49,7 +49,7 @@ htmlcov/
 *.onnx
 # Allow placeholder gitkeep in models directories
 !data/models/.gitkeep
-!backend/app/ml/models/.gitkeep
+!intelligence_layer/module_a_disease/models/.gitkeep
 
 # Node.js & Frontend
 node_modules/
