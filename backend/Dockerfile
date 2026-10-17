@@ -1,6 +1,8 @@
 FROM python:3.11-slim
 
-# Set environment variables
+# Copy official uv binary for high-speed package management
+COPY --from=ghcr.io/astral-sh/uv:0.9.11 /uv /bin/uv
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/backend:/app
@@ -14,10 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy backend requirements and install
+# Install Python dependencies using uv for 10x faster builds
 COPY backend/requirements.txt /app/backend/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r /app/backend/requirements.txt
+RUN uv pip install --system --no-cache -r /app/backend/requirements.txt
 
 # Copy backend application, intelligence layer, and demo data
 COPY backend /app/backend
