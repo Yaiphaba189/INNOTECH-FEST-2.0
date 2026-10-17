@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: harvestlink_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-harvestlink_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-harvestlink_password}
+      POSTGRES_DB: ${POSTGRES_DB:-harvestlink_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-harvestlink_user} -d ${POSTGRES_DB:-harvestlink_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    container_name: harvestlink_backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-harvestlink_user}:${POSTGRES_PASSWORD:-harvestlink_password}@db:5432/${POSTGRES_DB:-harvestlink_db}
+      - SECRET_KEY=${SECRET_KEY:-dev_secret_key_innotech_2026}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/Dockerfile.frontend
+    container_name: harvestlink_frontend
+    restart: always
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  postgres_data:
