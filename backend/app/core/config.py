@@ -58,11 +58,18 @@ class Settings(BaseSettings):
     MODEL_WEIGHTS_PATH: str = os.path.join(REPO_ROOT, "data", "models", "pineapple_mobilenet_v1.pt")
     INFERENCE_DEVICE: str = "cpu"
 
+    ROOT_ENV_FILE: str = os.path.join(REPO_ROOT, ".env")
+    BACKEND_ENV_FILE: str = os.path.join(REPO_ROOT, "backend", ".env")
+
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(
+            os.path.join(REPO_ROOT, ".env"),
+            os.path.join(REPO_ROOT, "backend", ".env"),
+            ".env",
+        ),
         env_file_encoding="utf-8",
         case_sensitive=True,
-        extra="allow"
+        extra="allow",
     )
 
 
