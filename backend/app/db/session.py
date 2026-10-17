@@ -9,12 +9,9 @@ logger = logging.getLogger(__name__)
 db_url = settings.DATABASE_URL
 engine_args = {"echo": False, "future": True}
 
-try:
-    engine = create_async_engine(db_url, **engine_args)
-except Exception as e:
-    logger.warning(f"Could not initialize primary database engine {db_url}: {e}")
-    db_url = settings.FALLBACK_SQLITE_URL
-    engine = create_async_engine(db_url, **engine_args)
+# create_async_engine never opens a connection, so it cannot fail here. The real
+# fallback decision is made in init_db(), where a connection is actually established.
+engine = create_async_engine(db_url, **engine_args)
 
 _sessionmaker = async_sessionmaker(
     bind=engine,
@@ -55,17 +52,37 @@ async def init_db():
 
     try:
         async with engine.begin() as conn:
-            if "postgresql" in str(engine.url):
+            if engine.dialect.name == "postgresql":
+                # PostgreSQL aborts the entire transaction when any statement fails, so the
+                # extension probe gets its own savepoint. Without it, an unavailable PostGIS
+                # poisons the transaction, the create_all below fails, and the error cascades
+                # into a bogus SQLite fallback even though PostgreSQL is perfectly healthy.
+                # No model uses geometry columns (spatial.py uses lat/lng + haversine),
+                # so PostGIS stays strictly best-effort.
                 try:
-                    await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
+                    async with conn.begin_nested():
+                        await conn.execute(
+                            text("CREATE EXTENSION IF NOT EXISTS postgis;")
+                        )
                 except Exception as ex:
-                    logger.warning(f"PostGIS extension notice: {ex}")
+                    logger.info("PostGIS unavailable; continuing without it: %s", ex)
             await conn.run_sync(Base.metadata.create_all)
-            logger.info("Database schemas initialized successfully.")
+        logger.info(
+            "Database schemas initialized on %s",
+            engine.url.render_as_string(hide_password=True),
+        )
     except Exception as e:
-        logger.warning(f"Connecting to primary database failed: {e}. Switching to fallback SQLite.")
-        fallback_engine = create_async_engine(settings.FALLBACK_SQLITE_URL, **engine_args)
-        engine = fallback_engine
+        if not settings.USE_SQLITE_FALLBACK:
+            logger.error(
+                "Primary database unavailable and SQLite fallback is disabled: %s", e
+            )
+            raise
+        logger.warning(
+            "Primary database unavailable (%s). Falling back to SQLite at %s.",
+            e,
+            settings.FALLBACK_SQLITE_URL,
+        )
+        engine = create_async_engine(settings.FALLBACK_SQLITE_URL, **engine_args)
         _sessionmaker = async_sessionmaker(
             bind=engine,
             class_=AsyncSession,
@@ -75,4 +92,6 @@ async def init_db():
         )
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        logger.info("Fallback SQLite database initialized successfully.")
+        logger.warning(
+            "Fallback SQLite database initialized at %s", settings.FALLBACK_SQLITE_URL
+        )

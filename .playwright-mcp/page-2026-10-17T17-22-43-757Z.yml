@@ -1,0 +1,109 @@
+- generic [active] [ref=f12e1]:
+  - note [ref=f12e2]:
+    - generic [ref=f12e5]: DEMO DATA — this prototype runs entirely on bundled simulation fixtures. No live farm or market telemetry is transmitted.
+  - generic [ref=f12e6]:
+    - banner [ref=f12e7]:
+      - generic [ref=f12e8]:
+        - generic [ref=f12e9]: 🍍
+        - generic [ref=f12e10]:
+          - generic [ref=f12e11]:
+            - generic [ref=f12e12]: HARVESTLINK AI
+            - generic [ref=f12e13]: INNOTECH FEST 2.0
+          - paragraph [ref=f12e14]: Predictive Crop Intelligence and Smart Market Linkage for Manipur
+      - navigation [ref=f12e15]:
+        - button "Farmer Terminal" [ref=f12e16] [cursor=pointer]
+        - button "Buyer Marketplace" [ref=f12e20] [cursor=pointer]
+        - button "FPO Logistics Hub" [ref=f12e25] [cursor=pointer]
+      - generic [ref=f12e31]:
+        - button "5-Min Pitch Guide" [ref=f12e32] [cursor=pointer]
+        - generic "Connected to live network" [ref=f12e37]: ONLINE
+    - main [ref=f12e43]:
+      - generic [ref=f12e44]:
+        - generic [ref=f12e45]:
+          - generic [ref=f12e46]:
+            - generic [ref=f12e47]: 👨‍🌾
+            - generic [ref=f12e48]:
+              - generic [ref=f12e49]:
+                - heading "Tombi Singh (Churachandpur / Thoubal)" [level=1] [ref=f12e50]
+                - generic [ref=f12e51]: Verified Smallholder
+              - generic [ref=f12e52]: Andro Terraces Cluster • 1.2 Ha Queen Pineapple (Day 480)
+          - generic [ref=f12e57]:
+            - generic [ref=f12e58]: "Monsoon Warning: 29 Oct (65mm)"
+            - generic [ref=f12e62]: 14.8° Brix (Grade A)
+        - generic [ref=f12e67]:
+          - 'button "Module A: Disease Scan" [ref=f12e68] [cursor=pointer]'
+          - 'button "Module B: Harvest Radar" [ref=f12e73] [cursor=pointer]'
+          - 'button "Module C: Transparent Market" [ref=f12e77] [cursor=pointer]'
+        - generic [ref=f12e82]:
+          - generic [ref=f12e84]:
+            - generic [ref=f12e85]:
+              - generic [ref=f12e86]:
+                - generic [ref=f12e87]: MODULE A
+                - heading "Crop Disease Screening & Triage" [level=2] [ref=f12e88]
+              - paragraph [ref=f12e89]: Real-time MobileNetV3 visual screening with client-side 2G compression (<300KB)
+            - generic [ref=f12e90]:
+              - generic [ref=f12e91]: "DEMO SAMPLES:"
+              - button "Heart Rot (91%)" [ref=f12e92] [cursor=pointer]
+              - button "Black Rot (88%)" [ref=f12e93] [cursor=pointer]
+              - button "Mealybug (84%)" [ref=f12e94] [cursor=pointer]
+              - button "Healthy Stand" [ref=f12e95] [cursor=pointer]
+          - generic [ref=f12e96]:
+            - generic [ref=f12e97]:
+              - generic [ref=f12e98]:
+                - generic [ref=f12e99]:
+                  - generic [ref=f12e100]: Diagnostic Perspective
+                  - generic [ref=f12e101]: Field Guide
+                - generic [ref=f12e102]:
+                  - button "Crown Top-Down" [ref=f12e103] [cursor=pointer]
+                  - button "Fruit Base & Stalk" [ref=f12e104] [cursor=pointer]
+                  - button "Lateral Fruit View" [ref=f12e105] [cursor=pointer]
+              - generic [ref=f12e107]:
+                - generic [ref=f12e112]: "Target Reticle: Align Crown"
+                - paragraph [ref=f12e113]: Capture photo of crown, leaf base, or lateral eyes in daylight (20–30 cm distance)
+              - generic [ref=f12e118]:
+                - button "Take Live Photo" [ref=f12e119] [cursor=pointer]
+                - button "Upload Image File" [ref=f12e123] [cursor=pointer]
+              - generic [ref=f12e127]:
+                - generic [ref=f12e128]:
+                  - generic [ref=f12e129]: CLIENT 2G COMPRESSION ENGINE
+                  - generic [ref=f12e130]: "-94.8% Bandwidth"
+                - generic [ref=f12e131]:
+                  - generic [ref=f12e132]: "Original: 4.0 MB"
+                  - generic [ref=f12e133]: "➔ Compressed: 213 KB"
+                - generic [ref=f12e134]: "SHA-256: a7f93e8d2c4b5190e29d61845bb08c90fe3421dca90827bfa7c5e4f210d3e589"
+            - generic [ref=f12e135]:
+              - generic [ref=f12e136]:
+                - generic [ref=f12e137]:
+                  - generic [ref=f12e138]: DIAGNOSTIC INFERENCE RESULT
+                  - generic [ref=f12e139]: "SEVERITY: MODERATE"
+                - heading "Phytophthora Heart Rot" [level=3] [ref=f12e140]
+              - generic [ref=f12e141]:
+                - generic [ref=f12e142]:
+                  - generic [ref=f12e143]: Model Confidence
+                  - generic [ref=f12e144]: 91.4%
+                - generic [ref=f12e147]:
+                  - generic [ref=f12e148]: <50% Inconclusive
+                  - generic [ref=f12e149]: 50-85% Preliminary
+                  - generic [ref=f12e150]: ">85% Confirmed Triage"
+              - generic [ref=f12e151]:
+                - generic [ref=f12e152]: "Visible Pathological Symptoms Detected:"
+                - list [ref=f12e153]:
+                  - listitem [ref=f12e154]:
+                    - generic [ref=f12e158]: Water-soaked brown lesions along basal leaf sheath
+                  - listitem [ref=f12e159]:
+                    - generic [ref=f12e163]: Premature central leaf whorl softening and easy detachment
+                  - listitem [ref=f12e164]:
+                    - generic [ref=f12e168]: Faint pungent fermentation odor at the fruit pedestal
+                  - listitem [ref=f12e169]:
+                    - generic [ref=f12e173]: Dark necrotic margins at heart leaf edges
+              - generic [ref=f12e174]:
+                - generic [ref=f12e175]: "Immediate Treatment Protocol (ICAR / CAU Guidelines):"
+                - generic [ref=f12e176]:
+                  - generic [ref=f12e177]:
+                    - text: "Organic & Cultural:"
+                    - paragraph [ref=f12e178]: Dip replacement suckers/slips in Trichoderma viride bio-fungicide slurry (10g/L) for 30 minutes before planting.
+                  - generic [ref=f12e179]:
+                    - text: "Chemical Fungicide:"
+                    - paragraph [ref=f12e180]: Crown drench with Copper Oxychloride 50% WP (0.25% - 2.5g/L water) directly into central whorl.
+              - button "Alert KVK Extension Officer" [ref=f12e182] [cursor=pointer]
+  - alert [ref=f12e185]

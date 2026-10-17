@@ -62,6 +62,7 @@ if os.path.exists(settings.UPLOAD_DIR):
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
+@app.get("/health", tags=["Health & Status"])
 @app.get("/api/health", tags=["Health & Status"])
 async def health_check():
     return {
@@ -69,6 +70,21 @@ async def health_check():
         "service": "HARVESTLINK AI Backend",
         "version": "1.0.0",
         "environment": settings.ENVIRONMENT
+    }
+
+
+@app.get("/v1/models", tags=["Health & Status"], include_in_schema=False)
+async def list_models():
+    """Stub endpoint to gracefully respond to IDE AI/LLM discovery probes."""
+    return {
+        "object": "list",
+        "data": [
+            {
+                "id": "pineapple-mobilenet-v1.2",
+                "object": "model",
+                "owned_by": "harvestlink-ai"
+            }
+        ]
     }
 
 

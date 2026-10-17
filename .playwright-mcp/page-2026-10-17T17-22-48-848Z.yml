@@ -1,0 +1,122 @@
+- generic [active] [ref=f13e1]:
+  - note [ref=f13e2]:
+    - generic [ref=f13e5]: DEMO DATA — this prototype runs entirely on bundled simulation fixtures. No live farm or market telemetry is transmitted.
+  - generic [ref=f13e6]:
+    - banner [ref=f13e7]:
+      - generic [ref=f13e8]:
+        - generic [ref=f13e9]: 🍍
+        - generic [ref=f13e10]:
+          - generic [ref=f13e11]:
+            - generic [ref=f13e12]: HARVESTLINK AI
+            - generic [ref=f13e13]: INNOTECH FEST 2.0
+          - paragraph [ref=f13e14]: Predictive Crop Intelligence and Smart Market Linkage for Manipur
+      - navigation [ref=f13e15]:
+        - button "Farmer Terminal" [ref=f13e16] [cursor=pointer]
+        - button "Buyer Marketplace" [ref=f13e20] [cursor=pointer]
+        - button "FPO Logistics Hub" [ref=f13e25] [cursor=pointer]
+      - generic [ref=f13e31]:
+        - button "5-Min Pitch Guide" [ref=f13e32] [cursor=pointer]
+        - generic "Connected to live network" [ref=f13e37]: ONLINE
+    - main [ref=f13e43]:
+      - generic [ref=f13e44]:
+        - generic [ref=f13e46]:
+          - generic [ref=f13e47]:
+            - generic [ref=f13e48]:
+              - generic [ref=f13e49]: BUYER PORTAL
+              - heading "Wholesale Procurement & Marketplace Feed" [level=2] [ref=f13e50]
+            - paragraph [ref=f13e51]: Direct verified sourcing from certified pineapple clusters in Churachandpur, Thoubal, and Bishnupur.
+          - button "Post Institutional Demand Order" [ref=f13e52] [cursor=pointer]
+        - generic [ref=f13e55]:
+          - generic [ref=f13e56]:
+            - generic [ref=f13e57]: "Filter by District:"
+            - combobox [ref=f13e60]:
+              - option "All Horticultural Districts" [selected]
+              - option "Thoubal Cluster"
+              - option "Churachandpur (Khousabung)"
+              - option "Bishnupur Cluster"
+            - combobox [ref=f13e61]:
+              - option "All Grades" [selected]
+              - option "Grade A (Brix > 14.0°)"
+              - option "Grade B (Brix 12.5 - 14.0°)"
+          - generic [ref=f13e62]:
+            - text: Showing
+            - strong [ref=f13e63]: "4"
+            - text: verified farm consignments
+        - generic [ref=f13e64]:
+          - generic [ref=f13e65]:
+            - generic [ref=f13e66]:
+              - generic [ref=f13e67]: LOT-PL-048
+              - generic [ref=f13e68]: Grade A
+            - generic [ref=f13e69]:
+              - heading "450 kg Queen Pineapple" [level=3] [ref=f13e70]
+              - generic [ref=f13e71]: "Thoubal (Andro) • Farmer: Tombi Singh"
+            - generic [ref=f13e76]:
+              - generic [ref=f13e77]:
+                - generic [ref=f13e78]: BRIX SWEETNESS
+                - generic [ref=f13e79]: 14.8° Brix
+              - generic [ref=f13e80]:
+                - generic [ref=f13e81]: READY DATE
+                - generic [ref=f13e82]: 26 Oct 2026
+            - generic [ref=f13e83]:
+              - generic [ref=f13e84]:
+                - generic [ref=f13e85]: ASKING RATE
+                - generic [ref=f13e86]: ₹28.00/kg
+              - button "Submit Offer" [ref=f13e87] [cursor=pointer]
+          - generic [ref=f13e88]:
+            - generic [ref=f13e89]:
+              - generic [ref=f13e90]: LOT-PL-051
+              - generic [ref=f13e91]: Grade A
+            - generic [ref=f13e92]:
+              - heading "600 kg Queen Pineapple" [level=3] [ref=f13e93]
+              - generic [ref=f13e94]: "Thoubal (Yairipok) • Farmer: Mangi Meitei"
+            - generic [ref=f13e99]:
+              - generic [ref=f13e100]:
+                - generic [ref=f13e101]: BRIX SWEETNESS
+                - generic [ref=f13e102]: 14.5° Brix
+              - generic [ref=f13e103]:
+                - generic [ref=f13e104]: READY DATE
+                - generic [ref=f13e105]: 26 Oct 2026
+            - generic [ref=f13e106]:
+              - generic [ref=f13e107]:
+                - generic [ref=f13e108]: ASKING RATE
+                - generic [ref=f13e109]: ₹28.50/kg
+              - button "Submit Offer" [ref=f13e110] [cursor=pointer]
+          - generic [ref=f13e111]:
+            - generic [ref=f13e112]:
+              - generic [ref=f13e113]: LOT-PL-062
+              - generic [ref=f13e114]: Grade A
+            - generic [ref=f13e115]:
+              - heading "850 kg Queen Pineapple" [level=3] [ref=f13e116]
+              - generic [ref=f13e117]: "Churachandpur (Khousabung) • Farmer: Khaidem Prem"
+            - generic [ref=f13e122]:
+              - generic [ref=f13e123]:
+                - generic [ref=f13e124]: BRIX SWEETNESS
+                - generic [ref=f13e125]: 15.2° Brix
+              - generic [ref=f13e126]:
+                - generic [ref=f13e127]: READY DATE
+                - generic [ref=f13e128]: 27 Oct 2026
+            - generic [ref=f13e129]:
+              - generic [ref=f13e130]:
+                - generic [ref=f13e131]: ASKING RATE
+                - generic [ref=f13e132]: ₹29.00/kg
+              - button "Submit Offer" [ref=f13e133] [cursor=pointer]
+          - generic [ref=f13e134]:
+            - generic [ref=f13e135]:
+              - generic [ref=f13e136]: LOT-PL-065
+              - generic [ref=f13e137]: Grade B
+            - generic [ref=f13e138]:
+              - heading "500 kg Queen Pineapple" [level=3] [ref=f13e139]
+              - generic [ref=f13e140]: "Thoubal (Nongpok Sekmai) • Farmer: Ibopishak S."
+            - generic [ref=f13e145]:
+              - generic [ref=f13e146]:
+                - generic [ref=f13e147]: BRIX SWEETNESS
+                - generic [ref=f13e148]: 13.9° Brix
+              - generic [ref=f13e149]:
+                - generic [ref=f13e150]: READY DATE
+                - generic [ref=f13e151]: 26 Oct 2026
+            - generic [ref=f13e152]:
+              - generic [ref=f13e153]:
+                - generic [ref=f13e154]: ASKING RATE
+                - generic [ref=f13e155]: ₹24.50/kg
+              - button "Submit Offer" [ref=f13e156] [cursor=pointer]
+  - alert [ref=f13e157]

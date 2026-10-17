@@ -1,0 +1,301 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap');
+
+:root {
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-bengali: 'Noto Sans Bengali', sans-serif;
+  --font-meetei: 'Noto Sans Meetei Mayek', 'Noto Sans Bengali', sans-serif;
+
+  /* Agrarian Brand Tokens (Light Theme Optimized) */
+  --pineapple-gold: #D97706;
+  --pineapple-gold-hover: #B45309;
+  --pineapple-gold-glow: rgba(217, 119, 6, 0.2);
+  --pineapple-gold-bg: rgba(245, 158, 11, 0.12);
+
+  --plantation-green: #059669;
+  --plantation-green-hover: #047857;
+  --plantation-green-glow: rgba(5, 150, 105, 0.2);
+  --plantation-green-bg: rgba(16, 185, 129, 0.12);
+
+  --earth-brown: #92400E;
+  --earth-brown-light: #FEF3C7;
+
+  --alert-crimson: #DC2626;
+  --alert-crimson-bg: rgba(220, 38, 38, 0.08);
+  --alert-amber: #D97706;
+  --alert-amber-bg: rgba(217, 119, 6, 0.08);
+
+  /* Light Theme Surfaces & Backgrounds */
+  --bg-app: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #F1F5F9;
+  --bg-surface-hover: #E2E8F0;
+
+  --border-subtle: #E2E8F0;
+  --border-medium: #CBD5E1;
+  --border-strong: #94A3B8;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-gold: #B45309;
+  --text-green: #047857;
+
+  /* Field Ergonomics */
+  --tap-min-size: 48px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --shadow-subtle: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --shadow-gold: 0 8px 25px rgba(217, 119, 6, 0.15);
+  --shadow-green: 0 8px 25px rgba(5, 150, 105, 0.15);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* Script-aware typography: Noto fallbacks must win for native Manipuri text
+   because Outfit/JetBrains Mono carry no Bengali or Meetei Mayek glyphs. */
+html[data-lang="mn-Beng"] body {
+  font-family: var(--font-bengali);
+}
+
+html[data-lang="mn-Mtei"] body {
+  font-family: var(--font-meetei);
+}
+
+/* Tabular figures for weights, rates, currency */
+.tabular-nums {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Bengali & Meetei Mayek script legibility */
+.lang-bengali {
+  font-family: var(--font-bengali), var(--font-sans);
+  line-height: 1.6;
+}
+
+/* Global Button & Tap Targets */
+button,
+a,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.tap-target {
+  min-height: var(--tap-min-size);
+  min-width: var(--tap-min-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px var(--pineapple-gold-glow);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #D97706, #B45309);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.25);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: #FFFFFF;
+  color: var(--text-primary);
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-surface-elevated);
+  border-color: var(--pineapple-gold);
+  color: var(--text-gold);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px var(--plantation-green-glow);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+}
+
+.btn-outline-danger {
+  background: var(--alert-crimson-bg);
+  color: var(--alert-crimson);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.btn-outline-danger:hover {
+  background: var(--alert-crimson);
+  color: #FFFFFF;
+}
+
+/* Glassmorphism Card Style (Light) */
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-subtle);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+}
+
+.glass-card-accent {
+  border-top: 3px solid var(--pineapple-gold);
+}
+
+.glass-card-green {
+  border-top: 3px solid var(--plantation-green);
+}
+
+.glass-card-alert {
+  border-top: 3px solid var(--alert-crimson);
+}
+
+/* Badge System */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge-gold {
+  background: var(--pineapple-gold-bg);
+  color: var(--pineapple-gold);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.badge-green {
+  background: var(--plantation-green-bg);
+  color: var(--plantation-green);
+  border: 1px solid rgba(5, 150, 105, 0.3);
+}
+
+.badge-crimson {
+  background: var(--alert-crimson-bg);
+  color: var(--alert-crimson);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.badge-slate {
+  background: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* Animations */
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes scanReticle {
+  0% {
+    top: 5%;
+  }
+
+  50% {
+    top: 90%;
+  }
+
+  100% {
+    top: 5%;
+  }
+}
+
+.animate-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #F59E0B, transparent);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+  animation: scanReticle 3s infinite linear;
+}

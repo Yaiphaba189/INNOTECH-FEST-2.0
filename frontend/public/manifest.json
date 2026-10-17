@@ -1,0 +1,20 @@
+{
+  "name": "HARVESTLINK AI — Predictive Crop Intelligence for Manipur",
+  "short_name": "HARVESTLINK",
+  "description": "Offline-first agricultural decision-support terminal for Queen & Kew pineapple clusters in Manipur. Built for INNOTECH FEST 2.0.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080C14",
+  "theme_color": "#0F172A",
+  "categories": ["agriculture", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
