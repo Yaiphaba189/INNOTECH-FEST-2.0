@@ -1,5 +1,15 @@
 import asyncio
+import os
+import sys
 from logging.config import fileConfig
+
+# Ensure backend directory and repository root are in Python module search path
+BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+REPO_ROOT = os.path.abspath(os.path.join(BACKEND_DIR, ".."))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
@@ -18,13 +28,20 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
+def get_db_url() -> str:
+    x_args = context.get_x_argument(as_dictionary=True)
+    return x_args.get("db_url") or settings.DATABASE_URL
+
+
 def run_migrations_offline() -> None:
-    url = settings.DATABASE_URL
+    url = get_db_url()
+    is_sqlite = "sqlite" in url
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        render_as_batch=is_sqlite,
     )
 
     with context.begin_transaction():
@@ -32,7 +49,12 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
+    is_sqlite = connection.dialect.name == "sqlite"
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        render_as_batch=is_sqlite,
+    )
 
     with context.begin_transaction():
         context.run_migrations()
@@ -40,7 +62,8 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = settings.DATABASE_URL
+    db_url = get_db_url()
+    configuration["sqlalchemy.url"] = db_url
     connectable = async_engine_from_config(
         configuration,
         prefix="sqlalchemy.",
