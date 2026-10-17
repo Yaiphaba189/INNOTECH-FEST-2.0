@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Relational Database with PostGIS Spatial Extension (Run locally via: docker compose up -d)
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: harvestlink_postgis
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-harvestlink_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-harvestlink_password}
+      POSTGRES_DB: ${POSTGRES_DB:-harvestlink_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-harvestlink_user} -d ${POSTGRES_DB:-harvestlink_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Optional Containerized Backend (Active only with --profile full)
+  backend:
+    profiles:
+      - full
+      - prod
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: harvestlink_backend
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "False"
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-harvestlink_user}:${POSTGRES_PASSWORD:-harvestlink_password}@db:5432/${POSTGRES_DB:-harvestlink_db}
+      SECRET_KEY: ${SECRET_KEY:-harvestlink_super_secure_key_innotech_2026}
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      UPLOAD_DIR: /app/data/demo/sample_images
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploaded_images:/app/data/demo/sample_images
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    driver: local
+  uploaded_images:
+    driver: local

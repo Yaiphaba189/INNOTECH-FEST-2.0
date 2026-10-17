@@ -42,6 +42,9 @@ wheels/
 .pytest_cache/
 .coverage
 htmlcov/
+*.db
+*.sqlite
+*.sqlite3
 
 # Machine Learning Large Weights (Track weights in external storage or releases)
 *.h5
