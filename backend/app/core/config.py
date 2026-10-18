@@ -25,19 +25,21 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     DATABASE_URL: str = "postgresql+asyncpg://harvestlink_user:harvestlink_password@localhost:5432/harvestlink_db"
     # Fallback SQLite DB for local development/test if PostgreSQL container is offline
-    FALLBACK_SQLITE_URL: str = "sqlite+aiosqlite:///./harvestlink.db"
+    FALLBACK_SQLITE_URL: str = f"sqlite+aiosqlite:///{os.path.join(REPO_ROOT, 'harvestlink.db')}"
     USE_SQLITE_FALLBACK: bool = True
 
     # API Configuration
     API_V1_STR: str = "/api"
     PROJECT_NAME: str = "HARVESTLINK AI API"
     API_HOST: str = "0.0.0.0"
-    API_PORT: int = 8000
+    API_PORT: int = 8001
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
+        "http://localhost:8001",
+        "http://127.0.0.1:8001",
     ]
 
     @field_validator("CORS_ORIGINS", mode="after")

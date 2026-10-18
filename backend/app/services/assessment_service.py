@@ -32,7 +32,8 @@ class AssessmentService:
 
         # 3. Predict disease via Module A vision pipeline
         try:
-            diag_result = predict_crop_disease(content, image_angle=image_angle)
+            crop_name = getattr(crop, "crop_type", "pineapple") or "pineapple"
+            diag_result = predict_crop_disease(content, image_angle=image_angle, crop=crop_name)
         except ValueError as ex:
             raise ImageCorruptedError(str(ex))
 
