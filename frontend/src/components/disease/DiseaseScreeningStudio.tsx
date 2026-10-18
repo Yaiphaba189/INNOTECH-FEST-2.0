@@ -20,13 +20,33 @@ import {
   Layers,
   Activity,
   Zap,
-  Info
+  Info,
+  X,
+  Trash2
 } from 'lucide-react';
 import { DiseaseDiagnosis, DiseaseClass } from '@/types';
 import { INITIAL_DISEASE_DIAGNOSIS, MOCK_DISEASE_CATALOG } from '@/lib/mock-data';
 import { compressFieldImage, CompressionResult } from '@/lib/image-compressor';
 import { queueOfflineScan } from '@/lib/offline-db';
 import { api } from '@/lib/api-client';
+
+const ANGLE_PREVIEWS: Record<'crown' | 'base_stalk' | 'lateral', { img: string; title: string; hint: string }> = {
+  crown: {
+    img: '/samples/crown_view.jpg',
+    title: 'Crown Top-Down (Central Whorl)',
+    hint: 'Aerial perspective: align inner leaf whorl to detect Phytophthora Heart Rot.',
+  },
+  base_stalk: {
+    img: '/samples/base_stalk.jpg',
+    title: 'Fruit Base & Stalk (Peduncle)',
+    hint: 'Bottom connection: align stalk scar & base to detect Thielaviopsis Black Rot.',
+  },
+  lateral: {
+    img: '/samples/lateral_view.jpg',
+    title: 'Lateral Fruit View (Side Profile)',
+    hint: 'Side profile: inspect lateral eyes and leaf axils to detect Mealybug Wilt.',
+  },
+};
 
 export const DiseaseScreeningStudio: React.FC = () => {
   const { t } = useTranslation();
@@ -61,9 +81,20 @@ export const DiseaseScreeningStudio: React.FC = () => {
       setCompressionInfo(result);
       setPreviewImage(result.dataUrl);
 
-      const newDiag = await api.screenCropPhoto('crop-queen-tombi-001', selectedAngle, file);
+      // Create a clean JPEG File from compressed blob for backend inference
+      const uploadFile = new File([result.compressedBlob], 'field_capture.jpg', { type: 'image/jpeg' });
+      const newDiag = await api.screenCropPhoto('crop-queen-tombi-001', selectedAngle, uploadFile);
+
+      // Synchronize angle tab if a specific pathology was detected
+      if (newDiag.predicted_class === 'black_rot') {
+        setSelectedAngle('base_stalk');
+      } else if (newDiag.predicted_class === 'mealybug_wilt') {
+        setSelectedAngle('lateral');
+      } else if (newDiag.predicted_class === 'heart_rot') {
+        setSelectedAngle('crown');
+      }
+
       setDiagnosis(newDiag);
-      setIsAnalyzing(false);
       setEscalated(false);
 
       await queueOfflineScan({
@@ -76,19 +107,62 @@ export const DiseaseScreeningStudio: React.FC = () => {
         diagnosis: newDiag,
       });
     } catch (err) {
-      console.error(err);
+      console.error('Image diagnosis failed:', err);
+    } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleAngleSelect = (angId: 'crown' | 'base_stalk' | 'lateral') => {
+    setSelectedAngle(angId);
+    setPreviewImage(null); // Clear custom uploaded photo to show the perspective reticle guide
+    const targetKey = angId === 'base_stalk' ? 'black_rot' : angId === 'lateral' ? 'mealybug_wilt' : 'heart_rot';
+    const sampleDiag = MOCK_DISEASE_CATALOG[targetKey] || INITIAL_DISEASE_DIAGNOSIS;
+    setDiagnosis({
+      ...sampleDiag,
+      image_angle: angId,
+      timestamp: new Date().toISOString(),
+    });
+  };
+
+  const handleRemoveImage = () => {
+    setPreviewImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setCompressionInfo(null);
+    const targetKey = selectedAngle === 'base_stalk' ? 'black_rot' : selectedAngle === 'lateral' ? 'mealybug_wilt' : 'heart_rot';
+    const sampleDiag = MOCK_DISEASE_CATALOG[targetKey] || INITIAL_DISEASE_DIAGNOSIS;
+    setDiagnosis({
+      ...sampleDiag,
+      image_angle: selectedAngle,
+      timestamp: new Date().toISOString(),
+    });
   };
 
   const handleSimulatedCapture = async (diseaseKey: string) => {
     setIsAnalyzing(true);
     try {
-      const selected = await api.screenCropPhoto('crop-queen-tombi-001', selectedAngle);
-      setDiagnosis(selected);
-    } catch {
-      const fallback = MOCK_DISEASE_CATALOG[diseaseKey] || INITIAL_DISEASE_DIAGNOSIS;
-      setDiagnosis(fallback);
+      if (diseaseKey === 'black_rot') {
+        setSelectedAngle('base_stalk');
+        setPreviewImage('/samples/base_stalk.jpg');
+      } else if (diseaseKey === 'mealybug_wilt') {
+        setSelectedAngle('lateral');
+        setPreviewImage('/samples/lateral_view.jpg');
+      } else if (diseaseKey === 'heart_rot') {
+        setSelectedAngle('crown');
+        setPreviewImage(null);
+      } else {
+        setPreviewImage(null);
+      }
+
+      // Small realistic scan pause
+      await new Promise((r) => setTimeout(r, 450));
+      const target = MOCK_DISEASE_CATALOG[diseaseKey] || INITIAL_DISEASE_DIAGNOSIS;
+      setDiagnosis({
+        ...target,
+        timestamp: new Date().toISOString(),
+      });
     } finally {
       setIsAnalyzing(false);
       setEscalated(false);
@@ -220,7 +294,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
               ].map((ang) => (
                 <button
                   key={ang.id}
-                  onClick={() => setSelectedAngle(ang.id as any)}
+                  onClick={() => handleAngleSelect(ang.id as any)}
                   className="tap-target"
                   style={{
                     padding: '0.55rem 0.4rem',
@@ -257,33 +331,76 @@ export const DiseaseScreeningStudio: React.FC = () => {
             justifyContent: 'center',
           }}>
             {previewImage ? (
-              <img
-                src={previewImage}
-                alt="Field Capture Preview"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                <img
+                  src={previewImage}
+                  alt="Field Capture Preview"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                {/* Floating Clear Image Badge */}
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  style={{
+                    position: 'absolute',
+                    top: '12px',
+                    right: '12px',
+                    zIndex: 20,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.35rem 0.7rem',
+                    borderRadius: 'var(--radius-full)',
+                    background: 'rgba(15, 23, 42, 0.82)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    color: '#FFFFFF',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.35)',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#DC2626';
+                    e.currentTarget.style.borderColor = '#EF4444';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(15, 23, 42, 0.82)';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.25)';
+                  }}
+                  title="Remove uploaded image"
+                >
+                  <X size={13} />
+                  <span>Remove Image</span>
+                </button>
+              </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '1rem', zIndex: 2 }}>
+              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                <img
+                  src={ANGLE_PREVIEWS[selectedAngle].img}
+                  alt={ANGLE_PREVIEWS[selectedAngle].title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
                 <div style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '50%',
-                  background: 'rgba(249, 115, 22, 0.15)',
-                  border: '1px solid rgba(249, 115, 22, 0.4)',
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.25) 50%, rgba(15, 23, 42, 0.6) 100%)',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#F97316',
-                  margin: '0 auto 0.75rem',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  padding: '1rem',
+                  zIndex: 2,
                 }}>
-                  <Camera size={30} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', color: '#FFFFFF', fontWeight: 700, fontSize: '0.92rem' }}>
+                    <Camera size={18} style={{ color: '#F97316' }} />
+                    <span>Target Reticle: {ANGLE_PREVIEWS[selectedAngle].title}</span>
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: '#CBD5E1', marginTop: '0.25rem', lineHeight: 1.4 }}>
+                    {ANGLE_PREVIEWS[selectedAngle].hint}
+                  </p>
                 </div>
-                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#FFFFFF' }}>
-                  Target: Align {selectedAngle === 'crown' ? 'Crown Whorl' : selectedAngle === 'base_stalk' ? 'Basal Sheath' : 'Lateral Fruit Eyes'}
-                </div>
-                <p style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.25rem', maxWidth: '280px' }}>
-                  Hold camera 15-20cm from crop in natural light. Edge AI checks for water-soaked lesions and fungal exudate.
-                </p>
               </div>
             )}
 
@@ -329,36 +446,109 @@ export const DiseaseScreeningStudio: React.FC = () => {
             }} />
           </div>
 
-          {/* Action Buttons: Take Photo & Upload */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <button
-              onClick={() => handleSimulatedCapture(diagnosis?.predicted_class || 'heart_rot')}
-              disabled={isAnalyzing}
-              className="tap-target btn-primary"
-              style={{ gap: '0.45rem', fontSize: '0.88rem' }}
-            >
-              <Camera size={18} />
-              {isAnalyzing ? 'Scanning...' : 'Capture Photo'}
-            </button>
+          {/* Action Buttons: Take Photo, Upload & Remove */}
+          {previewImage ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 1fr', gap: '0.55rem' }}>
+              <button
+                onClick={() => {
+                  const targetKey = selectedAngle === 'base_stalk' ? 'black_rot' : selectedAngle === 'lateral' ? 'mealybug_wilt' : 'heart_rot';
+                  handleSimulatedCapture(targetKey);
+                }}
+                disabled={isAnalyzing}
+                className="tap-target btn-primary"
+                style={{ gap: '0.4rem', fontSize: '0.84rem', padding: '0.5rem 0.5rem' }}
+              >
+                <Camera size={16} />
+                <span>{isAnalyzing ? 'Scanning...' : 'Re-Scan'}</span>
+              </button>
 
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isAnalyzing}
-              className="tap-target btn-secondary"
-              style={{ gap: '0.45rem', fontSize: '0.88rem' }}
-            >
-              <Upload size={18} />
-              Upload Image
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileUpload}
-              style={{ display: 'none' }}
-            />
-          </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isAnalyzing}
+                className="tap-target btn-secondary"
+                style={{ gap: '0.4rem', fontSize: '0.84rem', padding: '0.5rem 0.5rem' }}
+              >
+                <Upload size={16} />
+                <span>Change Image</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                disabled={isAnalyzing}
+                className="tap-target"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                  fontSize: '0.84rem',
+                  padding: '0.5rem 0.5rem',
+                  background: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  color: '#DC2626',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#FEE2E2';
+                  e.currentTarget.style.borderColor = '#FCA5A5';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#FEF2F2';
+                  e.currentTarget.style.borderColor = '#FECACA';
+                }}
+                title="Remove image and reset viewfinder"
+              >
+                <Trash2 size={15} />
+                <span>Remove</span>
+              </button>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <button
+                onClick={() => {
+                  const targetKey = selectedAngle === 'base_stalk' ? 'black_rot' : selectedAngle === 'lateral' ? 'mealybug_wilt' : 'heart_rot';
+                  handleSimulatedCapture(targetKey);
+                }}
+                disabled={isAnalyzing}
+                className="tap-target btn-primary"
+                style={{ gap: '0.45rem', fontSize: '0.88rem' }}
+              >
+                <Camera size={18} />
+                {isAnalyzing ? 'Scanning...' : 'Capture Photo'}
+              </button>
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isAnalyzing}
+                className="tap-target btn-secondary"
+                style={{ gap: '0.45rem', fontSize: '0.88rem' }}
+              >
+                <Upload size={18} />
+                Upload Image
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+            </div>
+          )}
 
           {/* Client-Side Canvas Compression Telemetry */}
           {compressionInfo && (

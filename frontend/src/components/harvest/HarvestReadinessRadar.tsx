@@ -169,9 +169,9 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                       {stage.description}
                     </p>
                     <div style={{ display: 'flex', gap: '0.65rem', marginTop: '0.25rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      <span>Threshold: {stage.gdd_threshold} GDD</span>
+                      <span>Threshold: {stage.gdd_threshold ? `${stage.gdd_threshold} GDD` : `${stage.days_range[1]} Days`}</span>
                       <span>•</span>
-                      <span>Target: {stage.target_brix_range}</span>
+                      <span>Target: {stage.target_brix_range || '14.5° Brix'}</span>
                     </div>
                   </div>
                 </div>
@@ -200,7 +200,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                 <span>THERMAL GDD</span>
               </div>
               <div className="tabular-nums" style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-primary)' }}>
-                {forecast.gdd_accumulated} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>/ {forecast.gdd_required}</span>
+                {forecast.gdd_accumulated} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>/ {forecast.gdd_required || forecast.gdd_target}</span>
               </div>
               <div style={{ fontSize: '0.7rem', color: '#059669' }}>
                 Base Temp 10°C • Manipur

@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import { Header } from '@/components/common/Header';
+import { Footer } from '@/components/common/Footer';
 import { DiseaseScreeningStudio } from '@/components/disease/DiseaseScreeningStudio';
 import { HarvestReadinessRadar } from '@/components/harvest/HarvestReadinessRadar';
 import { MarketLinkageModule } from '@/components/market/MarketLinkageModule';
+import { RoleGuard } from '@/components/auth/RoleGuard';
 import { useRouter } from 'next/navigation';
 import { Camera, CalendarDays, CircleDollarSign, CloudRain, MapPin, ShieldCheck, Cpu, ArrowRight, User } from 'lucide-react';
 
@@ -13,15 +15,16 @@ export default function FarmerPage() {
   const [activeTab, setActiveTab] = useState<'module-a' | 'module-b' | 'module-c'>('module-a');
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
-      <Header
-        currentRole="farmer"
-        onSelectRole={(role) => {
-          if (role === 'buyer') router.push('/buyer');
-          else if (role === 'fpo') router.push('/fpo');
-          else router.push('/farmer');
-        }}
-      />
+    <RoleGuard allowedRoles={['farmer']}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
+        <Header
+          currentRole="farmer"
+          onSelectRole={(role) => {
+            if (role === 'buyer') router.push('/buyer');
+            else if (role === 'fpo') router.push('/fpo');
+            else router.push('/farmer');
+          }}
+        />
 
       <main style={{ flex: 1, maxWidth: '1240px', width: '100%', margin: '0 auto', padding: '1.75rem 1.25rem' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -313,6 +316,9 @@ export default function FarmerPage() {
           {activeTab === 'module-c' && <MarketLinkageModule />}
         </div>
       </main>
+
+      <Footer />
     </div>
-  );
+  </RoleGuard>
+);
 }

@@ -1,4 +1,20 @@
-export type UserRole = 'farmer' | 'buyer' | 'fpo' | 'extension_officer';
+export type UserRole = 'farmer' | 'buyer' | 'fpo' | 'extension_officer' | 'admin' | 'superadmin';
+
+export interface AuthUser {
+  id: string;
+  phone_number: string;
+  full_name: string;
+  role: UserRole;
+  preferred_language?: string;
+  is_simulated?: boolean;
+  created_at?: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: AuthUser;
+}
 
 export type LanguageCode = 'en';
 
@@ -34,6 +50,8 @@ export interface PhenologyStage {
   name_beng?: string;
   name_mtei?: string;
   days_range: [number, number];
+  gdd_threshold?: number;
+  target_brix_range?: string;
   is_active: boolean;
   is_completed: boolean;
   description: string;
@@ -47,6 +65,7 @@ export interface HarvestForecastData {
   days_in_field: number;
   gdd_accumulated: number;
   gdd_target: number;
+  gdd_required?: number;
   estimated_brix: number;
   optimal_harvest_start: string;
   optimal_harvest_end: string;
@@ -68,20 +87,33 @@ export interface BuyerMatchQuote {
   buyer_name: string;
   buyer_type: 'Processor' | 'Wholesale Exporter' | 'Retail Co-op';
   location: string;
+  delivery_location?: string;
+  minimum_lot_kg?: number;
   distance_km: number;
+  transit_distance_km?: number;
   gross_rate_per_kg: number;
+  gross_offer_per_kg?: number;
+  escrow_secured?: boolean;
   deductions: {
     shared_freight: number;
     crates_packaging: number;
     platform_fee: number;
+    freight_per_kg?: number;
+    crate_fee_per_kg?: number;
+    platform_fee_per_kg?: number;
   };
   net_rate_per_kg: number;
+  net_farmer_price_per_kg?: number;
   total_payout: number;
   payment_terms: string;
   pickup_window: string;
   quality_tolerance: string;
   is_recommended: boolean;
   status: 'available' | 'locked' | 'expired';
+  middleman_comparison?: {
+    cash_advantage_per_kg: number;
+    advantage_percentage: number;
+  };
 }
 
 export interface HarvestLot {
