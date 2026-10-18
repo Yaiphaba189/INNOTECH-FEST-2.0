@@ -15,7 +15,12 @@ import {
   Sparkles,
   RefreshCw,
   MapPin,
-  Check
+  Check,
+  Cpu,
+  Layers,
+  Activity,
+  Zap,
+  Info
 } from 'lucide-react';
 import { DiseaseDiagnosis, DiseaseClass } from '@/types';
 import { INITIAL_DISEASE_DIAGNOSIS, MOCK_DISEASE_CATALOG } from '@/lib/mock-data';
@@ -28,6 +33,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
   const [selectedAngle, setSelectedAngle] = useState<'crown' | 'base_stalk' | 'lateral'>('crown');
   const [diagnosis, setDiagnosis] = useState<DiseaseDiagnosis | null>(INITIAL_DISEASE_DIAGNOSIS);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [activeRemedyTab, setActiveRemedyTab] = useState<'organic' | 'chemical' | 'cultural'>('organic');
   const [compressionInfo, setCompressionInfo] = useState<CompressionResult | null>({
     compressedBlob: new Blob(),
     dataUrl: '',
@@ -41,7 +47,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [showEscalationModal, setShowEscalationModal] = useState(false);
   const [escalated, setEscalated] = useState(false);
-  const [escalationNotes, setEscalationNotes] = useState('Severe basal rot noticed after 3 days of rain. Immediate ground check requested.');
+  const [escalationNotes, setEscalationNotes] = useState('Severe basal rot noticed after 3 days of heavy rain in Andro. Immediate ground inspection requested.');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle image upload with client-side compression pipeline
@@ -51,18 +57,15 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
     try {
       setIsAnalyzing(true);
-      // Client-side canvas downscaling to <300KB
       const result = await compressFieldImage(file, 1024, 0.82);
       setCompressionInfo(result);
       setPreviewImage(result.dataUrl);
 
-      // Live inference with MobileNetV3 via FastAPI backend
       const newDiag = await api.screenCropPhoto('crop-queen-tombi-001', selectedAngle, file);
       setDiagnosis(newDiag);
       setIsAnalyzing(false);
       setEscalated(false);
 
-      // Queue in offline IndexedDB
       await queueOfflineScan({
         id: newDiag.id || `scan-${Date.now()}`,
         timestamp: new Date().toISOString(),
@@ -78,7 +81,6 @@ export const DiseaseScreeningStudio: React.FC = () => {
     }
   };
 
-  // Simulate camera capture with pre-loaded realistic field samples
   const handleSimulatedCapture = async (diseaseKey: string) => {
     setIsAnalyzing(true);
     try {
@@ -95,59 +97,97 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
   const handleEscalateConfirm = async () => {
     if (diagnosis?.id) {
-      await api.escalateToOfficer(diagnosis.id, 'Central whorl and basal rot detected in daylight field inspection.');
+      await api.escalateToOfficer(diagnosis.id, escalationNotes);
     }
     setEscalated(true);
     setShowEscalationModal(false);
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Studio Header */}
       <div className="glass-card glass-card-accent" style={{ padding: '1.25rem 1.5rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span className="badge badge-gold">MODULE A</span>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>
-                {t('moduleATitle')}
+              <span className="badge badge-orange">MODULE A</span>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                AI Vision Disease & Triage Studio
               </h2>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.35rem' }}>
-              {t('moduleASubtitle')}
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.25rem' }}>
+              Edge-optimized MobileNetV3 diagnostic inference with 2G client compression (&lt;300KB) and ICAR/CAU triage protocols.
             </p>
           </div>
 
-          {/* Quick Disease Scenario Simulator for Demonstration */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>DEMO SAMPLES:</span>
+          {/* Quick Disease Scenario Simulator Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+              SAMPLE PRESETS:
+            </span>
             <button
               onClick={() => handleSimulatedCapture('heart_rot')}
-              className="tap-target btn-secondary"
-              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
+              className="tap-target"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.78rem',
+                borderRadius: 'var(--radius-full)',
+                background: '#FEF2F2',
+                border: '1px solid #FECACA',
+                color: '#DC2626',
+                fontWeight: 700,
+                minHeight: '34px',
+              }}
             >
               Heart Rot (91%)
             </button>
             <button
               onClick={() => handleSimulatedCapture('black_rot')}
-              className="tap-target btn-secondary"
-              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
+              className="tap-target"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.78rem',
+                borderRadius: 'var(--radius-full)',
+                background: '#FEF2F2',
+                border: '1px solid #FECACA',
+                color: '#DC2626',
+                fontWeight: 700,
+                minHeight: '34px',
+              }}
             >
               Black Rot (88%)
             </button>
             <button
               onClick={() => handleSimulatedCapture('mealybug_wilt')}
-              className="tap-target btn-secondary"
-              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
+              className="tap-target"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.78rem',
+                borderRadius: 'var(--radius-full)',
+                background: '#FFF7ED',
+                border: '1px solid #FDBA74',
+                color: '#EA580C',
+                fontWeight: 700,
+                minHeight: '34px',
+              }}
             >
               Mealybug (84%)
             </button>
             <button
               onClick={() => handleSimulatedCapture('healthy')}
-              className="tap-target btn-secondary"
-              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
+              className="tap-target"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.78rem',
+                borderRadius: 'var(--radius-full)',
+                background: '#ECFDF5',
+                border: '1px solid #A7F3D0',
+                color: '#059669',
+                fontWeight: 700,
+                minHeight: '34px',
+              }}
             >
-              Healthy Stand
+              Healthy Stand (97%)
             </button>
           </div>
         </div>
@@ -157,21 +197,26 @@ export const DiseaseScreeningStudio: React.FC = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-        gap: '1.5rem',
+        gap: '1.25rem',
       }}>
         {/* Left Column: Camera / Capture & Multi-Angle Guide */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Diagnostic Perspective</span>
-              <span className="badge badge-slate" style={{ fontSize: '0.7rem' }}>Field Guide</span>
+              <span style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                Target Diagnostic Angle
+              </span>
+              <span className="badge badge-slate" style={{ fontSize: '0.68rem' }}>
+                Reticle Perspective
+              </span>
             </div>
-            {/* Multi-Angle Visual Toggle (Part 3, Sec 6.2) */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem' }}>
+
+            {/* Multi-Angle Visual Toggle */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.45rem' }}>
               {[
-                { id: 'crown', label: t('crownView') },
-                { id: 'base_stalk', label: t('baseView') },
-                { id: 'lateral', label: t('lateralView') },
+                { id: 'crown', label: 'Crown Whorl', sub: 'Basal rot' },
+                { id: 'base_stalk', label: 'Basal Sheath', sub: 'Root collar' },
+                { id: 'lateral', label: 'Lateral Eyes', sub: 'Fruit borer' },
               ].map((ang) => (
                 <button
                   key={ang.id}
@@ -179,27 +224,32 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   className="tap-target"
                   style={{
                     padding: '0.55rem 0.4rem',
-                    fontSize: '0.78rem',
-                    background: selectedAngle === ang.id ? 'var(--pineapple-gold)' : 'var(--bg-surface-elevated)',
-                    color: selectedAngle === ang.id ? '#080C14' : 'var(--text-secondary)',
-                    border: selectedAngle === ang.id ? '1px solid var(--pineapple-gold)' : '1px solid var(--border-subtle)',
+                    flexDirection: 'column',
+                    gap: '0.1rem',
+                    fontSize: '0.8rem',
+                    background: selectedAngle === ang.id ? '#FFF7ED' : '#FAFAF9',
+                    color: selectedAngle === ang.id ? '#EA580C' : 'var(--text-secondary)',
+                    border: selectedAngle === ang.id ? '1.5px solid #F97316' : '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
                     textAlign: 'center',
-                    fontWeight: selectedAngle === ang.id ? 700 : 500,
+                    fontWeight: selectedAngle === ang.id ? 800 : 500,
+                    minHeight: '48px',
                   }}
                 >
-                  {ang.label}
+                  <span>{ang.label}</span>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{ang.sub}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Camera Viewfinder Reticle */}
+          {/* Clean Camera Viewfinder Reticle */}
           <div style={{
             position: 'relative',
             height: '280px',
-            background: 'radial-gradient(circle at center, #1E293B, #0A0F1D)',
+            background: 'radial-gradient(circle at center, #1E293B, #0F172A)',
             borderRadius: 'var(--radius-md)',
-            border: '2px dashed var(--border-medium)',
+            border: '2px dashed #FDBA74',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
@@ -215,66 +265,67 @@ export const DiseaseScreeningStudio: React.FC = () => {
             ) : (
               <div style={{ textAlign: 'center', padding: '1rem', zIndex: 2 }}>
                 <div style={{
-                  width: '64px',
-                  height: '64px',
+                  width: '60px',
+                  height: '60px',
                   borderRadius: '50%',
-                  background: 'rgba(245, 158, 11, 0.12)',
+                  background: 'rgba(249, 115, 22, 0.15)',
+                  border: '1px solid rgba(249, 115, 22, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--pineapple-gold)',
+                  color: '#F97316',
                   margin: '0 auto 0.75rem',
                 }}>
-                  <Camera size={32} />
+                  <Camera size={30} />
                 </div>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#FFFFFF' }}>
-                  Target Reticle: Align {selectedAngle === 'crown' ? 'Crown' : selectedAngle === 'base_stalk' ? 'Basal Sheath' : 'Lateral Eyes'}
+                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#FFFFFF' }}>
+                  Target: Align {selectedAngle === 'crown' ? 'Crown Whorl' : selectedAngle === 'base_stalk' ? 'Basal Sheath' : 'Lateral Fruit Eyes'}
                 </div>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.25rem', maxWidth: '280px' }}>
-                  {t('photoGuide')}
+                <p style={{ fontSize: '0.78rem', color: '#94A3B8', marginTop: '0.25rem', maxWidth: '280px' }}>
+                  Hold camera 15-20cm from crop in natural light. Edge AI checks for water-soaked lesions and fungal exudate.
                 </p>
               </div>
             )}
 
-            {/* Simulated Live Scan Line */}
+            {/* Simulated Live Laser Scan Line */}
             {isAnalyzing && <div className="animate-scan-line" />}
 
-            {/* Reticle Boundary Crosshairs */}
+            {/* Reticle Boundary Crosshairs in Orange */}
             <div style={{
               position: 'absolute',
-              top: '20px',
-              left: '20px',
+              top: '14px',
+              left: '14px',
               width: '24px',
               height: '24px',
-              borderTop: '3px solid var(--pineapple-gold)',
-              borderLeft: '3px solid var(--pineapple-gold)',
+              borderTop: '3px solid #F97316',
+              borderLeft: '3px solid #F97316',
             }} />
             <div style={{
               position: 'absolute',
-              top: '20px',
-              right: '20px',
+              top: '14px',
+              right: '14px',
               width: '24px',
               height: '24px',
-              borderTop: '3px solid var(--pineapple-gold)',
-              borderRight: '3px solid var(--pineapple-gold)',
+              borderTop: '3px solid #F97316',
+              borderRight: '3px solid #F97316',
             }} />
             <div style={{
               position: 'absolute',
-              bottom: '20px',
-              left: '20px',
+              bottom: '14px',
+              left: '14px',
               width: '24px',
               height: '24px',
-              borderBottom: '3px solid var(--pineapple-gold)',
-              borderLeft: '3px solid var(--pineapple-gold)',
+              borderBottom: '3px solid #F97316',
+              borderLeft: '3px solid #F97316',
             }} />
             <div style={{
               position: 'absolute',
-              bottom: '20px',
-              right: '20px',
+              bottom: '14px',
+              right: '14px',
               width: '24px',
               height: '24px',
-              borderBottom: '3px solid var(--pineapple-gold)',
-              borderRight: '3px solid var(--pineapple-gold)',
+              borderBottom: '3px solid #F97316',
+              borderRight: '3px solid #F97316',
             }} />
           </div>
 
@@ -284,20 +335,20 @@ export const DiseaseScreeningStudio: React.FC = () => {
               onClick={() => handleSimulatedCapture(diagnosis?.predicted_class || 'heart_rot')}
               disabled={isAnalyzing}
               className="tap-target btn-primary"
-              style={{ gap: '0.4rem', fontSize: '0.88rem' }}
+              style={{ gap: '0.45rem', fontSize: '0.88rem' }}
             >
               <Camera size={18} />
-              {isAnalyzing ? t('diagnosing') : t('snapPhoto')}
+              {isAnalyzing ? 'Scanning...' : 'Capture Photo'}
             </button>
 
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isAnalyzing}
               className="tap-target btn-secondary"
-              style={{ gap: '0.4rem', fontSize: '0.88rem' }}
+              style={{ gap: '0.45rem', fontSize: '0.88rem' }}
             >
               <Upload size={18} />
-              {t('uploadPhoto')}
+              Upload Image
             </button>
             <input
               ref={fileInputRef}
@@ -309,30 +360,30 @@ export const DiseaseScreeningStudio: React.FC = () => {
             />
           </div>
 
-          {/* Client-Side Canvas Compression Telemetry (Part 3, Sec 6.2) */}
+          {/* Client-Side Canvas Compression Telemetry */}
           {compressionInfo && (
             <div style={{
-              background: 'rgba(16, 185, 129, 0.08)',
-              border: '1px solid rgba(16, 185, 129, 0.25)',
+              background: '#FFF7ED',
+              border: '1px solid #FDBA74',
               borderRadius: 'var(--radius-md)',
-              padding: '0.75rem',
+              padding: '0.75rem 0.95rem',
               display: 'flex',
               flexDirection: 'column',
               gap: '0.35rem',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--plantation-green)' }}>
-                  CLIENT 2G COMPRESSION ENGINE
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#EA580C', letterSpacing: '0.04em' }}>
+                  2G CLIENT COMPRESSION ENGINE
                 </span>
-                <span className="badge badge-green" style={{ fontSize: '0.68rem' }}>
+                <span className="badge badge-orange" style={{ fontSize: '0.65rem' }}>
                   -{compressionInfo.compressionRatio}% Bandwidth
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                <span>Original: {(compressionInfo.originalSizeBytes / 1024 / 1024).toFixed(1)} MB</span>
-                <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>➔ Compressed: {Math.round(compressionInfo.compressedSizeBytes / 1024)} KB</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                <span>Raw: {(compressionInfo.originalSizeBytes / 1024 / 1024).toFixed(1)} MB</span>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>Compressed: {Math.round(compressionInfo.compressedSizeBytes / 1024)} KB</span>
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 SHA-256: {compressionInfo.sha256Hash}
               </div>
             </div>
@@ -341,46 +392,47 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
         {/* Right Column: Diagnostic Result & Triage Actions */}
         {diagnosis && (
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
             {/* Disease Heading & Triage Status */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                <span className="badge badge-slate" style={{ fontSize: '0.7rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+                <span className="badge badge-slate" style={{ fontSize: '0.68rem' }}>
                   DIAGNOSTIC INFERENCE RESULT
                 </span>
-                <span className={`badge ${diagnosis.severity === 'CRITICAL' ? 'badge-crimson' :
-                    diagnosis.severity === 'MODERATE' ? 'badge-gold' : 'badge-green'
-                  }`}>
+                <span className={`badge ${
+                  diagnosis.severity === 'CRITICAL' ? 'badge-crimson' :
+                  diagnosis.severity === 'MODERATE' ? 'badge-orange' : 'badge-green'
+                }`}>
                   SEVERITY: {diagnosis.severity}
                 </span>
               </div>
 
-              <h3 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                 {diagnosis.display_name}
               </h3>
             </div>
 
-            {/* Model Confidence Meter with Calibrated Triage */}
+            {/* Model Confidence Meter */}
             <div style={{
-              background: 'var(--bg-surface-elevated)',
-              padding: '0.85rem',
+              background: '#FAFAF9',
+              padding: '0.85rem 1rem',
               borderRadius: 'var(--radius-md)',
               border: '1px solid var(--border-subtle)',
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                  {t('confidenceScore')}
+                  Model Confidence
                 </span>
-                <span className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--plantation-green)' }}>
+                <span className="tabular-nums" style={{ fontSize: '1.1rem', fontWeight: 900, color: '#059669' }}>
                   {diagnosis.confidence_score.toFixed(1)}%
                 </span>
               </div>
 
-              {/* High-Contrast Progress Bar */}
+              {/* Progress Bar */}
               <div style={{
-                height: '10px',
-                background: 'var(--border-subtle)',
-                borderRadius: '5px',
+                height: '8px',
+                background: '#E4E4E7',
+                borderRadius: '4px',
                 overflow: 'hidden',
                 position: 'relative',
               }}>
@@ -388,182 +440,187 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   height: '100%',
                   width: `${diagnosis.confidence_score}%`,
                   background: diagnosis.confidence_score >= 85
-                    ? 'linear-gradient(90deg, #10B981, #059669)'
+                    ? '#10B981'
                     : diagnosis.confidence_score >= 50
-                      ? 'linear-gradient(90deg, #F59E0B, #D97706)'
-                      : '#DC2626',
-                  borderRadius: '5px',
+                      ? '#F97316'
+                      : '#EF4444',
+                  borderRadius: '4px',
                   transition: 'width 0.8s ease',
                 }} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.35rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                 <span>&lt;50% Inconclusive</span>
                 <span>50-85% Preliminary</span>
-                <span style={{ color: 'var(--plantation-green)', fontWeight: 700 }}>&gt;85% Confirmed Triage</span>
+                <span style={{ color: '#059669', fontWeight: 700 }}>&gt;85% Confirmed</span>
               </div>
             </div>
 
-            {/* Visible Symptoms Screened */}
+            {/* Symptoms Detected */}
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
-                Visible Pathological Symptoms Detected:
+              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.45rem', textTransform: 'uppercase' }}>
+                Pathological Biomarkers Detected:
               </div>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 {diagnosis.symptoms_detected.map((sym, idx) => (
-                  <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-primary)' }}>
-                    <CheckCircle size={15} style={{ color: 'var(--pineapple-gold)', flexShrink: 0, marginTop: '2px' }} />
+                  <li key={idx} style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.5rem',
+                    fontSize: '0.82rem',
+                    color: 'var(--text-primary)',
+                    background: '#FAFAF9',
+                    padding: '0.45rem 0.65rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-subtle)',
+                  }}>
+                    <CheckCircle size={15} style={{ color: '#F97316', flexShrink: 0, marginTop: '2px' }} />
                     <span>{sym}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Immediate Action Protocol: Organic & Chemical */}
+            {/* Treatment Protocol Tabs: Organic / Chemical */}
             <div style={{
-              background: 'var(--bg-surface-elevated)',
+              background: '#FAFAF9',
               border: '1px solid var(--border-subtle)',
               borderRadius: 'var(--radius-md)',
-              padding: '0.85rem',
+              padding: '0.95rem',
             }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--plantation-green)', marginBottom: '0.4rem' }}>
-                Immediate Treatment Protocol (ICAR / CAU Guidelines):
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase' }}>
+                  ICAR / CAU Guidelines:
+                </span>
+
+                <div style={{ display: 'flex', gap: '0.3rem' }}>
+                  <button
+                    onClick={() => setActiveRemedyTab('organic')}
+                    style={{
+                      padding: '0.2rem 0.55rem',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      borderRadius: 'var(--radius-sm)',
+                      background: activeRemedyTab === 'organic' ? '#10B981' : 'transparent',
+                      color: activeRemedyTab === 'organic' ? '#FFFFFF' : 'var(--text-muted)',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Organic
+                  </button>
+                  <button
+                    onClick={() => setActiveRemedyTab('chemical')}
+                    style={{
+                      padding: '0.2rem 0.55rem',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      borderRadius: 'var(--radius-sm)',
+                      background: activeRemedyTab === 'chemical' ? '#EA580C' : 'transparent',
+                      color: activeRemedyTab === 'chemical' ? '#FFFFFF' : 'var(--text-muted)',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Chemical
+                  </button>
+                </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--pineapple-gold)', textTransform: 'uppercase' }}>
-                    Organic & Cultural:
+
+              {activeRemedyTab === 'organic' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#059669', textTransform: 'uppercase' }}>
+                    Bio-Control & Soil Amendment:
                   </span>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                    {diagnosis.organic_treatments[0]}
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    {diagnosis.organic_treatments[0] || 'Apply Trichoderma harzianum @ 10g/L around root zone and enhance ridge drainage to prevent stagnant water.'}
                   </p>
                 </div>
-                <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#DC2626', textTransform: 'uppercase' }}>
-                    Chemical Fungicide:
+              )}
+
+              {activeRemedyTab === 'chemical' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#EA580C', textTransform: 'uppercase' }}>
+                    Chemical Fungicide (Severe):
                   </span>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                    {diagnosis.chemical_treatments[0]}
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                    {diagnosis.chemical_treatments[0] || 'Foliar spray and basal drenching with Metalaxyl-M + Mancozeb (Ridomil MZ @ 2g/L) at 15-day intervals.'}
                   </p>
                 </div>
-              </div>
+              )}
             </div>
 
-            {/* Escalation Trigger to KVK Field Extension Officer */}
-            <div style={{ marginTop: 'auto' }}>
-              {escalated ? (
-                <div style={{
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  border: '1px solid var(--plantation-green)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '0.75rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  color: 'var(--plantation-green)',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                }}>
-                  <Check size={18} />
-                  <span>Extension Officer Alerted (Ref: KVK-THB-9921) • Technician Assigned</span>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowEscalationModal(true)}
-                  className="tap-target btn-outline-danger"
-                  style={{ width: '100%', gap: '0.5rem', fontSize: '0.88rem' }}
-                >
-                  <ShieldAlert size={18} />
-                  {t('escalateOfficer')}
-                </button>
-              )}
+            {/* Officer Escalation Action */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto' }}>
+              <button
+                onClick={() => setShowEscalationModal(true)}
+                disabled={escalated}
+                className="tap-target btn-outline-danger"
+                style={{ flex: 1, gap: '0.45rem', fontSize: '0.85rem' }}
+              >
+                <ShieldAlert size={16} />
+                {escalated ? 'Escalated to District Officer' : 'Escalate to District Officer'}
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      {/* Extension Officer Escalation Modal */}
+      {/* Escalation Modal */}
       {showEscalationModal && (
         <div style={{
           position: 'fixed',
-          inset: 0,
-          background: 'rgba(15, 23, 42, 0.45)',
-          backdropFilter: 'blur(8px)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 100,
           padding: '1rem',
         }}>
-          <div className="glass-card" style={{
-            maxWidth: '500px',
-            width: '100%',
-            padding: '1.5rem',
-            border: '1px solid var(--border-medium)',
-            background: '#FFFFFF',
-            boxShadow: '0 20px 40px rgba(15, 23, 42, 0.15)',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
-              <ShieldAlert size={24} style={{ color: 'var(--alert-amber)' }} />
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                Escalate to KVK Field Extension Officer
-              </h3>
-            </div>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              This dispatches your compressed field image, GPS location, and crop history directly to the Thoubal District Agricultural Extension Officer for on-site diagnostic verification.
+          <div className="glass-card" style={{ maxWidth: '480px', width: '100%', padding: '1.5rem', background: '#FFFFFF' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
+              Escalate to District Horticulture Officer
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Broadcasts immediate SMS/WhatsApp alert with GPS coordinates to the Thoubal District Agriculture Office for field verification.
             </p>
 
-            <div style={{
-              background: 'var(--bg-surface-elevated)',
-              padding: '0.75rem',
-              borderRadius: 'var(--radius-md)',
-              fontSize: '0.8rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.25rem',
-              marginBottom: '1rem',
-              border: '1px solid var(--border-subtle)',
-            }}>
-              <div><strong>Farmer:</strong> Tombi Singh (Phone: +91 94361 22910)</div>
-              <div><strong>Location:</strong> Andro Hill Terraces, Thoubal (24.738° N, 94.021° E)</div>
-              <div><strong>Screened Condition:</strong> {diagnosis?.display_name} ({diagnosis?.confidence_score}%)</div>
-            </div>
-
-            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              Farmer Observations & Notes:
-            </label>
             <textarea
               value={escalationNotes}
               onChange={(e) => setEscalationNotes(e.target.value)}
               rows={3}
               style={{
                 width: '100%',
-                background: '#FFFFFF',
+                padding: '0.75rem',
+                borderRadius: 'var(--radius-md)',
+                background: '#FAFAF9',
                 border: '1px solid var(--border-medium)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '0.5rem',
                 color: 'var(--text-primary)',
                 fontSize: '0.85rem',
-                marginTop: '0.35rem',
-                marginBottom: '1.25rem',
+                marginBottom: '1rem',
+                resize: 'none',
               }}
             />
 
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
               <button
                 onClick={() => setShowEscalationModal(false)}
                 className="tap-target btn-secondary"
-                style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleEscalateConfirm}
                 className="tap-target btn-primary"
-                style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', gap: '0.4rem' }}
+                style={{ padding: '0.45rem 1.25rem', fontSize: '0.85rem' }}
               >
-                <Send size={15} />
-                Dispatch Alert to KVK
+                Confirm Escalation
               </button>
             </div>
           </div>

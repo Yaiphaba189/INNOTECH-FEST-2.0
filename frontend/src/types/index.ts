@@ -1,6 +1,6 @@
 export type UserRole = 'farmer' | 'buyer' | 'fpo' | 'extension_officer';
 
-export type LanguageCode = 'en' | 'mn-Beng' | 'mn-Mtei';
+export type LanguageCode = 'en';
 
 export type DiseaseClass = 
   | 'heart_rot' 
@@ -14,8 +14,8 @@ export interface DiseaseDiagnosis {
   id: string;
   predicted_class: DiseaseClass;
   display_name: string;
-  local_name_beng: string;
-  local_name_mtei: string;
+  local_name_beng?: string;
+  local_name_mtei?: string;
   confidence_score: number;
   triage_status: 'confirmed' | 'preliminary' | 'inconclusive';
   severity: 'CRITICAL' | 'MODERATE' | 'LOW' | 'NONE';
@@ -31,8 +31,8 @@ export interface DiseaseDiagnosis {
 export interface PhenologyStage {
   stage_id: string;
   name: string;
-  name_beng: string;
-  name_mtei: string;
+  name_beng?: string;
+  name_mtei?: string;
   days_range: [number, number];
   is_active: boolean;
   is_completed: boolean;

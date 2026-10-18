@@ -15,7 +15,9 @@ import {
   Check, 
   Calendar,
   Layers,
-  ArrowRight
+  ArrowRight,
+  ShieldCheck,
+  PackageCheck
 } from 'lucide-react';
 
 interface MarketplaceLot {
@@ -139,18 +141,18 @@ export const BuyerMarketplace: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Buyer Console Header */}
       <div className="glass-card glass-card-accent" style={{ padding: '1.25rem 1.5rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span className="badge badge-gold">BUYER PORTAL</span>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>
-                Wholesale Procurement & Marketplace Feed
+              <span className="badge badge-orange">BUYER PORTAL</span>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                Wholesale Procurement & Verified Marketplace Feed
               </h2>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.35rem' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.25rem' }}>
               Direct verified sourcing from certified pineapple clusters in Churachandpur, Thoubal, and Bishnupur.
             </p>
           </div>
@@ -158,30 +160,30 @@ export const BuyerMarketplace: React.FC = () => {
           <button
             onClick={() => setShowOrderModal(true)}
             className="tap-target btn-primary"
-            style={{ gap: '0.5rem', fontSize: '0.88rem' }}
+            style={{ gap: '0.45rem', fontSize: '0.88rem' }}
           >
-            <PlusCircle size={18} />
-            Post Institutional Demand Order
+            <PlusCircle size={17} />
+            Post Demand Order
           </button>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-card" style={{ padding: '1rem 1.25rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            <Filter size={16} /> Filter by District:
+      <div className="glass-card" style={{ padding: '0.85rem 1.25rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            <Filter size={15} style={{ color: '#F97316' }} /> Filter Feed:
           </div>
           <select
             value={selectedDistrict}
             onChange={(e) => setSelectedDistrict(e.target.value)}
             style={{
-              background: 'var(--bg-surface)',
+              background: '#FAFAF9',
               border: '1px solid var(--border-medium)',
               borderRadius: 'var(--radius-sm)',
               padding: '0.4rem 0.75rem',
               color: 'var(--text-primary)',
-              fontSize: '0.85rem',
+              fontSize: '0.82rem',
             }}
           >
             <option value="all">All Horticultural Districts</option>
@@ -194,21 +196,21 @@ export const BuyerMarketplace: React.FC = () => {
             value={selectedGrade}
             onChange={(e) => setSelectedGrade(e.target.value)}
             style={{
-              background: 'var(--bg-surface)',
+              background: '#FAFAF9',
               border: '1px solid var(--border-medium)',
               borderRadius: 'var(--radius-sm)',
               padding: '0.4rem 0.75rem',
               color: 'var(--text-primary)',
-              fontSize: '0.85rem',
+              fontSize: '0.82rem',
             }}
           >
-            <option value="all">All Grades</option>
+            <option value="all">All Quality Grades</option>
             <option value="Grade A">Grade A (Brix &gt; 14.0°)</option>
             <option value="Grade B">Grade B (Brix 12.5 - 14.0°)</option>
           </select>
         </div>
 
-        <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
           Showing <strong>{filteredLots.length}</strong> verified farm consignments
         </div>
       </div>
@@ -216,8 +218,8 @@ export const BuyerMarketplace: React.FC = () => {
       {/* Marketplace Lots Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '1.25rem',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: '1rem',
       }}>
         {filteredLots.map((lot) => (
           <div
@@ -226,12 +228,11 @@ export const BuyerMarketplace: React.FC = () => {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '1rem',
-              border: '1px solid var(--border-subtle)',
+              gap: '0.85rem',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="badge badge-gold" style={{ fontFamily: 'var(--font-mono)' }}>
+              <span className="badge badge-orange" style={{ fontFamily: 'var(--font-mono)' }}>
                 {lot.lot_code}
               </span>
               <span className={`badge ${lot.grade === 'Grade A' ? 'badge-green' : 'badge-slate'}`}>
@@ -244,29 +245,30 @@ export const BuyerMarketplace: React.FC = () => {
                 {lot.weight_kg} kg {lot.variety} Pineapple
               </h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
-                <MapPin size={14} style={{ color: 'var(--pineapple-gold)' }} />
+                <MapPin size={13} style={{ color: '#F97316' }} />
                 <span>{lot.district} • Farmer: {lot.farmer}</span>
               </div>
             </div>
 
             <div style={{
-              background: 'var(--bg-surface-elevated)',
+              background: '#FAFAF9',
               padding: '0.75rem',
               borderRadius: 'var(--radius-sm)',
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: '0.5rem',
+              border: '1px solid var(--border-subtle)',
             }}>
               <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>BRIX SWEETNESS</div>
-                <div className="tabular-nums" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--plantation-green)' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>BRIX SWEETNESS</div>
+                <div className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 900, color: '#059669' }}>
                   {lot.brix}° Brix
                 </div>
               </div>
 
               <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>READY DATE</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>HARVEST DATE</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   {lot.available_date}
                 </div>
               </div>
@@ -281,18 +283,19 @@ export const BuyerMarketplace: React.FC = () => {
               borderTop: '1px solid var(--border-subtle)',
             }}>
               <div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ASKING RATE</div>
-                <div className="tabular-nums" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--pineapple-gold)' }}>
-                  ₹{lot.minimum_rate.toFixed(2)}/kg
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>ASKING RATE</div>
+                <div className="tabular-nums" style={{ fontSize: '1.25rem', fontWeight: 900, color: '#EA580C' }}>
+                  ₹{lot.minimum_rate.toFixed(2)}<span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/kg</span>
                 </div>
               </div>
 
               <button
                 className="tap-target btn-primary"
-                style={{ padding: '0.45rem 1rem', fontSize: '0.85rem' }}
+                style={{ padding: '0.45rem 1rem', fontSize: '0.82rem', gap: '0.35rem' }}
                 onClick={() => alert(`Bid initiated for ${lot.lot_code} (${lot.weight_kg} kg). The farmer will review net realized payout.`)}
               >
-                Submit Offer
+                <span>Submit Offer</span>
+                <ArrowRight size={13} />
               </button>
             </div>
           </div>
@@ -304,64 +307,66 @@ export const BuyerMarketplace: React.FC = () => {
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(8px)',
+          background: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 100,
           padding: '1rem',
         }}>
-          <div className="glass-card" style={{ maxWidth: '520px', width: '100%', padding: '1.75rem', border: '1px solid var(--pineapple-gold)', background: 'rgba(15, 23, 42, 0.95)' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-              Create Institutional Procurement Demand Order
+          <div className="glass-card" style={{ maxWidth: '500px', width: '100%', padding: '1.5rem', background: '#FFFFFF' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.3rem' }}>
+              Create Institutional Demand Order
             </h3>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
-              Broadcast bulk procurement needs to FPO aggregators in Thoubal and Churachandpur with guaranteed weighbridge settlement terms.
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.15rem' }}>
+              Broadcast bulk procurement needs to FPO aggregators in Thoubal and Churachandpur.
             </p>
 
-            <form onSubmit={handlePlaceOrder} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <form onSubmit={handlePlaceOrder} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Pineapple Variety</label>
+                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Pineapple Variety</label>
                 <select
                   value={variety}
                   onChange={(e) => setVariety(e.target.value as any)}
                   style={{
                     width: '100%',
-                    background: 'var(--bg-app)',
+                    background: '#FAFAF9',
                     border: '1px solid var(--border-medium)',
                     borderRadius: 'var(--radius-sm)',
                     padding: '0.5rem',
                     color: 'var(--text-primary)',
-                    marginTop: '0.25rem',
+                    marginTop: '0.2rem',
+                    fontSize: '0.85rem',
                   }}
                 >
-                  <option value="Queen">Queen (Fresh Table / Canning Sweet - 14-16° Brix)</option>
+                  <option value="Queen">Queen (Table / Canning Sweet - 14-16° Brix)</option>
                   <option value="Kew">Kew (Large Juicing Variety - 12-14° Brix)</option>
                 </select>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Required Volume (kg)</label>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Required Volume (kg)</label>
                   <input
                     type="number"
                     value={requiredWeight}
                     onChange={(e) => setRequiredWeight(e.target.value)}
                     style={{
                       width: '100%',
-                      background: 'var(--bg-app)',
+                      background: '#FAFAF9',
                       border: '1px solid var(--border-medium)',
                       borderRadius: 'var(--radius-sm)',
                       padding: '0.5rem',
                       color: 'var(--text-primary)',
-                      marginTop: '0.25rem',
+                      marginTop: '0.2rem',
+                      fontSize: '0.85rem',
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Min Sugar (° Brix)</label>
+                  <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Min Sugar (° Brix)</label>
                   <input
                     type="number"
                     step="0.1"
@@ -369,19 +374,20 @@ export const BuyerMarketplace: React.FC = () => {
                     onChange={(e) => setTargetBrix(e.target.value)}
                     style={{
                       width: '100%',
-                      background: 'var(--bg-app)',
+                      background: '#FAFAF9',
                       border: '1px solid var(--border-medium)',
                       borderRadius: 'var(--radius-sm)',
                       padding: '0.5rem',
                       color: 'var(--text-primary)',
-                      marginTop: '0.25rem',
+                      marginTop: '0.2rem',
+                      fontSize: '0.85rem',
                     }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Max Gross Budget (₹ / kg)</label>
+                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Max Gross Budget (₹ / kg)</label>
                 <input
                   type="number"
                   step="0.5"
@@ -389,47 +395,49 @@ export const BuyerMarketplace: React.FC = () => {
                   onChange={(e) => setMaxRate(e.target.value)}
                   style={{
                     width: '100%',
-                    background: 'var(--bg-app)',
+                    background: '#FAFAF9',
                     border: '1px solid var(--border-medium)',
                     borderRadius: 'var(--radius-sm)',
                     padding: '0.5rem',
                     color: 'var(--text-primary)',
-                    marginTop: '0.25rem',
+                    marginTop: '0.2rem',
+                    fontSize: '0.85rem',
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Delivery Receiving Hub</label>
+                <label style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Delivery Receiving Hub</label>
                 <input
                   type="text"
                   value={targetHub}
                   onChange={(e) => setTargetHub(e.target.value)}
                   style={{
                     width: '100%',
-                    background: 'var(--bg-app)',
+                    background: '#FAFAF9',
                     border: '1px solid var(--border-medium)',
                     borderRadius: 'var(--radius-sm)',
                     padding: '0.5rem',
                     color: 'var(--text-primary)',
-                    marginTop: '0.25rem',
+                    marginTop: '0.2rem',
+                    fontSize: '0.85rem',
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.75rem' }}>
                 <button
                   type="button"
                   onClick={() => setShowOrderModal(false)}
                   className="tap-target btn-secondary"
-                  style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                  style={{ padding: '0.45rem 1rem', fontSize: '0.82rem' }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="tap-target btn-primary"
-                  style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
+                  style={{ padding: '0.45rem 1.25rem', fontSize: '0.82rem' }}
                 >
                   {orderSuccess ? 'Order Broadcasted!' : 'Broadcast to FPO Network'}
                 </button>

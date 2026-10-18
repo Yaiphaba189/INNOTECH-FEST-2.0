@@ -15,7 +15,10 @@ import {
   ArrowRight,
   TrendingDown,
   Sparkles,
-  Info
+  Info,
+  Scale,
+  Award,
+  Wallet
 } from 'lucide-react';
 import { BuyerMatchQuote, HarvestLot } from '@/types';
 import { MOCK_BUYER_MATCHES, MOCK_ACTIVE_LOT } from '@/lib/mock-data';
@@ -62,60 +65,72 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
     if (onDealLocked) {
       setTimeout(() => {
         onDealLocked(quote);
-      }, 600);
+      }, 700);
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Module Header */}
       <div className="glass-card glass-card-accent" style={{ padding: '1.25rem 1.5rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span className="badge badge-gold">MODULE C</span>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>
-                {t('moduleCTitle')}
+              <span className="badge badge-orange">MODULE C</span>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                Transparent Market Linkage & Guaranteed Net-Returns
               </h2>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.35rem' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.25rem' }}>
               Radical price transparency: upfront itemized deductions showing True Net Realized take-home pay per kilogram.
             </p>
           </div>
 
           <div style={{
-            background: 'var(--bg-surface-elevated)',
+            background: '#FAFAF9',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-md)',
-            padding: '0.5rem 0.85rem',
+            padding: '0.55rem 0.95rem',
             textAlign: 'right',
           }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>REGISTERED CONSIGNMENT</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>REGISTERED LOT</div>
             <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
               {activeLot.lot_code} • {activeLot.quantity_kg} kg {activeLot.crop_variety}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--plantation-green)' }}>
-              Verified Grade A (14.5° Brix) • Ready {activeLot.ready_date}
+            <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>
+              Verified Grade A (14.8° Brix) • Ready {activeLot.ready_date}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Economic Insight Callout: The Net Return Principle (Part 3, Sec 8.2) */}
+      {/* Economic Insight Callout */}
       <div style={{
-        background: 'var(--pineapple-gold-bg)',
-        border: '1px solid rgba(217, 119, 6, 0.25)',
+        background: '#FFF7ED',
+        border: '1px solid #FDBA74',
         borderRadius: 'var(--radius-md)',
-        padding: '0.85rem 1.15rem',
+        padding: '1rem 1.25rem',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.75rem',
+        gap: '0.85rem',
       }}>
-        <Info size={22} style={{ color: 'var(--pineapple-gold)', flexShrink: 0 }} />
-        <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-          <strong style={{ color: 'var(--text-primary)' }}>The Net Return Economic Principle: </strong>
-          Conventional brokers advertise high gross rates (e.g. ₹31.00/kg) but secretly deduct 25% for transit shrinkage and handling. 
-          HARVESTLINK AI deducts all pooled logistics, packaging, and platform fees upfront so farmers see their exact guaranteed bank payout before committing.
+        <div style={{
+          width: '38px',
+          height: '38px',
+          borderRadius: '10px',
+          background: '#FFEDD5',
+          color: '#EA580C',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <Wallet size={20} />
+        </div>
+        <div style={{ fontSize: '0.84rem', color: '#7C2D12', lineHeight: 1.5 }}>
+          <strong style={{ color: '#9A3412' }}>The Net Return Principle: </strong>
+          Conventional brokers advertise high gross rates (₹31.00/kg) but secretly dock 25% for transit shrinkage, paying out only ₹21.73/kg. 
+          HARVESTLINK AI itemizes all pooled freight, crates, and fees upfront so you take home <strong style={{ color: '#059669' }}>₹24.38/kg guaranteed (+₹2.65/kg more in your bank account)</strong>.
         </div>
       </div>
 
@@ -128,15 +143,20 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
           return (
             <div
               key={quote.id}
-              className={`glass-card ${quote.is_recommended ? 'glass-card-accent' : ''}`}
+              className="glass-card"
               style={{
                 position: 'relative',
                 border: isLocked 
-                  ? '2px solid var(--plantation-green)' 
+                  ? '2px solid #10B981' 
                   : quote.is_recommended 
-                  ? '1px solid var(--pineapple-gold)' 
+                  ? '1.5px solid #F97316' 
                   : '1px solid var(--border-subtle)',
-                transition: 'all 0.25s ease',
+                boxShadow: isLocked 
+                  ? '0 4px 16px rgba(16, 185, 129, 0.2)' 
+                  : quote.is_recommended 
+                  ? '0 4px 16px rgba(249, 115, 22, 0.15)' 
+                  : 'var(--shadow-card)',
+                transition: 'all 0.2s ease',
               }}
             >
               {/* Recommended Badge */}
@@ -144,20 +164,25 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                 <div style={{
                   position: 'absolute',
                   top: '-10px',
-                  right: '24px',
-                  background: 'linear-gradient(90deg, #F59E0B, #D97706)',
+                  right: '20px',
+                  background: '#F97316',
                   color: '#FFFFFF',
                   fontWeight: 800,
                   fontSize: '0.7rem',
-                  padding: '0.2rem 0.65rem',
+                  padding: '0.2rem 0.75rem',
                   borderRadius: 'var(--radius-full)',
+                  boxShadow: '0 2px 8px rgba(249, 115, 22, 0.4)',
                   letterSpacing: '0.04em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.3rem',
                 }}>
-                  ★ RECOMMENDED MATCH (HIGHEST NET TAKE-HOME)
+                  <Sparkles size={11} />
+                  RECOMMENDED NET RETURN
                 </div>
               )}
 
-              {/* Main Card Header & Summary */}
+              {/* Card Top Row: Buyer Profile & Payout Summary */}
               <div style={{
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -169,193 +194,178 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                   <div style={{
                     width: '46px',
                     height: '46px',
-                    borderRadius: 'var(--radius-md)',
-                    background: quote.is_recommended ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-surface-elevated)',
-                    color: quote.is_recommended ? 'var(--pineapple-gold)' : 'var(--text-secondary)',
+                    borderRadius: '12px',
+                    background: '#FAFAF9',
+                    border: '1px solid var(--border-subtle)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontWeight: 700,
+                    color: '#EA580C',
+                    flexShrink: 0,
                   }}>
-                    <Building2 size={24} />
+                    <Building2 size={22} />
                   </div>
 
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <h4 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                         {quote.buyer_name}
-                      </h3>
-                      <span className="badge badge-slate" style={{ fontSize: '0.68rem' }}>
-                        {quote.buyer_type}
-                      </span>
+                      </h4>
+                      {quote.escrow_secured && (
+                        <span className="badge badge-green" style={{ fontSize: '0.65rem' }}>
+                          <ShieldCheck size={11} />
+                          Escrow Guaranteed
+                        </span>
+                      )}
                     </div>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                      {quote.location} • {quote.distance_km} km transit
-                    </p>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
+                      Delivery: {quote.delivery_location} • Requirement: {quote.minimum_lot_kg} kg min
+                    </div>
                   </div>
                 </div>
 
-                {/* Pricing Columns: Gross vs Net Realized */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>GROSS OFFER</div>
-                    <div className="tabular-nums" style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', textDecoration: 'line-through' }}>
-                      ₹{quote.gross_rate_per_kg.toFixed(2)}/kg
-                    </div>
+                {/* Net Payout Callout */}
+                <div style={{
+                  textAlign: 'right',
+                  background: '#FAFAF9',
+                  padding: '0.6rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-subtle)',
+                }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>
+                    GUARANTEED NET RETURN
                   </div>
-
-                  <div style={{
-                    background: 'var(--bg-surface-elevated)',
-                    border: '1px solid var(--border-medium)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.4rem 0.85rem',
-                    textAlign: 'right',
-                  }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--plantation-green)', fontWeight: 700 }}>
-                      TRUE NET TAKE-HOME
-                    </div>
-                    <div className="tabular-nums" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                      ₹{quote.net_rate_per_kg.toFixed(2)} <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>/ kg</span>
-                    </div>
+                  <div className="tabular-nums" style={{ fontSize: '1.5rem', fontWeight: 900, color: '#059669', lineHeight: 1.1 }}>
+                    ₹{quote.net_farmer_price_per_kg.toFixed(2)}
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}> / kg</span>
                   </div>
-
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>TOTAL PAYOUT ({activeLot.quantity_kg} kg)</div>
-                    <div className="tabular-nums" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--pineapple-gold)' }}>
-                      ₹{quote.total_payout.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                    </div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    Gross: ₹{quote.gross_offer_per_kg.toFixed(2)}/kg
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons: Expand Inspector & Lock Deal */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginTop: '1rem',
-                paddingTop: '0.85rem',
-                borderTop: '1px solid var(--border-subtle)',
-              }}>
+              {/* Itemized Deductions Waterfall Toggle */}
+              <div style={{ marginTop: '1rem' }}>
                 <button
                   onClick={() => toggleExpand(quote.id)}
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: 'var(--text-gold)',
+                    color: '#EA580C',
                     fontSize: '0.82rem',
-                    fontWeight: 600,
+                    fontWeight: 700,
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.35rem',
+                    padding: 0,
                   }}
                 >
-                  {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  <span>{isExpanded ? 'Hide Itemized Deductions' : 'Inspect Exact Rupee Deductions'}</span>
+                  <span>{isExpanded ? 'Hide Itemized Deductions Waterfall' : 'View Itemized Transparent Deductions'}</span>
+                  {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                 </button>
 
-                <div>
-                  {isLocked ? (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.45rem',
-                      color: 'var(--plantation-green)',
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
-                    }}>
-                      <ShieldCheck size={20} />
-                      <span>{t('dealLocked')} (Consignment Committed)</span>
+                {isExpanded && (
+                  <div style={{
+                    marginTop: '0.75rem',
+                    background: '#FAFAF9',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-subtle)',
+                    padding: '0.95rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.55rem',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                      <span>Gross Purchase Offer</span>
+                      <strong className="tabular-nums">+₹{quote.gross_offer_per_kg.toFixed(2)} / kg</strong>
                     </div>
-                  ) : (
-                    <button
-                      onClick={() => handleLockDeal(quote)}
-                      className="tap-target btn-primary"
-                      style={{ padding: '0.5rem 1.25rem', fontSize: '0.88rem', gap: '0.4rem' }}
-                    >
-                      <Lock size={16} />
-                      {t('acceptDeal')}
-                    </button>
-                  )}
-                </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#DC2626' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Truck size={13} />
+                        Pooled Freight & Transit ({quote.transit_distance_km} km)
+                      </span>
+                      <span className="tabular-nums">-₹{quote.deductions.freight_per_kg.toFixed(2)} / kg</span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#DC2626' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Package size={13} />
+                        Standard Ventilated Crates
+                      </span>
+                      <span className="tabular-nums">-₹{quote.deductions.crate_fee_per_kg.toFixed(2)} / kg</span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#DC2626' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Coins size={13} />
+                        FPO Aggregation & Platform Fee (1.5%)
+                      </span>
+                      <span className="tabular-nums">-₹{quote.deductions.platform_fee_per_kg.toFixed(2)} / kg</span>
+                    </div>
+
+                    <div style={{
+                      borderTop: '1px solid var(--border-medium)',
+                      paddingTop: '0.55rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: '0.88rem',
+                      color: '#059669',
+                      fontWeight: 800,
+                    }}>
+                      <span>Guaranteed Farmer Bank Payout</span>
+                      <span className="tabular-nums">₹{quote.net_farmer_price_per_kg.toFixed(2)} / kg (₹{(quote.net_farmer_price_per_kg * 450).toLocaleString('en-IN', { maximumFractionDigits: 0 })} for 450kg)</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Expandable Deductions Inspector Panel */}
-              {isExpanded && (
+              {/* Card Footer: Comparison Callout & Lock Deal Action */}
+              <div style={{
+                marginTop: '1rem',
+                paddingTop: '0.75rem',
+                borderTop: '1px solid var(--border-subtle)',
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.75rem',
+              }}>
                 <div style={{
-                  marginTop: '1rem',
-                  background: 'var(--bg-surface-elevated)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '1rem',
-                  border: '1px solid var(--border-subtle)',
+                  fontSize: '0.8rem',
+                  color: quote.middleman_comparison.cash_advantage_per_kg > 0 ? '#059669' : 'var(--text-secondary)',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  fontWeight: 600,
                 }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--pineapple-gold)', textTransform: 'uppercase' }}>
-                    Itemized Cost Decomposition:
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-                    <div style={{ background: 'var(--bg-app)', border: '1px solid var(--border-subtle)', padding: '0.65rem', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                        <Truck size={14} /> Shared Freight via FPO
-                      </div>
-                      <div className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--alert-crimson)', marginTop: '0.2rem' }}>
-                        - ₹{quote.deductions.shared_freight.toFixed(2)} / kg
-                      </div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-                        Combined load saving ₹1.85/kg over solo truck
-                      </div>
-                    </div>
-
-                    <div style={{ background: 'var(--bg-app)', border: '1px solid var(--border-subtle)', padding: '0.65rem', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                        <Package size={14} /> Crates & Packaging
-                      </div>
-                      <div className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--alert-crimson)', marginTop: '0.2rem' }}>
-                        - ₹{quote.deductions.crates_packaging.toFixed(2)} / kg
-                      </div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-                        Standardized 20kg food-grade plastic lugs
-                      </div>
-                    </div>
-
-                    <div style={{ background: 'var(--bg-app)', border: '1px solid var(--border-subtle)', padding: '0.65rem', borderRadius: 'var(--radius-sm)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                        <Coins size={14} /> Platform Fee (1.4%)
-                      </div>
-                      <div className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--alert-crimson)', marginTop: '0.2rem' }}>
-                        - ₹{quote.deductions.platform_fee.toFixed(2)} / kg
-                      </div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-                        Quality inspection & smart-contract escrow
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    background: 'var(--bg-app)',
-                    border: '1px solid var(--border-subtle)',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.78rem',
-                    color: 'var(--text-primary)',
-                  }}>
-                    <div>
-                      <strong>Payment Terms:</strong> {quote.payment_terms}
-                    </div>
-                    <div>
-                      <strong>Pickup Window:</strong> {quote.pickup_window}
-                    </div>
-                  </div>
+                  <Award size={15} style={{ color: '#EA580C' }} />
+                  <span>
+                    Advantage vs Broker Cash: <strong>+₹{quote.middleman_comparison.cash_advantage_per_kg.toFixed(2)}/kg (+{quote.middleman_comparison.advantage_percentage.toFixed(1)}% higher payout)</strong>
+                  </span>
                 </div>
-              )}
+
+                <button
+                  onClick={() => handleLockDeal(quote)}
+                  disabled={isLocked}
+                  className={`tap-target ${isLocked ? 'btn-success' : 'btn-primary'}`}
+                  style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
+                >
+                  {isLocked ? (
+                    <>
+                      <CheckCircle size={16} style={{ marginRight: '0.4rem' }} />
+                      Deal Locked in Escrow
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={16} style={{ marginRight: '0.4rem' }} />
+                      Lock Guaranteed Payout
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           );
         })}

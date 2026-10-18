@@ -15,7 +15,10 @@ import {
   ShieldCheck,
   User,
   Phone,
-  FileText
+  FileText,
+  Navigation,
+  Gauge,
+  Sparkles
 } from 'lucide-react';
 import { DispatchRun } from '@/types';
 import { MOCK_DISPATCH_RUN } from '@/lib/mock-data';
@@ -30,11 +33,14 @@ export const FpoLogisticsConsole: React.FC = () => {
 
   useEffect(() => {
     api.getDispatchRun('Churachandpur')
-      .then((data) => setRun(data))
+      .then((data) => {
+        if (data && data.run_id) {
+          setRun(data);
+        }
+      })
       .catch((err) => console.warn('Dispatch run fetch error:', err));
   }, []);
 
-  // Generate real scannable QR Code
   useEffect(() => {
     const qrPayload = JSON.stringify({
       token: run.digital_gate_pass_token,
@@ -47,11 +53,11 @@ export const FpoLogisticsConsole: React.FC = () => {
     });
 
     QRCode.toDataURL(qrPayload, {
-      width: 200,
+      width: 220,
       margin: 1,
       color: {
-        dark: '#080C14',
-        light: '#F8FAFC',
+        dark: '#18181B',
+        light: '#FFFFFF',
       },
     })
       .then((url) => setQrDataUrl(url))
@@ -63,36 +69,38 @@ export const FpoLogisticsConsole: React.FC = () => {
     setTimeout(() => setSmsSent(false), 5000);
   };
 
+  const stops = run.stops || [];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Console Header */}
       <div className="glass-card glass-card-accent" style={{ padding: '1.25rem 1.5rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span className="badge badge-gold">MODULE D</span>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>
-                {t('moduleDTitle')}
+              <span className="badge badge-orange">MODULE D</span>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                FPO Collective Logistics & Route Dispatch Console
               </h2>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.35rem' }}>
-              Google OR-Tools Capacitated Vehicle Routing (CVRPTW) pooling small lots into full payloads (≥ 75%).
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.25rem' }}>
+              Google OR-Tools Capacitated Vehicle Routing (CVRPTW) pooling smallholder lots into ≥ 75% saturated transit payloads.
             </p>
           </div>
 
           <div style={{
-            background: 'var(--bg-surface-elevated)',
+            background: '#FAFAF9',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-md)',
-            padding: '0.5rem 0.85rem',
+            padding: '0.55rem 0.95rem',
             textAlign: 'right',
           }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>DISPATCH RUN ID</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>DISPATCH RUN ID</div>
             <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
               {run.run_id}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--plantation-green)' }}>
-              {run.cluster_district}
+            <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>
+              {run.cluster_district} Cluster
             </div>
           </div>
         </div>
@@ -102,23 +110,24 @@ export const FpoLogisticsConsole: React.FC = () => {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-        gap: '1.5rem',
+        gap: '1.25rem',
       }}>
-        {/* Left Column: Vehicle Load Saturation Gauge (Part 3, Sec 9.2) */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* Left Column: Vehicle Load Saturation Gauge */}
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-              {t('payloadSaturation')}
+            <span style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+              Vehicle Payload Saturation Meter
             </span>
             <span className="badge badge-green">
-              {run.capacity_fill_pct}% SATURATION
+              <span className="pulse-dot pulse-dot-green" />
+              {run.capacity_fill_pct}% SATURATION (PASS)
             </span>
           </div>
 
           {/* Vehicle Metadata Header */}
           <div style={{
-            background: 'var(--bg-surface-elevated)',
-            padding: '0.85rem',
+            background: '#FAFAF9',
+            padding: '0.95rem',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border-subtle)',
             display: 'flex',
@@ -129,12 +138,13 @@ export const FpoLogisticsConsole: React.FC = () => {
               <div style={{
                 width: '42px',
                 height: '42px',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(245, 158, 11, 0.15)',
-                color: 'var(--pineapple-gold)',
+                borderRadius: '10px',
+                background: '#FFF7ED',
+                color: '#EA580C',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                flexShrink: 0,
               }}>
                 <Truck size={22} />
               </div>
@@ -142,318 +152,354 @@ export const FpoLogisticsConsole: React.FC = () => {
                 <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
                   {run.vehicle_type}
                 </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                   Reg: {run.vehicle_registration} • Driver: {run.driver_name}
                 </div>
               </div>
             </div>
 
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>DRIVER CONTACT</div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--pineapple-gold)', fontWeight: 600 }}>
-                {run.driver_phone}
-              </div>
-            </div>
+            <span className="badge badge-orange" style={{ fontSize: '0.68rem' }}>
+              Scheduled 06:30 AM
+            </span>
           </div>
 
-          {/* Load Progress Bar & Economics */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-              <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Current Accumulated Cargo</span>
-              <span className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+          {/* Visual Saturation Progress Bar with 75% Gate Mark */}
+          <div style={{
+            background: '#FAFAF9',
+            padding: '1rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border-subtle)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Loaded Payload
+              </span>
+              <span className="tabular-nums" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#059669' }}>
                 {run.current_payload_kg} kg <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>/ {run.vehicle_capacity_kg} kg</span>
               </span>
             </div>
 
-            {/* High-Contrast Progress Bar with 75% Threshold Line */}
+            {/* High-Contrast Progress Bar */}
             <div style={{
-              height: '16px',
-              background: 'var(--border-subtle)',
-              borderRadius: '8px',
+              height: '10px',
+              background: '#E4E4E7',
+              borderRadius: '5px',
               overflow: 'hidden',
               position: 'relative',
-              border: '1px solid var(--border-medium)',
             }}>
               <div style={{
                 height: '100%',
                 width: `${run.capacity_fill_pct}%`,
-                background: 'linear-gradient(90deg, #F59E0B, #10B981)',
-                borderRadius: '8px',
+                background: '#10B981',
+                borderRadius: '5px',
                 transition: 'width 0.8s ease',
               }} />
-              {/* 75% Economic Threshold Marker */}
+
+              {/* 75% Gate Marker */}
               <div style={{
                 position: 'absolute',
                 top: 0,
                 bottom: 0,
                 left: '75%',
                 width: '2px',
-                background: 'var(--text-primary)',
-                zIndex: 2,
-              }} title="75% Minimum Payload Threshold" />
+                background: '#F97316',
+              }} />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.35rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
               <span>0 kg</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>▲ 75% Efficiency Barrier</span>
-              <span>2,500 kg</span>
+              <span style={{ color: '#EA580C', fontWeight: 700 }}>▲ 75% Mandatory Transit Gate ({Math.round(run.vehicle_capacity_kg * 0.75)} kg)</span>
+              <span>{run.vehicle_capacity_kg} kg</span>
             </div>
           </div>
 
-          {/* Efficiency & Savings Summary */}
+          {/* Quick Metrics Grid */}
           <div style={{
-            background: 'var(--plantation-green-bg)',
-            border: '1px solid rgba(5, 150, 105, 0.3)',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '0.65rem',
+          }}>
+            <div style={{
+              background: '#FAFAF9',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+              padding: '0.65rem',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>PICKUPS</div>
+              <div style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
+                {stops.length} Lots
+              </div>
+            </div>
+
+            <div style={{
+              background: '#FAFAF9',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+              padding: '0.65rem',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>SAVINGS</div>
+              <div className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 900, color: '#059669', marginTop: '0.1rem' }}>
+                +₹{run.cost_savings_per_kg.toFixed(2)}/kg
+              </div>
+            </div>
+
+            <div style={{
+              background: '#FAFAF9',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+              padding: '0.65rem',
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>DESTINATION</div>
+              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#EA580C', marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                Nilakuthi Hub
+              </div>
+            </div>
+          </div>
+
+          {/* Digital Gate-Pass Card */}
+          <div style={{
+            background: '#FAFAF9',
+            border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius-md)',
-            padding: '0.85rem',
+            padding: '0.95rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.75rem',
+            justifyContent: 'space-between',
+            gap: '0.85rem',
           }}>
-            <CheckCircle2 size={24} style={{ color: 'var(--plantation-green)', flexShrink: 0 }} />
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
-                Optimal Freight Efficiency Threshold Reached
-              </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--plantation-green)', fontWeight: 600 }}>
-                Estimated Collective Transport Savings: ₹{run.cost_savings_per_kg.toFixed(2)} / kg (₹3,792 saved on run)
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              {qrDataUrl && (
+                <img
+                  src={qrDataUrl}
+                  alt="Transit Gate Pass QR Code"
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-medium)',
+                  }}
+                />
+              )}
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                  Digital Transit Gate-Pass
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  TOKEN: {run.digital_gate_pass_token.slice(0, 16)}...
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#059669', marginTop: '0.15rem' }}>
+                  Verified by FPO Logistics Lead
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Destination */}
-          <div style={{
-            background: 'var(--bg-surface-elevated)',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-subtle)',
-            fontSize: '0.82rem',
-          }}>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>DESTINATION HUB:</span>
-            <div style={{ color: 'var(--text-primary)', fontWeight: 700, marginTop: '0.15rem' }}>
-              {run.destination_hub}
-            </div>
+            <button
+              onClick={() => setShowManifestModal(true)}
+              className="tap-target btn-secondary"
+              style={{ padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
+            >
+              <QrCode size={14} style={{ marginRight: '0.3rem' }} />
+              Enlarge QR
+            </button>
           </div>
         </div>
 
-        {/* Right Column: 4 Consolidated Farm Waypoints & Digital QR Gate-Pass */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* Right Column: Multi-Farm Route Stops Waypoint Sequence */}
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>
-              Pickup Waypoints (4 Consolidated Farms)
+            <span style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+              Optimized Waypoint Sequence
             </span>
-            <span className="badge badge-slate" style={{ fontSize: '0.7rem' }}>
-              Optimal Sequence
+            <span className="badge badge-orange">
+              CVRPTW SOLVER 1.8s
             </span>
           </div>
 
-          {/* Waypoints List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            {run.stops.map((stop) => (
-              <div
-                key={stop.order}
-                style={{
-                  background: 'var(--bg-surface-elevated)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '0.65rem 0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.75rem',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          {/* Sequential Waypoint Timeline */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {stops.map((stop, idx) => {
+              return (
+                <div
+                  key={stop.lot_code || idx}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.75rem',
+                    padding: '0.75rem 0.95rem',
+                    borderRadius: 'var(--radius-md)',
+                    background: '#FAFAF9',
+                    border: '1px solid var(--border-subtle)',
+                  }}
+                >
                   <div style={{
                     width: '26px',
                     height: '26px',
                     borderRadius: '50%',
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--pineapple-gold)',
-                    color: 'var(--pineapple-gold)',
-                    fontWeight: 700,
-                    fontSize: '0.75rem',
+                    background: '#FFF7ED',
+                    border: '1px solid #FDBA74',
+                    color: '#EA580C',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    fontWeight: 900,
+                    fontSize: '0.75rem',
                     flexShrink: 0,
+                    marginTop: '2px',
                   }}>
-                    {stop.order}
+                    {stop.order || idx + 1}
                   </div>
 
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
-                      {stop.farmer_name} ({stop.village})
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                        {stop.farmer_name}
+                      </span>
+                      <span className="badge badge-slate" style={{ fontSize: '0.62rem' }}>
+                        {stop.village}, {stop.district}
+                      </span>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                      {stop.grade} • {stop.lot_code}
+
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
+                      Lot: {stop.lot_code} • {stop.grade}
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginTop: '0.35rem',
+                      fontSize: '0.72rem',
+                    }}>
+                      <span style={{ color: '#EA580C', fontWeight: 700 }}>
+                        Pickup: {stop.quantity_kg} kg
+                      </span>
+                      <span style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Phone size={11} /> {stop.contact_phone}
+                      </span>
                     </div>
                   </div>
                 </div>
+              );
+            })}
 
-                <div style={{ textAlign: 'right' }}>
-                  <div className="tabular-nums" style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--pineapple-gold)' }}>
-                    {stop.quantity_kg} kg
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                    {stop.contact_phone}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Consignment Gate-Pass & Verification with Real QR Code */}
-          <div style={{
-            background: 'var(--bg-surface-elevated)',
-            border: '1px solid var(--border-medium)',
-            borderRadius: 'var(--radius-md)',
-            padding: '1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem',
-          }}>
-            {qrDataUrl ? (
+            {/* Destination Final Stop */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.75rem',
+              padding: '0.75rem 0.95rem',
+              borderRadius: 'var(--radius-md)',
+              background: '#ECFDF5',
+              border: '1px solid #A7F3D0',
+            }}>
               <div style={{
-                background: '#FFFFFF',
-                padding: '6px',
-                borderRadius: '8px',
-                display: 'inline-flex',
+                width: '26px',
+                height: '26px',
+                borderRadius: '50%',
+                background: '#10B981',
+                color: '#FFFFFF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 900,
+                fontSize: '0.75rem',
                 flexShrink: 0,
-                border: '1px solid var(--border-subtle)',
+                marginTop: '2px',
               }}>
-                <img 
-                  src={qrDataUrl} 
-                  alt="Consignment QR Gate Pass" 
-                  style={{ width: '90px', height: '90px', display: 'block' }} 
-                />
+                <MapPin size={13} color="#FFFFFF" />
               </div>
-            ) : (
-              <div style={{ width: '90px', height: '90px', background: 'var(--border-subtle)', borderRadius: '8px' }} />
-            )}
-
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <ShieldCheck size={16} style={{ color: 'var(--plantation-green)' }} />
-                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--plantation-green)' }}>
-                  DIGITAL DISPATCH TOKEN
-                </span>
-              </div>
-              <div style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                color: 'var(--text-primary)',
-                marginTop: '0.15rem',
-                wordBreak: 'break-all',
-              }}>
-                {run.digital_gate_pass_token}
-              </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                Authenticated by Smart Contract • Weighbridge Ready
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#065F46' }}>
+                    {run.destination_hub}
+                  </span>
+                  <span className="badge badge-green" style={{ fontSize: '0.62rem' }}>
+                    DESTINATION
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#047857', marginTop: '0.1rem', fontWeight: 600 }}>
+                  Weighbridge & Unload: {run.current_payload_kg} kg
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Actions: Print Manifest & Send SMS */}
+          {/* Action Bar */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: 'auto' }}>
             <button
-              onClick={() => setShowManifestModal(true)}
-              className="tap-target btn-secondary"
-              style={{ gap: '0.4rem', fontSize: '0.85rem' }}
-            >
-              <Printer size={16} />
-              {t('printManifest')}
-            </button>
-
-            <button
               onClick={handleSendSms}
+              disabled={smsSent}
               className="tap-target btn-primary"
               style={{ gap: '0.4rem', fontSize: '0.85rem' }}
             >
               <MessageSquare size={16} />
-              {smsSent ? 'SMS Dispatched!' : t('sendDriverSms')}
+              {smsSent ? 'SMS Dispatched' : 'SMS Route to Driver'}
+            </button>
+
+            <button
+              onClick={() => window.print()}
+              className="tap-target btn-secondary"
+              style={{ gap: '0.4rem', fontSize: '0.85rem' }}
+            >
+              <Printer size={16} />
+              Print Manifest
             </button>
           </div>
         </div>
       </div>
 
-      {/* Driver Manifest Modal */}
+      {/* Enlarged QR Modal */}
       {showManifestModal && (
         <div style={{
           position: 'fixed',
-          inset: 0,
-          background: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(8px)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 100,
           padding: '1rem',
         }}>
-          <div className="glass-card" style={{ maxWidth: '600px', width: '100%', padding: '1.75rem', border: '1px solid var(--pineapple-gold)', background: 'rgba(15, 23, 42, 0.95)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-medium)', paddingBottom: '0.75rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  FPO CONSIGNMENT DISPATCH MANIFEST
-                </h3>
-                <div style={{ fontSize: '0.78rem', color: 'var(--pineapple-gold)', fontFamily: 'var(--font-mono)' }}>
-                  RUN: {run.run_id} • PASS: {run.digital_gate_pass_token}
-                </div>
-              </div>
-              <span className="badge badge-green">OFFICIAL GATE-PASS</span>
-            </div>
+          <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', background: '#FFFFFF' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+              Digital Gate-Pass QR Code
+            </h3>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.15rem' }}>
+              Present to Highway Patrol & Processing Plant Checkpoint
+            </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.82rem', marginBottom: '1rem' }}>
-              <div><strong>Vehicle:</strong> {run.vehicle_type} ({run.vehicle_registration})</div>
-              <div><strong>Driver:</strong> {run.driver_name} ({run.driver_phone})</div>
-              <div><strong>Aggregate Weight:</strong> {run.current_payload_kg} kg</div>
-              <div><strong>Destination:</strong> {run.destination_hub}</div>
-            </div>
-
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', marginBottom: '1.25rem' }}>
-              <thead>
-                <tr style={{ background: 'var(--bg-surface-elevated)', borderBottom: '1px solid var(--border-medium)' }}>
-                  <th style={{ padding: '0.5rem', textAlign: 'left' }}>#</th>
-                  <th style={{ padding: '0.5rem', textAlign: 'left' }}>Farmer / Farm</th>
-                  <th style={{ padding: '0.5rem', textAlign: 'left' }}>Lot</th>
-                  <th style={{ padding: '0.5rem', textAlign: 'right' }}>Weight</th>
-                  <th style={{ padding: '0.5rem', textAlign: 'right' }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {run.stops.map((stop) => (
-                  <tr key={stop.order} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                    <td style={{ padding: '0.5rem' }}>{stop.order}</td>
-                    <td style={{ padding: '0.5rem' }}>{stop.farmer_name} ({stop.village})</td>
-                    <td style={{ padding: '0.5rem', fontFamily: 'var(--font-mono)' }}>{stop.lot_code}</td>
-                    <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 700 }} className="tabular-nums">{stop.quantity_kg} kg</td>
-                    <td style={{ padding: '0.5rem', textAlign: 'right', color: 'var(--plantation-green)' }}>Verified</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setShowManifestModal(false)}
-                className="tap-target btn-secondary"
-                style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  window.print();
-                  setShowManifestModal(false);
+            {qrDataUrl && (
+              <img
+                src={qrDataUrl}
+                alt="Enlarged QR"
+                style={{
+                  width: '220px',
+                  height: '220px',
+                  margin: '0 auto 1.15rem',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-medium)',
                 }}
-                className="tap-target btn-primary"
-                style={{ padding: '0.5rem 1rem', fontSize: '0.85rem', gap: '0.4rem' }}
-              >
-                <Printer size={16} />
-                Print / Save PDF
-              </button>
+              />
+            )}
+
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginBottom: '1rem' }}>
+              RUN: {run.run_id} • VEHICLE: {run.vehicle_registration}
             </div>
+
+            <button
+              onClick={() => setShowManifestModal(false)}
+              className="tap-target btn-secondary"
+              style={{ width: '100%' }}
+            >
+              Close Gate Pass
+            </button>
           </div>
         </div>
       )}

@@ -1,56 +1,59 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
   --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-bengali: 'Noto Sans Bengali', sans-serif;
-  --font-meetei: 'Noto Sans Meetei Mayek', 'Noto Sans Bengali', sans-serif;
 
-  /* Agrarian Brand Tokens (Light Theme Optimized) */
-  --pineapple-gold: #D97706;
-  --pineapple-gold-hover: #B45309;
-  --pineapple-gold-glow: rgba(217, 119, 6, 0.2);
-  --pineapple-gold-bg: rgba(245, 158, 11, 0.12);
+  /* Aesthetic White & Vibrant Citrus Orange Palette */
+  --brand-orange: #F97316;
+  --brand-orange-light: #FFEDD5;
+  --brand-orange-deep: #EA580C;
+  --brand-orange-hover: #C2410C;
+  --brand-orange-glow: rgba(249, 115, 22, 0.25);
+  --brand-orange-bg: rgba(249, 115, 22, 0.08);
 
-  --plantation-green: #059669;
-  --plantation-green-hover: #047857;
-  --plantation-green-glow: rgba(5, 150, 105, 0.2);
-  --plantation-green-bg: rgba(16, 185, 129, 0.12);
+  --accent-green: #10B981;
+  --accent-green-light: #D1FAE5;
+  --accent-green-deep: #059669;
+  --accent-green-bg: rgba(16, 185, 129, 0.08);
 
-  --earth-brown: #92400E;
-  --earth-brown-light: #FEF3C7;
+  --accent-blue: #3B82F6;
+  --accent-blue-bg: rgba(59, 130, 246, 0.08);
 
-  --alert-crimson: #DC2626;
-  --alert-crimson-bg: rgba(220, 38, 38, 0.08);
-  --alert-amber: #D97706;
-  --alert-amber-bg: rgba(217, 119, 6, 0.08);
+  --accent-crimson: #EF4444;
+  --accent-crimson-bg: rgba(239, 68, 68, 0.08);
 
-  /* Light Theme Surfaces & Backgrounds */
-  --bg-app: #F8FAFC;
+  /* Clean Luminous White & Soft Ivory Surfaces */
+  --bg-app: #FAFAF9;
   --bg-surface: #FFFFFF;
-  --bg-surface-elevated: #F1F5F9;
-  --bg-surface-hover: #E2E8F0;
+  --bg-surface-elevated: #F4F4F5;
+  --bg-surface-glass: rgba(255, 255, 255, 0.94);
+  --bg-surface-hover: #F9FAFB;
 
-  --border-subtle: #E2E8F0;
-  --border-medium: #CBD5E1;
-  --border-strong: #94A3B8;
+  --border-subtle: #E4E4E7;
+  --border-medium: #D4D4D8;
+  --border-strong: #A1A1AA;
+  --border-orange: rgba(249, 115, 22, 0.35);
 
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  --text-gold: #B45309;
-  --text-green: #047857;
+  --text-primary: #18181B;
+  --text-secondary: #52525B;
+  --text-muted: #71717A;
+  --text-orange: #EA580C;
+  --text-green: #059669;
 
-  /* Field Ergonomics */
-  --tap-min-size: 48px;
+  /* Ergonomics, Shapes & Soft Shadows */
+  --tap-min-size: 46px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
-  --shadow-subtle: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.03);
-  --shadow-gold: 0 8px 25px rgba(217, 119, 6, 0.15);
-  --shadow-green: 0 8px 25px rgba(5, 150, 105, 0.15);
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-card: 0 4px 16px -2px rgba(24, 24, 27, 0.04), 0 1px 3px rgba(24, 24, 27, 0.02);
+  --shadow-hover: 0 12px 28px -6px rgba(249, 115, 22, 0.14), 0 4px 10px rgba(0, 0, 0, 0.03);
+  --shadow-orange: 0 4px 14px rgba(249, 115, 22, 0.28);
+  --shadow-green: 0 4px 14px rgba(16, 185, 129, 0.28);
 
   color-scheme: light;
 }
@@ -64,6 +67,11 @@
 html,
 body {
   background-color: var(--bg-app);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(249, 115, 22, 0.02) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.02) 0px, transparent 50%);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-sans);
   min-height: 100vh;
@@ -73,16 +81,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Script-aware typography: Noto fallbacks must win for native Manipuri text
-   because Outfit/JetBrains Mono carry no Bengali or Meetei Mayek glyphs. */
-html[data-lang="mn-Beng"] body {
-  font-family: var(--font-bengali);
-}
-
-html[data-lang="mn-Mtei"] body {
-  font-family: var(--font-meetei);
-}
-
 /* Tabular figures for weights, rates, currency */
 .tabular-nums {
   font-family: var(--font-mono);
@@ -90,13 +88,7 @@ html[data-lang="mn-Mtei"] body {
   letter-spacing: -0.02em;
 }
 
-/* Bengali & Meetei Mayek script legibility */
-.lang-bengali {
-  font-family: var(--font-bengali), var(--font-sans);
-  line-height: 1.6;
-}
-
-/* Global Button & Tap Targets */
+/* Button & Tap Targets */
 button,
 a,
 input,
@@ -108,185 +100,202 @@ textarea {
 
 .tap-target {
   min-height: var(--tap-min-size);
-  min-width: var(--tap-min-size);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.65rem 1.25rem;
+  padding: 0.6rem 1.25rem;
   border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
   border: 1px solid transparent;
   user-select: none;
 }
 
+.tap-target:active {
+  transform: scale(0.98);
+}
+
 .btn-primary {
-  background: linear-gradient(135deg, #F59E0B, #D97706);
+  background: var(--brand-orange);
   color: #FFFFFF;
-  box-shadow: 0 4px 14px var(--pineapple-gold-glow);
+  font-weight: 700;
+  box-shadow: var(--shadow-orange);
+  border: 1px solid transparent;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #D97706, #B45309);
+  background: var(--brand-orange-deep);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.25);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
+  box-shadow: 0 8px 20px -4px rgba(249, 115, 22, 0.4);
 }
 
 .btn-secondary {
   background: #FFFFFF;
   color: var(--text-primary);
-  border: 1px solid var(--border-medium);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-subtle);
 }
 
 .btn-secondary:hover {
-  background: var(--bg-surface-elevated);
-  border-color: var(--pineapple-gold);
-  color: var(--text-gold);
+  background: #F9FAFB;
+  border-color: var(--brand-orange);
+  color: var(--text-orange);
+  transform: translateY(-1px);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #10B981, #059669);
+  background: var(--accent-green);
   color: #FFFFFF;
-  box-shadow: 0 4px 14px var(--plantation-green-glow);
+  font-weight: 700;
+  box-shadow: var(--shadow-green);
+  border: 1px solid transparent;
 }
 
 .btn-success:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+  background: var(--accent-green-deep);
   transform: translateY(-1px);
 }
 
 .btn-outline-danger {
-  background: var(--alert-crimson-bg);
-  color: var(--alert-crimson);
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: #FFF1F2;
+  color: #E11D48;
+  border: 1px solid #FECDD3;
 }
 
 .btn-outline-danger:hover {
-  background: var(--alert-crimson);
-  color: #FFFFFF;
+  background: #FFE4E6;
+  color: #BE123C;
 }
 
-/* Glassmorphism Card Style (Light) */
+/* Clean Aesthetic White Cards */
 .glass-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: #FFFFFF;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
-  box-shadow: var(--shadow-subtle);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-card);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
 .glass-card:hover {
   border-color: var(--border-medium);
-  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
 }
 
 .glass-card-accent {
-  border-top: 3px solid var(--pineapple-gold);
+  border-top: 3px solid var(--brand-orange);
 }
 
 .glass-card-green {
-  border-top: 3px solid var(--plantation-green);
+  border-top: 3px solid var(--accent-green);
 }
 
 .glass-card-alert {
-  border-top: 3px solid var(--alert-crimson);
+  border-top: 3px solid var(--accent-crimson);
 }
 
-/* Badge System */
+/* Badges */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
+  padding: 0.25rem 0.7rem;
   border-radius: var(--radius-full);
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.badge-orange {
+  background: #FFF7ED;
+  color: #EA580C;
+  border: 1px solid #FDBA74;
 }
 
 .badge-gold {
-  background: var(--pineapple-gold-bg);
-  color: var(--pineapple-gold);
-  border: 1px solid rgba(217, 119, 6, 0.3);
+  background: #FFF7ED;
+  color: #EA580C;
+  border: 1px solid #FDBA74;
 }
 
 .badge-green {
-  background: var(--plantation-green-bg);
-  color: var(--plantation-green);
-  border: 1px solid rgba(5, 150, 105, 0.3);
+  background: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
 }
 
 .badge-crimson {
-  background: var(--alert-crimson-bg);
-  color: var(--alert-crimson);
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
 }
 
 .badge-slate {
-  background: var(--bg-surface-elevated);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-subtle);
+  background: #F4F4F5;
+  color: #52525B;
+  border: 1px solid #E4E4E7;
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
+.badge-blue {
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+}
+
+/* Pulsing Status Beacon */
+.pulse-dot {
   width: 8px;
   height: 8px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--bg-app);
+.pulse-dot-green {
+  background: #10B981;
+  box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+  animation: pulse-ring 2s infinite;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--border-medium);
-  border-radius: 4px;
+.pulse-dot-orange {
+  background: #F97316;
+  box-shadow: 0 0 0 rgba(249, 115, 22, 0.4);
+  animation: pulse-ring 2s infinite;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border-strong);
-}
-
-/* Animations */
-@keyframes pulseGlow {
-
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.8;
-    transform: scale(1.02);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulseGlow 2.5s infinite ease-in-out;
-}
-
-@keyframes scanReticle {
+@keyframes pulse-ring {
   0% {
-    top: 5%;
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
   }
-
-  50% {
-    top: 90%;
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
   }
-
   100% {
-    top: 5%;
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+/* AI Camera Laser Scanning Animation */
+@keyframes laser-scan {
+  0% {
+    top: 0%;
+    opacity: 0.8;
+  }
+  50% {
+    top: 100%;
+    opacity: 1;
+  }
+  100% {
+    top: 0%;
+    opacity: 0.8;
   }
 }
 
@@ -295,7 +304,27 @@ textarea {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, transparent, #F59E0B, transparent);
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
-  animation: scanReticle 3s infinite linear;
+  background: linear-gradient(90deg, transparent, #F97316, transparent);
+  box-shadow: 0 0 12px #F97316;
+  animation: laser-scan 2.2s ease-in-out infinite;
+  z-index: 10;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAFAF9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4D4D8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A1A1AA;
 }

@@ -9,7 +9,7 @@ export default function BuyerPage() {
   const router = useRouter();
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
       <Header
         currentRole="buyer"
         onSelectRole={(role) => {
@@ -19,7 +19,7 @@ export default function BuyerPage() {
         }}
       />
 
-      <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '1.5rem 1.25rem' }}>
+      <main style={{ flex: 1, maxWidth: '1240px', width: '100%', margin: '0 auto', padding: '1.75rem 1.25rem' }}>
         <BuyerMarketplace />
       </main>
     </div>

@@ -8,9 +8,9 @@ import {
   WifiOff,
   Sprout,
   Building2,
-  Truck
+  Truck,
+  Server
 } from 'lucide-react';
-import { Logo } from './Logo';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -44,17 +44,17 @@ export const Header: React.FC<HeaderProps> = ({
       position: 'sticky',
       top: 0,
       zIndex: 50,
-      background: 'var(--bg-surface)',
+      background: 'rgba(255, 255, 255, 0.96)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
       borderBottom: '1px solid var(--border-subtle)',
-      padding: '0.75rem 1.25rem',
+      padding: '0.85rem 1.75rem',
       display: 'flex',
       flexWrap: 'wrap',
       alignItems: 'center',
       justifyContent: 'space-between',
-      gap: '1rem',
-      boxShadow: 'var(--shadow-subtle)',
+      gap: '1.25rem',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
     }}>
       {/* Brand & Subtitle */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -62,108 +62,154 @@ export const Header: React.FC<HeaderProps> = ({
           width: '42px',
           height: '42px',
           borderRadius: '12px',
-          background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+          background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           color: '#FFFFFF',
-          boxShadow: '0 4px 16px rgba(217, 119, 6, 0.35)',
-          fontWeight: 800,
           fontSize: '1.35rem',
           flexShrink: 0,
+          boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)',
         }}>
-          🍍
+          <Sprout size={22} color="#FFFFFF" strokeWidth={2.4} />
         </div>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{
               fontWeight: 900,
-              fontSize: '1.45rem',
-              letterSpacing: '-0.025em',
-              color: 'var(--text-primary)',
-              lineHeight: 1.2,
-              display: 'inline-block',
+              fontSize: '1.35rem',
+              letterSpacing: '-0.02em',
+              color: '#18181B',
+              lineHeight: 1.15,
             }}>
               HARVESTLINK
             </span>
             <span style={{
               fontWeight: 900,
-              fontSize: '1.45rem',
-              letterSpacing: '-0.02em',
-              color: 'var(--pineapple-gold)',
-              lineHeight: 1.2,
-              display: 'inline-block',
-              marginLeft: '0.4rem',
+              fontSize: '1.35rem',
+              letterSpacing: '-0.01em',
+              color: '#F97316',
+              lineHeight: 1.15,
             }}>
               AI
             </span>
+            <span className="badge badge-orange" style={{ fontSize: '0.62rem', padding: '0.15rem 0.5rem' }}>
+              INNOTECH 2.0
+            </span>
           </div>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', maxWidth: '420px', marginTop: '0.15rem' }}>
-            {t('tagline')}
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '0.1rem' }}>
+            Predictive Crop Decision Terminal • Manipur Horticulture
           </p>
         </div>
       </div>
 
-      {/* Role Navigation Switcher */}
+      {/* Role Navigation Segmented Switcher */}
       <nav style={{
         display: 'flex',
         alignItems: 'center',
-        background: 'var(--bg-surface-elevated)',
+        background: '#F4F4F5',
         padding: '0.25rem',
-        borderRadius: 'var(--radius-md)',
-        border: '1px solid var(--border-subtle)',
+        borderRadius: 'var(--radius-full)',
         gap: '0.25rem',
       }}>
         <button
           onClick={() => onSelectRole('farmer')}
-          className={`tap-target ${currentRole === 'farmer' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem' }}
+          className="tap-target"
+          style={{
+            padding: '0.45rem 1rem',
+            fontSize: '0.84rem',
+            borderRadius: 'var(--radius-full)',
+            background: currentRole === 'farmer' ? '#F97316' : 'transparent',
+            color: currentRole === 'farmer' ? '#FFFFFF' : 'var(--text-secondary)',
+            fontWeight: currentRole === 'farmer' ? 700 : 500,
+            boxShadow: currentRole === 'farmer' ? '0 2px 8px rgba(249, 115, 22, 0.35)' : 'none',
+            border: 'none',
+            minHeight: '38px',
+          }}
           title="Farmer Terminal: Disease, Harvest, Transparent Returns"
         >
-          <Sprout size={16} style={{ marginRight: '0.4rem' }} />
-          {t('roleFarmer')}
+          <Sprout size={15} style={{ marginRight: '0.4rem' }} />
+          Farmer
         </button>
 
         <button
           onClick={() => onSelectRole('buyer')}
-          className={`tap-target ${currentRole === 'buyer' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem' }}
+          className="tap-target"
+          style={{
+            padding: '0.45rem 1rem',
+            fontSize: '0.84rem',
+            borderRadius: 'var(--radius-full)',
+            background: currentRole === 'buyer' ? '#F97316' : 'transparent',
+            color: currentRole === 'buyer' ? '#FFFFFF' : 'var(--text-secondary)',
+            fontWeight: currentRole === 'buyer' ? 700 : 500,
+            boxShadow: currentRole === 'buyer' ? '0 2px 8px rgba(249, 115, 22, 0.35)' : 'none',
+            border: 'none',
+            minHeight: '38px',
+          }}
           title="Buyer Marketplace: Wholesale Lot Feed & Orders"
         >
-          <Building2 size={16} style={{ marginRight: '0.4rem' }} />
-          {t('roleBuyer')}
+          <Building2 size={15} style={{ marginRight: '0.4rem' }} />
+          Buyer
         </button>
 
         <button
           onClick={() => onSelectRole('fpo')}
-          className={`tap-target ${currentRole === 'fpo' ? 'btn-primary' : 'btn-secondary'}`}
-          style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem' }}
+          className="tap-target"
+          style={{
+            padding: '0.45rem 1rem',
+            fontSize: '0.84rem',
+            borderRadius: 'var(--radius-full)',
+            background: currentRole === 'fpo' ? '#F97316' : 'transparent',
+            color: currentRole === 'fpo' ? '#FFFFFF' : 'var(--text-secondary)',
+            fontWeight: currentRole === 'fpo' ? 700 : 500,
+            boxShadow: currentRole === 'fpo' ? '0 2px 8px rgba(249, 115, 22, 0.35)' : 'none',
+            border: 'none',
+            minHeight: '38px',
+          }}
           title="FPO Logistics: Pooling & QR Gate-Pass"
         >
-          <Truck size={16} style={{ marginRight: '0.4rem' }} />
-          {t('roleFpo')}
+          <Truck size={15} style={{ marginRight: '0.4rem' }} />
+          FPO Logistics
         </button>
       </nav>
 
-      {/* Utility Controls: Online Indicator */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+      {/* Backend & Connectivity Telemetry Badges */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {/* Live Backend Connection Indicator */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          padding: '0.35rem 0.75rem',
+          borderRadius: 'var(--radius-full)',
+          background: '#ECFDF5',
+          border: '1px solid #A7F3D0',
+          fontSize: '0.75rem',
+          color: '#059669',
+          fontWeight: 700,
+        }}>
+          <span className="pulse-dot pulse-dot-green" />
+          <Server size={13} />
+          <span>API :8001</span>
+        </div>
+
         {/* Network Connectivity Status */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '0.35rem',
-            padding: '0.35rem 0.65rem',
+            padding: '0.35rem 0.75rem',
             borderRadius: 'var(--radius-full)',
-            background: isOnline ? 'var(--plantation-green-bg)' : 'var(--alert-amber-bg)',
-            border: `1px solid ${isOnline ? 'rgba(5, 150, 105, 0.3)' : 'rgba(217, 119, 6, 0.3)'}`,
+            background: isOnline ? '#F4F4F5' : '#FFF7ED',
+            border: `1px solid ${isOnline ? '#E4E4E7' : '#FDBA74'}`,
             fontSize: '0.75rem',
-            color: isOnline ? 'var(--plantation-green)' : 'var(--alert-amber)',
-            fontWeight: 600,
+            color: isOnline ? '#52525B' : '#EA580C',
+            fontWeight: 700,
           }}
-          title={isOnline ? 'Connected to live network' : 'Offline Mode: Scans & actions queued in local Dexie IndexedDB'}
+          title={isOnline ? 'Connected to live network' : 'Offline Mode'}
         >
-          {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
+          {isOnline ? <Wifi size={13} /> : <WifiOff size={13} />}
           <span>{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
         </div>
       </div>
