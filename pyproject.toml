@@ -30,4 +30,5 @@ dependencies = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
-testpaths = ["backend/tests"]
+pythonpath = ["."]
+testpaths = ["backend/tests", "intelligence_layer/tests"]

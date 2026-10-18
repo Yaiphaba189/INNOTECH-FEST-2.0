@@ -1,43 +1,38 @@
-from typing import Dict, Any, List
+"""Unified net-returns and buyer matching pipeline connecting Module C AI engines."""
+
+from __future__ import annotations
+
+from typing import Any, Dict, List
+
+from intelligence_layer.module_c_pricing.net_returns.pricing_engine import compute_net_returns
+from intelligence_layer.module_c_pricing.ranking.buyer_matcher import (
+    get_crop_benchmark,
+    rank_buyer_orders,
+    score_buyer_match,
+)
 
 
 def calculate_net_returns(
     gross_rate: float,
     lot_weight_kg: float,
     distance_km: float = 35.0,
-    handling_per_kg: float = 0.80,
+    handling_per_kg: float | None = None,
     platform_fee_pct: float = 0.015,
-    payment_terms_days: int = 0
+    payment_terms_days: int = 0,
+    crop: str = "pineapple",
+    terrain_corridor: str = "valley"
 ) -> Dict[str, Any]:
-    """
-    Computes transparent net-returns pricing per kg and total farmer take-home pay,
-    eliminating hidden middlemen deductions.
-    """
-    # Shared freight cost based on consolidated transport distance
-    # Between ₹1.80 to ₹3.20/kg for Manipur regional corridors
-    if distance_km <= 20.0:
-        unit_freight = 1.80
-    elif distance_km <= 50.0:
-        unit_freight = round(1.80 + ((distance_km - 20.0) / 30.0) * (3.00 - 1.80), 2)
-    else:
-        unit_freight = 3.20
-
-    unit_handling = round(handling_per_kg, 2)
-    unit_platform_fee = round(gross_rate * platform_fee_pct, 2)
-    total_deductions_per_kg = round(unit_freight + unit_handling + unit_platform_fee, 2)
-    net_rate_per_kg = round(max(0.0, gross_rate - total_deductions_per_kg), 2)
-    total_farmer_take_home = round(net_rate_per_kg * lot_weight_kg, 2)
-
-    return {
-        "gross_rate": round(gross_rate, 2),
-        "freight_deduction": unit_freight,
-        "handling_deduction": unit_handling,
-        "platform_fee": unit_platform_fee,
-        "total_deductions_per_kg": total_deductions_per_kg,
-        "net_rate": net_rate_per_kg,
-        "total_take_home": total_farmer_take_home,
-        "distance_km": round(distance_km, 1)
-    }
+    """Computes transparent net-returns pricing per kg and total farmer take-home pay."""
+    return compute_net_returns(
+        gross_rate=gross_rate,
+        lot_weight_kg=lot_weight_kg,
+        distance_km=distance_km,
+        handling_per_kg=handling_per_kg,
+        platform_fee_pct=platform_fee_pct,
+        payment_terms_days=payment_terms_days,
+        crop=crop,
+        terrain_corridor=terrain_corridor
+    )
 
 
 def score_buyer_order(
@@ -45,28 +40,25 @@ def score_buyer_order(
     distance_km: float,
     payment_terms_days: int,
     is_exact_grade_match: bool,
-    max_market_net: float = 30.0
+    max_market_net: float | None = None,
+    crop: str = "pineapple"
 ) -> float:
-    """
-    Multi-criteria buyer ranking utility function:
-    Match Score = 0.50*S_net + 0.20*S_dist + 0.20*S_pay + 0.10*S_grade
-    """
-    # S_net: normalized net rate
-    s_net = min(1.0, max(0.0, net_rate / max_market_net))
-    
-    # S_dist: normalized proximity (closer is better, max 100km)
-    s_dist = max(0.0, 1.0 - (distance_km / 100.0))
-    
-    # S_pay: payment immediacy (0 days=1.0, 7 days=0.7, 14 days=0.3)
-    if payment_terms_days == 0:
-        s_pay = 1.0
-    elif payment_terms_days <= 7:
-        s_pay = 0.7
-    else:
-        s_pay = 0.3
-        
-    # S_grade: exact quality match
-    s_grade = 1.0 if is_exact_grade_match else 0.6
+    """Computes multi-criteria buyer ranking utility score."""
+    benchmark = max_market_net if max_market_net is not None else get_crop_benchmark(crop)
+    res = score_buyer_match(
+        net_rate=net_rate,
+        distance_km=distance_km,
+        payment_terms_days=payment_terms_days,
+        is_exact_grade_match=is_exact_grade_match,
+        benchmark_max_net=benchmark
+    )
+    return res["composite_score"]
 
-    score = (0.50 * s_net) + (0.20 * s_dist) + (0.20 * s_pay) + (0.10 * s_grade)
-    return round(score, 3)
+
+def match_and_rank_orders(
+    lot_data: Dict[str, Any],
+    active_orders: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
+    """Ranks active buyer orders for a lot using net pricing and multi-criteria scoring."""
+    return rank_buyer_orders(lot_data, active_orders, calculate_net_returns)
+
