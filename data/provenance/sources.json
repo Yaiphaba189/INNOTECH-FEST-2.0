@@ -1,0 +1,62 @@
+{
+  "pineapple": {
+    "name": "Pineapple Leaf Disease Dataset (PLDD), v1",
+    "doi": "10.5281/zenodo.21893516",
+    "page": "https://zenodo.org/records/21893516",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "authors": [
+      "Raj, Saranya",
+      "Prakash, Nupur",
+      "Malik, Nidhi"
+    ],
+    "scope": [
+      "healthy",
+      "mealybug_wilt"
+    ],
+    "exclusions": [
+      "heart_rot",
+      "black_rot"
+    ]
+  },
+  "rice": {
+    "name": "A Rice Leaf Disease Image Dataset for Multi-Class Disease Classification, v1",
+    "doi": "10.17632/n8jpkpfz5p.1",
+    "page": "https://data.mendeley.com/datasets/n8jpkpfz5p/1",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "authors": [
+      "Md Mahamudul Hasan",
+      "Md Shakib Hossain",
+      "Jahanur Biswas"
+    ],
+    "scope": [
+      "healthy",
+      "blast",
+      "bacterial_leaf_blight",
+      "sheath_blight",
+      "tungro"
+    ],
+    "exclusions": []
+  },
+  "orange": {
+    "name": "Multi-format open-source sweet orange leaf dataset, v1 (original images only)",
+    "doi": "10.17632/f7cr74mwpj.1",
+    "page": "https://data.mendeley.com/datasets/f7cr74mwpj/1",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "authors": [
+      "Yousuf Rayhan Emon",
+      "Md Taimur Ahad"
+    ],
+    "scope": [
+      "healthy",
+      "citrus_canker",
+      "citrus_greening_hlb",
+      "powdery_mildew"
+    ],
+    "exclusions": [
+      "root_rot"
+    ]
+  }
+}

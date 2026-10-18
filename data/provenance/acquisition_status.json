@@ -1,0 +1,16 @@
+{
+  "updated": "2026-10-18",
+  "prepared_images_by_crop": {
+    "pineapple": {
+      "healthy": 1118
+    },
+    "rice": {
+      "bacterial_leaf_blight": 70
+    }
+  },
+  "total_prepared_images": 1188,
+  "status": "in_progress",
+  "active_crop": "pineapple",
+  "active_archive": "PLDD_Mealy_bug_wilt.zip",
+  "reason": "Downloading PLDD_Mealy_bug_wilt.zip"
+}

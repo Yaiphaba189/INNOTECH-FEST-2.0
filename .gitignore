@@ -70,3 +70,9 @@ out/
 *.swp
 *.swo
 *~
+
+# Curated public training images are large local artifacts. Recreate them with
+# scripts/prepare_public_datasets.py; keep source/provenance metadata trackable.
+data/training/**/*.jpg
+data/training/**/*.jpeg
+data/training/**/*.png
