@@ -5,7 +5,43 @@ import {
   DispatchRun,
   MarketplaceLot,
   DemandOrder,
+  AuthUser,
+  AuthResponse,
+  UserRole,
 } from '@/types';
+
+export const DEMO_USERS: Record<string, { phone: string; pass: string; name: string; role: UserRole }> = {
+  farmer: {
+    phone: '9862000001',
+    pass: 'farmer123',
+    name: 'Tombi Singh (Farmer)',
+    role: 'farmer',
+  },
+  buyer: {
+    phone: '9862000002',
+    pass: 'buyer123',
+    name: 'Seven Sisters Agro (Buyer)',
+    role: 'buyer',
+  },
+  fpo: {
+    phone: '9862000003',
+    pass: 'fpo123',
+    name: 'Churachandpur FPO (Lead)',
+    role: 'fpo',
+  },
+  extension_officer: {
+    phone: '9862000004',
+    pass: 'officer123',
+    name: 'Dr. L. Kanta Sharma (Officer)',
+    role: 'extension_officer',
+  },
+  admin: {
+    phone: '9862000005',
+    pass: 'admin123',
+    name: 'State Admin (Portal)',
+    role: 'admin',
+  },
+};
 import {
   INITIAL_DISEASE_DIAGNOSIS,
   MOCK_HARVEST_FORECAST,
@@ -201,5 +237,112 @@ export const api = {
       },
       { success: true, order_id: `order-${Date.now()}` }
     );
+  },
+
+  auth: {
+    async login(phone_number: string, password: string): Promise<AuthResponse> {
+      try {
+        const formData = new URLSearchParams();
+        formData.append('username', phone_number);
+        formData.append('password', password);
+
+        const res = await fetch(`${PRIMARY_API_BASE}/api/auth/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData.toString(),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('harvestlink_user_active', JSON.stringify(data.user));
+            localStorage.setItem('harvestlink_token_active', data.access_token);
+          }
+          return data;
+        }
+      } catch {
+        // fallback
+      }
+
+      const matched = Object.values(DEMO_USERS).find((u) => u.phone === phone_number) || {
+        phone: phone_number,
+        pass: password,
+        name: 'Demo User',
+        role: 'farmer' as UserRole,
+      };
+
+      const demoUser: AuthUser = {
+        id: `usr-${matched.role}-001`,
+        phone_number: matched.phone,
+        full_name: matched.name,
+        role: matched.role,
+        preferred_language: 'en',
+        is_simulated: true,
+        created_at: new Date().toISOString(),
+      };
+
+      const resp: AuthResponse = {
+        access_token: `demo-token-${Date.now()}`,
+        token_type: 'bearer',
+        user: demoUser,
+      };
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('harvestlink_user_active', JSON.stringify(demoUser));
+        localStorage.setItem('harvestlink_token_active', resp.access_token);
+      }
+
+      return resp;
+    },
+
+    async register(payload: {
+      phone_number: string;
+      full_name: string;
+      password: string;
+      role: UserRole;
+      preferred_language?: string;
+    }): Promise<AuthResponse> {
+      try {
+        const res = await fetch(`${PRIMARY_API_BASE}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('harvestlink_user_active', JSON.stringify(data.user));
+            localStorage.setItem('harvestlink_token_active', data.access_token);
+          }
+          return data;
+        }
+      } catch {
+        // fallback
+      }
+
+      const newUser: AuthUser = {
+        id: `usr-${payload.role}-${Date.now()}`,
+        phone_number: payload.phone_number,
+        full_name: payload.full_name,
+        role: payload.role,
+        preferred_language: payload.preferred_language || 'en',
+        is_simulated: true,
+        created_at: new Date().toISOString(),
+      };
+
+      const resp: AuthResponse = {
+        access_token: `reg-token-${Date.now()}`,
+        token_type: 'bearer',
+        user: newUser,
+      };
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('harvestlink_user_active', JSON.stringify(newUser));
+        localStorage.setItem('harvestlink_token_active', resp.access_token);
+      }
+
+      return resp;
+    },
   },
 };
