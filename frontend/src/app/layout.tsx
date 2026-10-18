@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
 import { I18nProvider } from '@/lib/i18n';
+import { AuthProvider } from '@/context/AuthContext';
 import { ServiceWorkerRegistrar } from '@/components/common/ServiceWorkerRegistrar';
 
 export const metadata: Metadata = {
@@ -66,8 +67,10 @@ export default function RootLayout({
       </head>
       <body>
         <I18nProvider>
-          <ServiceWorkerRegistrar />
-          {children}
+          <AuthProvider>
+            <ServiceWorkerRegistrar />
+            {children}
+          </AuthProvider>
         </I18nProvider>
       </body>
     </html>

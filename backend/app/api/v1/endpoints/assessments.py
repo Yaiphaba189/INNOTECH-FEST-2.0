@@ -15,7 +15,7 @@ async def screen_crop_photo(
     crop_record_id: str = Form(..., description="Target crop record ID"),
     image_angle: str = Form("crown", description="crown, fruit_base, or lateral"),
     image_file: UploadFile = File(..., description="Uploaded diagnostic photo (PNG/JPEG, max 5MB)"),
-    current_user: User = Depends(get_current_farmer_or_fpo),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """

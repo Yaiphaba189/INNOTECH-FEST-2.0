@@ -2,26 +2,32 @@
 
 import React from 'react';
 import { Header } from '@/components/common/Header';
+import { Footer } from '@/components/common/Footer';
 import { FpoLogisticsConsole } from '@/components/fpo/FpoLogisticsConsole';
+import { RoleGuard } from '@/components/auth/RoleGuard';
 import { useRouter } from 'next/navigation';
 
 export default function FpoPage() {
   const router = useRouter();
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
-      <Header
-        currentRole="fpo"
-        onSelectRole={(role) => {
-          if (role === 'farmer') router.push('/farmer');
-          else if (role === 'buyer') router.push('/buyer');
-          else router.push('/fpo');
-        }}
-      />
+    <RoleGuard allowedRoles={['fpo']}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
+        <Header
+          currentRole="fpo"
+          onSelectRole={(role) => {
+            if (role === 'farmer') router.push('/farmer');
+            else if (role === 'buyer') router.push('/buyer');
+            else router.push('/fpo');
+          }}
+        />
 
-      <main style={{ flex: 1, maxWidth: '1240px', width: '100%', margin: '0 auto', padding: '1.75rem 1.25rem' }}>
-        <FpoLogisticsConsole />
-      </main>
-    </div>
+        <main style={{ flex: 1, maxWidth: '1240px', width: '100%', margin: '0 auto', padding: '1.75rem 1.25rem' }}>
+          <FpoLogisticsConsole />
+        </main>
+
+        <Footer />
+      </div>
+    </RoleGuard>
   );
 }

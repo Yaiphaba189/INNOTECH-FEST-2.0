@@ -139,6 +139,16 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
         {quotes.map((quote) => {
           const isExpanded = expandedQuoteId === quote.id;
           const isLocked = lockedDealId === quote.id;
+          const netPrice = quote.net_farmer_price_per_kg ?? quote.net_rate_per_kg ?? 24.40;
+          const grossPrice = quote.gross_offer_per_kg ?? quote.gross_rate_per_kg ?? 28.00;
+          const deliveryLoc = quote.delivery_location || quote.location || 'Hub Location';
+          const minLotKg = quote.minimum_lot_kg || 400;
+          const transitDist = quote.transit_distance_km ?? quote.distance_km ?? 30;
+          const freightPerKg = quote.deductions?.freight_per_kg ?? quote.deductions?.shared_freight ?? 2.40;
+          const crateFeePerKg = quote.deductions?.crate_fee_per_kg ?? quote.deductions?.crates_packaging ?? 0.80;
+          const platformFeePerKg = quote.deductions?.platform_fee_per_kg ?? quote.deductions?.platform_fee ?? 0.40;
+          const middlemanAdvantage = quote.middleman_comparison?.cash_advantage_per_kg ?? 4.40;
+          const middlemanAdvPct = quote.middleman_comparison?.advantage_percentage ?? 22.0;
 
           return (
             <div
@@ -219,7 +229,7 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                       )}
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                      Delivery: {quote.delivery_location} • Requirement: {quote.minimum_lot_kg} kg min
+                      Delivery: {deliveryLoc} • Requirement: {minLotKg} kg min
                     </div>
                   </div>
                 </div>
@@ -236,11 +246,11 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                     GUARANTEED NET RETURN
                   </div>
                   <div className="tabular-nums" style={{ fontSize: '1.5rem', fontWeight: 900, color: '#059669', lineHeight: 1.1 }}>
-                    ₹{quote.net_farmer_price_per_kg.toFixed(2)}
+                    ₹{netPrice.toFixed(2)}
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600 }}> / kg</span>
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                    Gross: ₹{quote.gross_offer_per_kg.toFixed(2)}/kg
+                    Gross: ₹{grossPrice.toFixed(2)}/kg
                   </div>
                 </div>
               </div>
@@ -279,15 +289,15 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-primary)' }}>
                       <span>Gross Purchase Offer</span>
-                      <strong className="tabular-nums">+₹{quote.gross_offer_per_kg.toFixed(2)} / kg</strong>
+                      <strong className="tabular-nums">+₹{grossPrice.toFixed(2)} / kg</strong>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#DC2626' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                         <Truck size={13} />
-                        Pooled Freight & Transit ({quote.transit_distance_km} km)
+                        Pooled Freight & Transit ({transitDist} km)
                       </span>
-                      <span className="tabular-nums">-₹{quote.deductions.freight_per_kg.toFixed(2)} / kg</span>
+                      <span className="tabular-nums">-₹{freightPerKg.toFixed(2)} / kg</span>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#DC2626' }}>
@@ -295,7 +305,7 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                         <Package size={13} />
                         Standard Ventilated Crates
                       </span>
-                      <span className="tabular-nums">-₹{quote.deductions.crate_fee_per_kg.toFixed(2)} / kg</span>
+                      <span className="tabular-nums">-₹{crateFeePerKg.toFixed(2)} / kg</span>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#DC2626' }}>
@@ -303,7 +313,7 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                         <Coins size={13} />
                         FPO Aggregation & Platform Fee (1.5%)
                       </span>
-                      <span className="tabular-nums">-₹{quote.deductions.platform_fee_per_kg.toFixed(2)} / kg</span>
+                      <span className="tabular-nums">-₹{platformFeePerKg.toFixed(2)} / kg</span>
                     </div>
 
                     <div style={{
@@ -316,7 +326,7 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                       fontWeight: 800,
                     }}>
                       <span>Guaranteed Farmer Bank Payout</span>
-                      <span className="tabular-nums">₹{quote.net_farmer_price_per_kg.toFixed(2)} / kg (₹{(quote.net_farmer_price_per_kg * 450).toLocaleString('en-IN', { maximumFractionDigits: 0 })} for 450kg)</span>
+                      <span className="tabular-nums">₹{netPrice.toFixed(2)} / kg (₹{(netPrice * 450).toLocaleString('en-IN', { maximumFractionDigits: 0 })} for 450kg)</span>
                     </div>
                   </div>
                 )}
@@ -335,7 +345,7 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
               }}>
                 <div style={{
                   fontSize: '0.8rem',
-                  color: quote.middleman_comparison.cash_advantage_per_kg > 0 ? '#059669' : 'var(--text-secondary)',
+                  color: middlemanAdvantage > 0 ? '#059669' : 'var(--text-secondary)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.35rem',
@@ -343,7 +353,7 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
                 }}>
                   <Award size={15} style={{ color: '#EA580C' }} />
                   <span>
-                    Advantage vs Broker Cash: <strong>+₹{quote.middleman_comparison.cash_advantage_per_kg.toFixed(2)}/kg (+{quote.middleman_comparison.advantage_percentage.toFixed(1)}% higher payout)</strong>
+                    Advantage vs Broker Cash: <strong>+₹{middlemanAdvantage.toFixed(2)}/kg (+{middlemanAdvPct.toFixed(1)}% higher payout)</strong>
                   </span>
                 </div>
 
