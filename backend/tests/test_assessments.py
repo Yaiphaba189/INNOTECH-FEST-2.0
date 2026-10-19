@@ -42,3 +42,32 @@ async def test_disease_screening_and_escalation(client: AsyncClient, farmer_toke
     esc_data = esc_res.json()
     assert esc_data["status"] == "assigned_to_officer"
     assert "referral_id" in esc_data
+
+
+@pytest.mark.asyncio
+async def test_auto_detect_reports_triage_and_evidence_from_pixels(client):
+    import io
+    from PIL import Image
+
+    def upload(color):
+        buf = io.BytesIO()
+        Image.new("RGB", (224, 224), color).save(buf, format="JPEG")
+        return {"image_file": ("f.jpg", buf.getvalue(), "image/jpeg")}
+
+    rot = (await client.post("/api/assessments/auto-detect", data={"crop_hint": "pineapple"}, files=upload((150, 100, 45)))).json()
+    blank = (await client.post("/api/assessments/auto-detect", data={"crop_hint": "pineapple"}, files=upload((245, 245, 245)))).json()
+
+    assert rot["diagnosis"]["predicted_class"] == "heart_rot"
+    assert rot["diagnosis"]["triage_status"] == "confirmed"
+    assert rot["inference_mode"] == "colour_heuristic"
+    assert blank["diagnosis"]["triage_status"] == "inconclusive"
+    assert blank["diagnosis"]["refer_to_expert"] is True
+
+
+@pytest.mark.asyncio
+async def test_model_info_reports_engine_and_coverage(client):
+    cards = {c["crop"]: c for c in (await client.get("/api/assessments/model-info")).json()}
+    assert set(cards) == {"pineapple", "rice", "orange"}
+    # tests run with trained weights disabled, so every crop reports the colour-rule engine
+    assert cards["pineapple"]["inference_mode"] == "colour_heuristic"
+    assert cards["pineapple"]["test_accuracy"] is None

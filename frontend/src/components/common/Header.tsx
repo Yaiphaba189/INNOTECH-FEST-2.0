@@ -13,7 +13,9 @@ import {
   ChevronDown,
   LogOut,
   ShieldCheck,
+  Sparkles,
 } from 'lucide-react';
+import { AICopilotModal } from '@/components/common/AICopilotModal';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -29,6 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
     user,
     isAuthenticated,
     logout,
+    switchDemoRole,
     openAuthModal,
     closeAuthModal,
     isAuthModalOpen,
@@ -36,15 +39,18 @@ export const Header: React.FC<HeaderProps> = ({
   } = useAuth();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isSuperAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
-  const handleRoleTabClick = (targetRole: UserRole) => {
-    if (user && user.role !== targetRole && !isSuperAdmin) {
-      // User is logged in with another role: prompt switch account
-      openAuthModal('login');
-      return;
+  const handleRoleTabClick = async (targetRole: UserRole) => {
+    if (user?.role !== targetRole && !isSuperAdmin) {
+      try {
+        await switchDemoRole(targetRole);
+      } catch (err) {
+        console.warn('Auto role switch fallback:', err);
+      }
     }
     onSelectRole(targetRole);
   };
@@ -93,47 +99,46 @@ export const Header: React.FC<HeaderProps> = ({
           position: 'sticky',
           top: 0,
           zIndex: 50,
-          background: 'rgba(255, 255, 255, 0.96)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
+          background: 'rgba(255, 255, 255, 0.88)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           borderBottom: '1px solid var(--border-subtle)',
-          padding: '0.85rem 1.75rem',
+          padding: '0.65rem 1.75rem',
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '1.25rem',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+          gap: '1rem',
+          boxShadow: '0 1px 2px rgba(15, 23, 42, 0.03)',
         }}
       >
         {/* Brand & Subtitle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div
             style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '12px',
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
               background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#FFFFFF',
-              fontSize: '1.35rem',
               flexShrink: 0,
-              boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3)',
+              boxShadow: '0 3px 10px rgba(249, 115, 22, 0.25)',
             }}
           >
-            <Sprout size={22} color="#FFFFFF" strokeWidth={2.4} />
+            <Sprout size={19} color="#FFFFFF" strokeWidth={2.4} />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <span
                 style={{
                   fontWeight: 900,
-                  fontSize: '1.35rem',
-                  letterSpacing: '-0.02em',
-                  color: '#18181B',
-                  lineHeight: 1.15,
+                  fontSize: '1.2rem',
+                  letterSpacing: '-0.025em',
+                  color: '#0F172A',
+                  lineHeight: 1.1,
                 }}
               >
                 HARVESTLINK
@@ -141,135 +146,107 @@ export const Header: React.FC<HeaderProps> = ({
               <span
                 style={{
                   fontWeight: 900,
-                  fontSize: '1.35rem',
+                  fontSize: '1.2rem',
                   letterSpacing: '-0.01em',
                   color: '#F97316',
-                  lineHeight: 1.15,
+                  lineHeight: 1.1,
                 }}
               >
                 AI
               </span>
+              <span
+                className="badge badge-orange"
+                style={{ fontSize: '0.62rem', padding: '0.15rem 0.45rem', fontWeight: 800 }}
+              >
+                2.0
+              </span>
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500, marginTop: '0.1rem' }}>
-              Predictive Crop Decision Terminal • Manipur Horticulture
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500, margin: 0 }}>
+              Manipur Horticulture Decision Terminal
             </p>
           </div>
         </div>
 
-        {/* Role Navigation Segmented Switcher - Hides non-role tabs unless Super Admin */}
-        <nav
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: '#F4F4F5',
-            padding: '0.25rem',
-            borderRadius: 'var(--radius-full)',
-            gap: '0.35rem',
-          }}
-        >
+        {/* Role Navigation Segmented Switcher */}
+        <nav className="nav-segmented">
           {/* Super Admin Indicator Chip */}
           {isSuperAdmin && (
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.35rem 0.75rem',
+                gap: '0.3rem',
+                padding: '0.25rem 0.6rem',
                 borderRadius: 'var(--radius-full)',
                 background: '#EEF2FF',
-                border: '1px solid #C7D2FE',
                 color: '#4F46E5',
-                fontSize: '0.74rem',
-                fontWeight: 800,
-                marginRight: '0.2rem',
+                fontSize: '0.7rem',
+                fontWeight: 700,
               }}
             >
-              <ShieldCheck size={14} strokeWidth={2.5} />
-              <span>SUPER ADMIN • ALL ACCESS</span>
+              <ShieldCheck size={13} strokeWidth={2.5} />
+              <span>SUPER ADMIN</span>
             </div>
           )}
 
-          {/* Farmer Tab: Only rendered if Super Admin, Farmer, or unauthenticated */}
-          {(isSuperAdmin || user?.role === 'farmer' || !user) && (
-            <button
-              onClick={() => handleRoleTabClick('farmer')}
-              className="tap-target"
-              style={{
-                padding: '0.45rem 1rem',
-                fontSize: '0.84rem',
-                borderRadius: 'var(--radius-full)',
-                background: currentRole === 'farmer' ? '#F97316' : 'transparent',
-                color: currentRole === 'farmer' ? '#FFFFFF' : 'var(--text-secondary)',
-                fontWeight: currentRole === 'farmer' ? 700 : 500,
-                boxShadow: currentRole === 'farmer' ? '0 2px 8px rgba(249, 115, 22, 0.35)' : 'none',
-                border: 'none',
-                minHeight: '38px',
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-              }}
-              title="Farmer Terminal: Disease, Harvest, Transparent Returns"
-            >
-              <Sprout size={15} style={{ marginRight: '0.4rem' }} />
-              <span>Farmer</span>
-            </button>
-          )}
+          {/* Farmer Tab */}
+          <button
+            onClick={() => handleRoleTabClick('farmer')}
+            className={`nav-segmented-item ${currentRole === 'farmer' ? 'active' : ''}`}
+            title="Farmer Terminal"
+          >
+            <Sprout size={14} />
+            <span>Farmer</span>
+          </button>
 
-          {/* Buyer Tab: Only rendered if Super Admin, Buyer, or unauthenticated */}
-          {(isSuperAdmin || user?.role === 'buyer' || !user) && (
-            <button
-              onClick={() => handleRoleTabClick('buyer')}
-              className="tap-target"
-              style={{
-                padding: '0.45rem 1rem',
-                fontSize: '0.84rem',
-                borderRadius: 'var(--radius-full)',
-                background: currentRole === 'buyer' ? '#F97316' : 'transparent',
-                color: currentRole === 'buyer' ? '#FFFFFF' : 'var(--text-secondary)',
-                fontWeight: currentRole === 'buyer' ? 700 : 500,
-                boxShadow: currentRole === 'buyer' ? '0 2px 8px rgba(249, 115, 22, 0.35)' : 'none',
-                border: 'none',
-                minHeight: '38px',
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-              }}
-              title="Buyer Marketplace: Wholesale Lot Feed & Orders"
-            >
-              <Building2 size={15} style={{ marginRight: '0.4rem' }} />
-              <span>Buyer</span>
-            </button>
-          )}
+          {/* Buyer Tab */}
+          <button
+            onClick={() => handleRoleTabClick('buyer')}
+            className={`nav-segmented-item ${currentRole === 'buyer' ? 'active' : ''}`}
+            title="Buyer Marketplace"
+          >
+            <Building2 size={14} />
+            <span>Buyer</span>
+          </button>
 
-          {/* FPO Logistics Tab: Only rendered if Super Admin, FPO, or unauthenticated */}
-          {(isSuperAdmin || user?.role === 'fpo' || !user) && (
-            <button
-              onClick={() => handleRoleTabClick('fpo')}
-              className="tap-target"
-              style={{
-                padding: '0.45rem 1rem',
-                fontSize: '0.84rem',
-                borderRadius: 'var(--radius-full)',
-                background: currentRole === 'fpo' ? '#F97316' : 'transparent',
-                color: currentRole === 'fpo' ? '#FFFFFF' : 'var(--text-secondary)',
-                fontWeight: currentRole === 'fpo' ? 700 : 500,
-                boxShadow: currentRole === 'fpo' ? '0 2px 8px rgba(249, 115, 22, 0.35)' : 'none',
-                border: 'none',
-                minHeight: '38px',
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-              }}
-              title="FPO Logistics: Pooling & QR Gate-Pass"
-            >
-              <Truck size={15} style={{ marginRight: '0.4rem' }} />
-              <span>FPO Logistics</span>
-            </button>
-          )}
+          {/* FPO Logistics Tab */}
+          <button
+            onClick={() => handleRoleTabClick('fpo')}
+            className={`nav-segmented-item ${currentRole === 'fpo' ? 'active' : ''}`}
+            title="FPO Logistics"
+          >
+            <Truck size={14} />
+            <span>FPO Logistics</span>
+          </button>
         </nav>
 
-        {/* Right Side: Auth User Badge & Telemetry */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        {/* Right Side: Auth User Badge & AI Copilot */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          {/* AI Copilot Button */}
+          <button
+            type="button"
+            onClick={() => setIsCopilotOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.38rem 0.8rem',
+              borderRadius: 'var(--radius-full)',
+              background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
+              color: '#FFFFFF',
+              border: 'none',
+              fontSize: '0.76rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)',
+              transition: 'all 0.15s ease',
+            }}
+            title="Open HARVESTLINK AI Copilot (OpenRouter Free LLM)"
+          >
+            <Sparkles size={14} color="#38BDF8" />
+            <span>AI Copilot</span>
+          </button>
+
           {/* User Account Chip with Dropdown */}
           <div ref={menuRef} style={{ position: 'relative' }}>
             {isAuthenticated && user ? (
@@ -279,24 +256,25 @@ export const Header: React.FC<HeaderProps> = ({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.55rem',
-                  padding: '0.35rem 0.65rem 0.35rem 0.4rem',
+                  gap: '0.5rem',
+                  padding: '0.3rem 0.6rem 0.3rem 0.35rem',
                   borderRadius: 'var(--radius-full)',
-                  background: '#FAFAF9',
-                  border: '1px solid #E2E8F0',
+                  background: '#FFFFFF',
+                  border: '1px solid var(--border-subtle)',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
+                  boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)',
                 }}
               >
                 {/* Initials Circle */}
                 <div
                   style={{
-                    width: '30px',
-                    height: '30px',
+                    width: '28px',
+                    height: '28px',
                     borderRadius: '50%',
                     background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
                     color: '#FFFFFF',
-                    fontSize: '0.78rem',
+                    fontSize: '0.75rem',
                     fontWeight: 800,
                     display: 'flex',
                     alignItems: 'center',
@@ -307,38 +285,31 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
                 <div style={{ textAlign: 'left', lineHeight: 1.15 }}>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#18181B' }}>
-                    {user.full_name.length > 15 ? `${user.full_name.slice(0, 15)}...` : user.full_name}
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0F172A' }}>
+                    {user.full_name.length > 14 ? `${user.full_name.slice(0, 14)}...` : user.full_name}
                   </div>
-                  <div style={{ fontSize: '0.68rem', color: roleMeta.color, fontWeight: 700 }}>
+                  <div style={{ fontSize: '0.65rem', color: roleMeta.color, fontWeight: 700 }}>
                     {roleMeta.label}
                   </div>
                 </div>
 
-                <ChevronDown size={14} style={{ color: '#94A3B8', transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+                <ChevronDown size={13} style={{ color: '#94A3B8', transform: isUserMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => openAuthModal('login')}
-                className="tap-target"
+                className="tap-target btn-primary"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.45rem',
-                  padding: '0.45rem 0.95rem',
+                  padding: '0.4rem 0.9rem',
                   borderRadius: 'var(--radius-full)',
-                  background: '#F97316',
-                  color: '#FFFFFF',
-                  fontWeight: 700,
-                  fontSize: '0.84rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(249, 115, 22, 0.3)',
+                  fontSize: '0.82rem',
+                  minHeight: '34px',
+                  gap: '0.4rem',
                 }}
               >
-                <User size={15} />
-                <span>Sign In / Register</span>
+                <User size={14} />
+                <span>Sign In</span>
               </button>
             )}
 
@@ -347,23 +318,23 @@ export const Header: React.FC<HeaderProps> = ({
               <div
                 style={{
                   position: 'absolute',
-                  top: '120%',
+                  top: '115%',
                   right: 0,
-                  width: '240px',
+                  width: '230px',
                   background: '#FFFFFF',
                   borderRadius: '14px',
-                  boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.15)',
-                  border: '1px solid #E2E8F0',
-                  padding: '0.65rem',
+                  boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.12)',
+                  border: '1px solid var(--border-subtle)',
+                  padding: '0.5rem',
                   zIndex: 60,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.35rem',
+                  gap: '0.25rem',
                 }}
               >
                 {/* Profile Summary */}
-                <div style={{ padding: '0.45rem 0.55rem', borderBottom: '1px solid #F1F5F9' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0F172A' }}>
+                <div style={{ padding: '0.45rem 0.5rem', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0F172A' }}>
                     {user.full_name}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: '#64748B' }}>
@@ -379,11 +350,11 @@ export const Header: React.FC<HeaderProps> = ({
                       borderRadius: '4px',
                       background: roleMeta.bg,
                       color: roleMeta.color,
-                      fontSize: '0.68rem',
+                      fontSize: '0.66rem',
                       fontWeight: 800,
                     }}
                   >
-                    <RoleIcon size={12} />
+                    <RoleIcon size={11} />
                     <span>{roleMeta.label.toUpperCase()}</span>
                   </div>
                 </div>
@@ -398,22 +369,22 @@ export const Header: React.FC<HeaderProps> = ({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.5rem 0.65rem',
+                    gap: '0.45rem',
+                    padding: '0.45rem 0.55rem',
                     borderRadius: '8px',
                     border: 'none',
                     background: 'transparent',
                     color: '#DC2626',
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     fontWeight: 600,
                     cursor: 'pointer',
                     textAlign: 'left',
-                    transition: 'background 0.1s ease',
+                    transition: 'background 0.12s ease',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = '#FEF2F2')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <LogOut size={14} />
+                  <LogOut size={13} />
                   <span>Sign Out</span>
                 </button>
               </div>
@@ -428,6 +399,13 @@ export const Header: React.FC<HeaderProps> = ({
         onClose={closeAuthModal}
         initialTab={authModalTab}
       />
+
+      {/* AI Copilot Modal (OpenRouter Free LLM) */}
+      <AICopilotModal
+        isOpen={isCopilotOpen}
+        onClose={() => setIsCopilotOpen(false)}
+      />
     </>
   );
 };
+

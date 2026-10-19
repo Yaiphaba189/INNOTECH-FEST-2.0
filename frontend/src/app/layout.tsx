@@ -51,7 +51,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Meetei+Mayek:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
-        <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
         {process.env.NODE_ENV !== 'production' && (
           <script
             dangerouslySetInnerHTML={{

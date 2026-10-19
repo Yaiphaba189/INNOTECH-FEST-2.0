@@ -3,22 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import QRCode from 'qrcode';
-import { 
-  Truck, 
-  MapPin, 
-  CheckCircle2, 
-  Printer, 
-  MessageSquare, 
-  QrCode, 
-  AlertCircle, 
-  ArrowRight,
-  ShieldCheck,
-  User,
+import {
+  Truck,
+  MapPin,
+  Printer,
+  MessageSquare,
+  QrCode,
   Phone,
-  FileText,
-  Navigation,
-  Gauge,
-  Sparkles
+  X,
 } from 'lucide-react';
 import { DispatchRun } from '@/types';
 import { MOCK_DISPATCH_RUN } from '@/lib/mock-data';
@@ -27,12 +19,15 @@ import { api } from '@/lib/api-client';
 export const FpoLogisticsConsole: React.FC = () => {
   const { t } = useTranslation();
   const [run, setRun] = useState<DispatchRun>(MOCK_DISPATCH_RUN);
+  // Persisted runs have UUID ids; show a short readable code instead.
+  const displayRunId = run.run_id.length > 24 ? `RUN-${run.run_id.slice(0, 8).toUpperCase()}` : run.run_id;
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [smsSent, setSmsSent] = useState(false);
   const [showManifestModal, setShowManifestModal] = useState(false);
 
   useEffect(() => {
-    api.getDispatchRun('Churachandpur')
+    api
+      .getDispatchRun('latest')
       .then((data) => {
         if (data && data.run_id) {
           setRun(data);
@@ -56,7 +51,7 @@ export const FpoLogisticsConsole: React.FC = () => {
       width: 220,
       margin: 1,
       color: {
-        dark: '#18181B',
+        dark: '#0F172A',
         light: '#FFFFFF',
       },
     })
@@ -66,232 +61,205 @@ export const FpoLogisticsConsole: React.FC = () => {
 
   const handleSendSms = () => {
     setSmsSent(true);
-    setTimeout(() => setSmsSent(false), 5000);
+    setTimeout(() => setSmsSent(false), 4000);
   };
 
   const stops = run.stops || [];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Console Header */}
-      <div className="glass-card glass-card-accent" style={{ padding: '1.25rem 1.5rem' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span className="badge badge-orange">MODULE D</span>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                FPO Collective Logistics & Route Dispatch Console
-              </h2>
-            </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '0.25rem' }}>
-              Google OR-Tools Capacitated Vehicle Routing (CVRPTW) pooling smallholder lots into ≥ 75% saturated transit payloads.
-            </p>
+      <div
+        className="glass-card"
+        style={{
+          padding: '1.25rem 1.5rem',
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+        }}
+      >
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span className="badge badge-orange" style={{ fontSize: '0.66rem' }}>
+              FPO LOGISTICS
+            </span>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Collective Logistics & Route Dispatch
+            </h1>
           </div>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '0.2rem' }}>
+            Consolidating smallholder harvest lots into ≥75% saturated transit payloads.
+          </p>
+        </div>
 
-          <div style={{
-            background: '#FAFAF9',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-md)',
-            padding: '0.55rem 0.95rem',
-            textAlign: 'right',
-          }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>DISPATCH RUN ID</div>
-            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
-              {run.run_id}
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>
-              {run.cluster_district} Cluster
-            </div>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span className="badge badge-slate" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem' }}>
+            RUN: {displayRunId}
+          </span>
+          <span className="badge badge-green" style={{ fontSize: '0.72rem' }}>
+            {run.cluster_district} Cluster
+          </span>
         </div>
       </div>
 
       {/* Main Grid: Vehicle Saturation & Waypoint Route */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-        gap: '1.25rem',
-      }}>
-        {/* Left Column: Vehicle Load Saturation Gauge */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gap: '1.25rem',
+        }}
+      >
+        {/* Left Column: Vehicle Saturation & QR Gate-Pass */}
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-              Vehicle Payload Saturation Meter
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Vehicle Saturation Meter
             </span>
-            <span className="badge badge-green">
-              <span className="pulse-dot pulse-dot-green" />
-              {run.capacity_fill_pct}% SATURATION (PASS)
+            <span
+              className={`badge ${run.capacity_fill_pct >= 75 ? 'badge-green' : 'badge-orange'}`}
+              style={{ fontSize: '0.68rem' }}
+            >
+              <span className={`pulse-dot ${run.capacity_fill_pct >= 75 ? 'pulse-dot-green' : ''}`} />
+              {run.capacity_fill_pct}% Full ({run.capacity_fill_pct >= 75 ? 'Pass' : 'Below 75% gate'})
             </span>
           </div>
 
-          {/* Vehicle Metadata Header */}
-          <div style={{
-            background: '#FAFAF9',
-            padding: '0.95rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-subtle)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div style={{
-                width: '42px',
-                height: '42px',
-                borderRadius: '10px',
-                background: '#FFF7ED',
-                color: '#EA580C',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <Truck size={22} />
+          {/* Vehicle Info Box */}
+          <div
+            style={{
+              background: '#F8FAFC',
+              padding: '0.85rem',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '10px',
+                  background: '#FFF7ED',
+                  color: '#EA580C',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Truck size={20} />
               </div>
               <div>
-                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
                   {run.vehicle_type}
                 </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                   Reg: {run.vehicle_registration} • Driver: {run.driver_name}
                 </div>
               </div>
             </div>
 
-            <span className="badge badge-orange" style={{ fontSize: '0.68rem' }}>
-              Scheduled 06:30 AM
+            <span className="badge badge-orange" style={{ fontSize: '0.66rem' }}>
+              06:30 AM
             </span>
           </div>
 
-          {/* Visual Saturation Progress Bar with 75% Gate Mark */}
-          <div style={{
-            background: '#FAFAF9',
-            padding: '1rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-subtle)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.45rem' }}>
-              <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-                Loaded Payload
+          {/* Saturation Progress */}
+          <div
+            style={{
+              background: '#F8FAFC',
+              padding: '0.85rem',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-subtle)',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Consolidated Payload
               </span>
-              <span className="tabular-nums" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#059669' }}>
-                {run.current_payload_kg} kg <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>/ {run.vehicle_capacity_kg} kg</span>
+              <span className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 900, color: '#059669' }}>
+                {run.current_payload_kg} kg <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>/ {run.vehicle_capacity_kg} kg</span>
               </span>
             </div>
 
-            {/* High-Contrast Progress Bar */}
-            <div style={{
-              height: '10px',
-              background: '#E4E4E7',
-              borderRadius: '5px',
-              overflow: 'hidden',
-              position: 'relative',
-            }}>
-              <div style={{
-                height: '100%',
-                width: `${run.capacity_fill_pct}%`,
-                background: '#10B981',
-                borderRadius: '5px',
-                transition: 'width 0.8s ease',
-              }} />
-
-              {/* 75% Gate Marker */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                left: '75%',
-                width: '2px',
-                background: '#F97316',
-              }} />
+            <div style={{ height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+              <div
+                style={{
+                  height: '100%',
+                  width: `${run.capacity_fill_pct}%`,
+                  background: '#10B981',
+                  borderRadius: '4px',
+                  transition: 'width 0.6s ease',
+                }}
+              />
+              <div style={{ position: 'absolute', top: 0, bottom: 0, left: '75%', width: '2px', background: '#F97316' }} />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.4rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.35rem', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
               <span>0 kg</span>
-              <span style={{ color: '#EA580C', fontWeight: 700 }}>▲ 75% Mandatory Transit Gate ({Math.round(run.vehicle_capacity_kg * 0.75)} kg)</span>
+              <span style={{ color: '#EA580C', fontWeight: 700 }}>75% Target Gate</span>
               <span>{run.vehicle_capacity_kg} kg</span>
             </div>
           </div>
 
-          {/* Quick Metrics Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '0.65rem',
-          }}>
-            <div style={{
-              background: '#FAFAF9',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-subtle)',
-              padding: '0.65rem',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>PICKUPS</div>
-              <div style={{ fontSize: '1.15rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
+          {/* 3 Metrics */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
+            <div style={{ background: '#F8FAFC', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', padding: '0.55rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>STOPS</div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
                 {stops.length} Lots
               </div>
             </div>
 
-            <div style={{
-              background: '#FAFAF9',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-subtle)',
-              padding: '0.65rem',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>SAVINGS</div>
-              <div className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 900, color: '#059669', marginTop: '0.1rem' }}>
+            <div style={{ background: '#F8FAFC', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', padding: '0.55rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>SAVINGS</div>
+              <div className="tabular-nums" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#059669', marginTop: '0.1rem' }}>
                 +₹{run.cost_savings_per_kg.toFixed(2)}/kg
               </div>
             </div>
 
-            <div style={{
-              background: '#FAFAF9',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-subtle)',
-              padding: '0.65rem',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700 }}>DESTINATION</div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#EA580C', marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                Nilakuthi Hub
+            <div style={{ background: '#F8FAFC', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', padding: '0.55rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>HUB</div>
+              <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#EA580C', marginTop: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                Nilakuthi
               </div>
             </div>
           </div>
 
-          {/* Digital Gate-Pass Card */}
-          <div style={{
-            background: '#FAFAF9',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-md)',
-            padding: '0.95rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.85rem',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Digital Gate Pass Card */}
+          <div
+            style={{
+              background: '#F8FAFC',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.75rem',
+              marginTop: 'auto',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               {qrDataUrl && (
                 <img
                   src={qrDataUrl}
-                  alt="Transit Gate Pass QR Code"
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-medium)',
-                  }}
+                  alt="Transit Gate Pass QR"
+                  style={{ width: '50px', height: '50px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}
                 />
               )}
               <div>
-                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                <div style={{ fontWeight: 800, fontSize: '0.84rem', color: 'var(--text-primary)' }}>
                   Digital Transit Gate-Pass
                 </div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                  TOKEN: {run.digital_gate_pass_token.slice(0, 16)}...
-                </div>
-                <div style={{ fontSize: '0.72rem', color: '#059669', marginTop: '0.15rem' }}>
-                  Verified by FPO Logistics Lead
+                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  TOKEN: {run.digital_gate_pass_token.slice(0, 14)}...
                 </div>
               </div>
             </div>
@@ -299,153 +267,139 @@ export const FpoLogisticsConsole: React.FC = () => {
             <button
               onClick={() => setShowManifestModal(true)}
               className="tap-target btn-secondary"
-              style={{ padding: '0.4rem 0.75rem', fontSize: '0.78rem' }}
+              style={{ padding: '0.35rem 0.75rem', fontSize: '0.76rem', minHeight: '32px' }}
             >
-              <QrCode size={14} style={{ marginRight: '0.3rem' }} />
-              Enlarge QR
+              <QrCode size={13} style={{ marginRight: '0.25rem' }} />
+              QR Pass
             </button>
           </div>
         </div>
 
-        {/* Right Column: Multi-Farm Route Stops Waypoint Sequence */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }}>
+        {/* Right Column: Route Stops Timeline & Actions */}
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-              Optimized Waypoint Sequence
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Pickup Route Timeline
             </span>
-            <span className="badge badge-orange">
-              CVRPTW SOLVER 1.8s
+            <span className="badge badge-orange" style={{ fontSize: '0.68rem' }}>
+              CVRPTW Optimal
             </span>
           </div>
 
-          {/* Sequential Waypoint Timeline */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {stops.map((stop, idx) => {
-              return (
+          {/* Route Stops */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            {stops.map((stop, idx) => (
+              <div
+                key={stop.lot_code || idx}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                  padding: '0.65rem 0.85rem',
+                  borderRadius: 'var(--radius-md)',
+                  background: '#F8FAFC',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
                 <div
-                  key={stop.lot_code || idx}
                   style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '0.75rem',
-                    padding: '0.75rem 0.95rem',
-                    borderRadius: 'var(--radius-md)',
-                    background: '#FAFAF9',
-                    border: '1px solid var(--border-subtle)',
-                  }}
-                >
-                  <div style={{
-                    width: '26px',
-                    height: '26px',
+                    width: '24px',
+                    height: '24px',
                     borderRadius: '50%',
                     background: '#FFF7ED',
-                    border: '1px solid #FDBA74',
+                    border: '1px solid #FED7AA',
                     color: '#EA580C',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 900,
-                    fontSize: '0.75rem',
+                    fontSize: '0.72rem',
                     flexShrink: 0,
-                    marginTop: '2px',
-                  }}>
-                    {stop.order || idx + 1}
+                  }}
+                >
+                  {stop.order || idx + 1}
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                      {stop.farmer_name}
+                    </span>
+                    <span style={{ fontSize: '0.74rem', color: '#EA580C', fontWeight: 700 }}>
+                      {stop.quantity_kg} kg
+                    </span>
                   </div>
-
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
-                        {stop.farmer_name}
-                      </span>
-                      <span className="badge badge-slate" style={{ fontSize: '0.62rem' }}>
-                        {stop.village}, {stop.district}
-                      </span>
-                    </div>
-
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
-                      Lot: {stop.lot_code} • {stop.grade}
-                    </div>
-
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginTop: '0.35rem',
-                      fontSize: '0.72rem',
-                    }}>
-                      <span style={{ color: '#EA580C', fontWeight: 700 }}>
-                        Pickup: {stop.quantity_kg} kg
-                      </span>
-                      <span style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Phone size={11} /> {stop.contact_phone}
-                      </span>
-                    </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    {stop.village}, {stop.district} • Lot: {stop.lot_code}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
 
-            {/* Destination Final Stop */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.75rem',
-              padding: '0.75rem 0.95rem',
-              borderRadius: 'var(--radius-md)',
-              background: '#ECFDF5',
-              border: '1px solid #A7F3D0',
-            }}>
-              <div style={{
-                width: '26px',
-                height: '26px',
-                borderRadius: '50%',
-                background: '#10B981',
-                color: '#FFFFFF',
+            {/* Destination Hub */}
+            <div
+              style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 900,
-                fontSize: '0.75rem',
-                flexShrink: 0,
-                marginTop: '2px',
-              }}>
-                <MapPin size={13} color="#FFFFFF" />
+                gap: '0.65rem',
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                background: '#ECFDF5',
+                border: '1px solid #A7F3D0',
+              }}
+            >
+              <div
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  background: '#10B981',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 900,
+                  fontSize: '0.72rem',
+                  flexShrink: 0,
+                }}
+              >
+                <MapPin size={12} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontWeight: 800, fontSize: '0.88rem', color: '#065F46' }}>
+                  <span style={{ fontWeight: 800, fontSize: '0.82rem', color: '#065F46' }}>
                     {run.destination_hub}
                   </span>
                   <span className="badge badge-green" style={{ fontSize: '0.62rem' }}>
                     DESTINATION
                   </span>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#047857', marginTop: '0.1rem', fontWeight: 600 }}>
-                  Weighbridge & Unload: {run.current_payload_kg} kg
+                <div style={{ fontSize: '0.7rem', color: '#047857', fontWeight: 600 }}>
+                  Total Payload: {run.current_payload_kg} kg
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Action Bar */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginTop: 'auto' }}>
+          {/* Action Buttons */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', marginTop: 'auto' }}>
             <button
               onClick={handleSendSms}
               disabled={smsSent}
               className="tap-target btn-primary"
-              style={{ gap: '0.4rem', fontSize: '0.85rem' }}
+              style={{ gap: '0.35rem', fontSize: '0.82rem', minHeight: '36px' }}
             >
-              <MessageSquare size={16} />
-              {smsSent ? 'SMS Dispatched' : 'SMS Route to Driver'}
+              <MessageSquare size={14} />
+              <span>{smsSent ? '✓ Dispatched' : 'SMS Route to Driver'}</span>
             </button>
 
             <button
               onClick={() => window.print()}
               className="tap-target btn-secondary"
-              style={{ gap: '0.4rem', fontSize: '0.85rem' }}
+              style={{ gap: '0.35rem', fontSize: '0.82rem', minHeight: '36px' }}
             >
-              <Printer size={16} />
-              Print Manifest
+              <Printer size={14} />
+              <span>Print Manifest</span>
             </button>
           </div>
         </div>
@@ -453,26 +407,35 @@ export const FpoLogisticsConsole: React.FC = () => {
 
       {/* Enlarged QR Modal */}
       {showManifestModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '1rem',
-        }}>
-          <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', background: '#FFFFFF' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-              Digital Gate-Pass QR Code
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.15rem' }}>
-              Present to Highway Patrol & Processing Plant Checkpoint
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.45)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '1rem',
+          }}
+        >
+          <div className="glass-card" style={{ maxWidth: '380px', width: '100%', textAlign: 'center', background: '#FFFFFF', padding: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                Digital Gate-Pass QR Code
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowManifestModal(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+              Scan at Highway Patrol & Processing Plant Checkpoint
             </p>
 
             {qrDataUrl && (
@@ -480,25 +443,25 @@ export const FpoLogisticsConsole: React.FC = () => {
                 src={qrDataUrl}
                 alt="Enlarged QR"
                 style={{
-                  width: '220px',
-                  height: '220px',
-                  margin: '0 auto 1.15rem',
+                  width: '200px',
+                  height: '200px',
+                  margin: '0 auto 1rem',
                   borderRadius: '8px',
-                  border: '1px solid var(--border-medium)',
+                  border: '1px solid var(--border-subtle)',
                 }}
               />
             )}
 
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginBottom: '1rem' }}>
-              RUN: {run.run_id} • VEHICLE: {run.vehicle_registration}
+              RUN: {displayRunId} • VEHICLE: {run.vehicle_registration}
             </div>
 
             <button
               onClick={() => setShowManifestModal(false)}
               className="tap-target btn-secondary"
-              style={{ width: '100%' }}
+              style={{ width: '100%', fontSize: '0.82rem' }}
             >
-              Close Gate Pass
+              Close
             </button>
           </div>
         </div>

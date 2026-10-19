@@ -1,10 +1,10 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.services.farm_service import FarmService
 from app.services.forecast_service import ForecastService
-from app.schemas.crop import CropCreate, CropResponse, HarvestForecastResponse
+from app.schemas.crop import CropCreate, CropResponse, HarvestForecastResponse, FieldEvaluationResponse
 from app.api.deps import get_current_user, get_current_farmer_or_fpo
 from app.models.user import User
 
@@ -70,3 +70,25 @@ async def get_crop_harvest_forecast(
         simulated_rainfall_mm=simulated_rainfall_mm
     )
     return HarvestForecastResponse(**forecast)
+
+
+@router.post("/evaluate-frame", response_model=FieldEvaluationResponse)
+async def evaluate_field_frame(
+    image_file: UploadFile = File(...),
+    crop_hint: Optional[str] = Form(None),
+):
+    """
+    Evaluates live field video frame or snapshot for Harvest Readiness Radar:
+    - Determines if the frame has an established planted stand or unplanted fallow soil
+    - Detects crop species (Pineapple, Rice, Orange)
+    - Assesses crop health & stress conditions: water deficit (lacking water) or root rot onset
+    - Projects exact harvest readiness, Brix sweetness, GDD accumulation, and optimal pick date
+    """
+    content = await image_file.read()
+    result = await ForecastService.evaluate_field_frame(
+        content=content,
+        filename=image_file.filename or "field_frame.jpg",
+        crop_hint=crop_hint
+    )
+    return FieldEvaluationResponse(**result)
+

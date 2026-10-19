@@ -11,6 +11,8 @@ from intelligence_layer.module_d_logistics.clustering.spatial_clustering import 
 from intelligence_layer.module_d_logistics.vrp_solver.cvrptw_solver import (
     VEHICLE_PROFILES,
     solve_vehicle_dispatch,
+    calculate_biological_decay_rate,
+    calculate_lot_shelf_life_hours,
 )
 
 
@@ -29,11 +31,12 @@ def solve_cvrp_dispatch(
     destination_hub: str,
     farm_lots: List[Dict[str, Any]],
     enforce_threshold: bool = True,
-    corridor_type: str = "valley"
+    corridor_type: str = "valley",
+    crate_temp_c: float = 29.5
 ) -> Dict[str, Any]:
     """
     Optimizes multi-farm lot consolidation for FPO collective transport.
-    Enforces minimum 75% vehicle payload saturation constraint.
+    Enforces minimum 75% vehicle payload saturation constraint and Bio-Thermal Q10 routing.
     """
     return solve_vehicle_dispatch(
         cluster_district=cluster_district,
@@ -41,6 +44,8 @@ def solve_cvrp_dispatch(
         destination_hub=destination_hub,
         farm_lots=farm_lots,
         enforce_threshold=enforce_threshold,
-        corridor_type=corridor_type
+        corridor_type=corridor_type,
+        crate_temp_c=crate_temp_c
     )
+
 

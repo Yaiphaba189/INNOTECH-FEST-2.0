@@ -44,6 +44,10 @@ class BuyerMatchResponse(BaseModel):
     payment_terms_days: int
     pickup_date: date
     status: str
+    distance_km: float
+    broker_net_rate: float
+    advantage_vs_broker: float
+    advantage_pct: float
 
 
 class AcceptMatchResponse(BaseModel):

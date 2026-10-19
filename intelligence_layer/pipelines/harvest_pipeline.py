@@ -16,19 +16,23 @@ def calculate_harvest_forecast(
     elevation_meters: int = 800,
     rainfall_forecast_48h_mm: float = 65.0,
     target_brix: float = 14.5,
-    district: str = "Churachandpur"
+    district: str = "Churachandpur",
+    slope_deg: float = 0.0,
+    aspect_deg: float = 180.0
 ) -> Dict[str, Any]:
     """
     Unified harvest readiness assessment:
-    1. Computes thermal units (GDD) accumulated since planting and stage progression.
+    1. Computes thermal units (GDD) accumulated since planting with 3D solar-aspect DEM correction.
     2. Determines optimal harvest window and estimated Brix sweetness.
     3. Synthesizes 48-hour meteorological risk and triggers urgent pre-downpour alerts.
     """
-    # 1 & 2. Phenological progression and GDD
+    # 1 & 2. Phenological progression and GDD with terrain aspect ray-tracing
     timeline = compute_harvest_timeline(
         crop_variety=crop_variety,
         planting_date=planting_date,
-        elevation_meters=elevation_meters
+        elevation_meters=elevation_meters,
+        slope_deg=slope_deg,
+        aspect_deg=aspect_deg
     )
 
     stage = timeline["current_stage"]
@@ -49,6 +53,10 @@ def calculate_harvest_forecast(
         "days_in_field": timeline["days_in_field"],
         "gdd_accumulated": timeline["gdd_accumulated"],
         "target_gdd": timeline["target_gdd"],
+        "topographic_solar_factor": timeline.get("topographic_solar_factor", 1.0),
+        "slope_deg": slope_deg,
+        "aspect_deg": aspect_deg,
+        "maturity_divergence_days": timeline.get("maturity_divergence_days", 0),
         "optimal_harvest_start": timeline["optimal_harvest_start"],
         "optimal_harvest_end": timeline["optimal_harvest_end"],
         "estimated_brix": timeline["estimated_brix"],

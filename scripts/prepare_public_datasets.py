@@ -447,7 +447,7 @@ def orange_label(member: str) -> str | None:
     return None
 
 
-def prepare_orange(rows: dict[str, dict[str, str]]) -> None:
+def prepare_orange(rows: dict[str, dict[str, str]], workers: int) -> None:
     # The 5 GB Sweetorange.zip is the original-image archive; the separate
     # Sweet_orange_cGAN_dataset.zip is excluded because it contains generated data.
     warm_mendeley_page("https://data.mendeley.com/datasets/f7cr74mwpj/1")
@@ -460,6 +460,7 @@ def prepare_orange(rows: dict[str, dict[str, str]]) -> None:
         curl_download_segmented(
             source_file["content_details"]["download_url"], archive,
             int(source_file["content_details"]["size"]),
+            workers=max(workers, 6),
         )
     print("Verifying MD5 checksum for Sweetorange.zip...", flush=True)
     expected_sha = source_file.get("content_details", {}).get("sha256_hash", "")
@@ -498,7 +499,7 @@ def prepare_orange(rows: dict[str, dict[str, str]]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--crop", choices=["all", "pineapple", "rice", "orange"], default="all")
-    parser.add_argument("--workers", type=int, default=2, help="Concurrent rice image downloads (default: 2)")
+    parser.add_argument("--workers", type=int, default=2, help="Concurrent downloads for rice images / orange archive chunks (default: 2; the source throttles per connection, so 24-32 is much faster)")
     args = parser.parse_args()
     if args.workers < 1 or args.workers > 32:
         parser.error("--workers must be between 1 and 32")
@@ -515,7 +516,7 @@ def main() -> None:
         elif crop == "rice":
             prepare_rice(rows, args.workers)
         else:
-            prepare_orange(rows)
+            prepare_orange(rows, args.workers)
     print(f"Prepared images: {len(rows)}")
     counts: dict[tuple[str, str], int] = {}
     for row in rows.values():

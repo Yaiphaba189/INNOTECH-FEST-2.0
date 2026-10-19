@@ -1,5 +1,7 @@
 import os
 import sys
+
+os.environ["HARVESTLINK_DISABLE_TRAINED_MODELS"] = "1"  # deterministic colour-analyzer behaviour in tests
 import glob
 import pytest
 import pytest_asyncio
@@ -47,7 +49,7 @@ async def setup_test_db():
 
     # Seed isolated test data
     from scripts.seed_demo_data import seed_all
-    await seed_all()
+    await seed_all(pregenerate_dispatch=False)
 
     yield
 

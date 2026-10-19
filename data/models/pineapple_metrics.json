@@ -1,0 +1,55 @@
+{
+  "accuracy": 0.9699,
+  "macro_f1": 0.9698,
+  "mean_confidence": 0.9627,
+  "expected_calibration_error": 0.0152,
+  "per_class": {
+    "healthy": {
+      "precision": 1.0,
+      "recall": 0.9383,
+      "f1": 0.9682,
+      "support": 162
+    },
+    "mealybug_wilt": {
+      "precision": 0.9444,
+      "recall": 1.0,
+      "f1": 0.9714,
+      "support": 170
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "healthy",
+      "mealybug_wilt"
+    ],
+    "rows_true_cols_pred": [
+      [
+        152,
+        10
+      ],
+      [
+        0,
+        170
+      ]
+    ]
+  },
+  "crop": "pineapple",
+  "trained_on": "2026-10-19",
+  "classes": [
+    "healthy",
+    "mealybug_wilt"
+  ],
+  "temperature": 0.7832,
+  "best_val_accuracy": 0.9096,
+  "images": {
+    "train": 1543,
+    "val": 332,
+    "test": 332
+  },
+  "split_method": "group-level 70/15/15, source specimen id",
+  "backbone": "MobileNetV3-Small, ImageNet-pretrained",
+  "caveats": [
+    "Public leaf-image datasets, not Manipur field photos: expect lower accuracy on phone photos in the field.",
+    "Classes without licensed public data are not covered by this model."
+  ]
+}

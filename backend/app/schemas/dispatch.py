@@ -21,6 +21,11 @@ class StopManifest(BaseModel):
     variety: str
     grade: str
     accumulated_vehicle_load_kg: float
+    shelf_life_hours: Optional[float] = None
+    truck_transit_hours: Optional[float] = None
+    remaining_safe_hours: Optional[float] = None
+    decay_risk_tier: Optional[str] = None
+    pickup_priority_rationale: Optional[str] = None
 
 
 class DispatchPlanResponse(BaseModel):
@@ -38,6 +43,10 @@ class DispatchPlanResponse(BaseModel):
     stops: List[StopManifest]
     status: str
     created_at: datetime
+    crate_temperature_c: Optional[float] = 29.5
+    q10_respiratory_rate: Optional[float] = 2.21
+    bio_thermal_routing_active: Optional[bool] = True
+    fragile_lot_sequencing: Optional[str] = "Fragile high-Brix lots sequenced to be picked up LAST"
 
 
 class GatePassVerificationResponse(BaseModel):
@@ -53,3 +62,33 @@ class GatePassVerificationResponse(BaseModel):
     manifest_stops: List[Any]
     status: str
     created_at: datetime
+
+
+class DispatchWaypointView(BaseModel):
+    order: int
+    farmer_name: str
+    village: str
+    district: str
+    lot_code: str
+    quantity_kg: float
+    grade: str
+    contact_phone: str
+
+
+class DispatchRunView(BaseModel):
+    """Console view of a persisted dispatch run, shaped for the FPO logistics screen."""
+    run_id: str
+    cluster_district: str
+    vehicle_type: str
+    vehicle_capacity_kg: float
+    current_payload_kg: float
+    capacity_fill_pct: float
+    driver_name: str
+    driver_phone: str
+    vehicle_registration: str
+    stops: List[DispatchWaypointView]
+    destination_hub: str
+    cost_savings_per_kg: float
+    digital_gate_pass_token: str
+    timestamp: datetime
+    status: str

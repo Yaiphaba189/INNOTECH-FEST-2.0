@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from intelligence_layer.module_c_pricing.net_returns.pricing_engine import compute_net_returns
+from intelligence_layer.module_c_pricing.net_returns.shapley_freight import compute_shapley_freight_allocation
 from intelligence_layer.module_c_pricing.ranking.buyer_matcher import (
     get_crop_benchmark,
     rank_buyer_orders,
@@ -20,7 +21,9 @@ def calculate_net_returns(
     platform_fee_pct: float = 0.015,
     payment_terms_days: int = 0,
     crop: str = "pineapple",
-    terrain_corridor: str = "valley"
+    terrain_corridor: str = "valley",
+    detour_km: float = 0.0,
+    use_shapley: bool = False
 ) -> Dict[str, Any]:
     """Computes transparent net-returns pricing per kg and total farmer take-home pay."""
     return compute_net_returns(
@@ -31,8 +34,11 @@ def calculate_net_returns(
         platform_fee_pct=platform_fee_pct,
         payment_terms_days=payment_terms_days,
         crop=crop,
-        terrain_corridor=terrain_corridor
+        terrain_corridor=terrain_corridor,
+        detour_km=detour_km,
+        use_shapley=use_shapley
     )
+
 
 
 def score_buyer_order(

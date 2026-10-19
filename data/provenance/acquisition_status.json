@@ -6,12 +6,16 @@
       "mealybug_wilt": 1089
     },
     "rice": {
-      "bacterial_leaf_blight": 70
+      "bacterial_leaf_blight": 785,
+      "blast": 521,
+      "healthy": 753,
+      "sheath_blight": 608,
+      "tungro": 556
     }
   },
-  "total_prepared_images": 2277,
-  "status": "completed",
-  "active_crop": "",
-  "active_archive": "",
-  "reason": "Preparation completed for crop(s): pineapple"
+  "total_prepared_images": 5430,
+  "status": "in_progress",
+  "active_crop": "orange",
+  "active_archive": "Sweetorange.zip",
+  "reason": "Extracting and preprocessing orange images"
 }

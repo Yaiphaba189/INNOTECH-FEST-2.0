@@ -73,11 +73,13 @@ def compute_net_returns(
     platform_fee_pct: float = DEFAULT_PLATFORM_FEE_PCT,
     payment_terms_days: int = 0,
     crop: str = "pineapple",
-    terrain_corridor: str = "valley"
+    terrain_corridor: str = "valley",
+    detour_km: float = 0.0,
+    use_shapley: bool = False
 ) -> Dict[str, Any]:
     """
     Computes itemized deductions, true net realized rate per kg, and guaranteed farmer payout.
-    Accommodates crop-specific packaging requirements and transit corridors.
+    Accommodates crop-specific packaging requirements, transit corridors, and Shapley cooperative freight dividends.
     """
     crop_clean = crop.lower().strip()
     if handling_per_kg is None:
@@ -85,7 +87,20 @@ def compute_net_returns(
     else:
         unit_handling = round(handling_per_kg, 2)
 
-    unit_freight = calculate_freight_deduction(distance_km, terrain_corridor=terrain_corridor)
+    base_freight = calculate_freight_deduction(distance_km, terrain_corridor=terrain_corridor)
+
+    # Shapley Value Fair Freight Dividend:
+    # phi_i(v) = Base Corridor Rate + Detour Penalty_i - Consolidation Bonus_i
+    if use_shapley or detour_km > 0:
+        detour_penalty = round(min(1.40, (detour_km / 10.0) * 0.65 * (1.4 if "hill" in terrain_corridor else 1.0)), 2)
+        # Consolidation bonus for participating in FPO truck saturation
+        consolidation_bonus = round(min(0.50, (lot_weight_kg / 2500.0) * 0.40), 2)
+        unit_freight = round(max(1.20, base_freight + detour_penalty - consolidation_bonus), 2)
+    else:
+        detour_penalty = 0.0
+        consolidation_bonus = 0.0
+        unit_freight = base_freight
+
     unit_platform_fee = round(gross_rate * platform_fee_pct, 2)
 
     total_deductions_per_kg = round(unit_freight + unit_handling + unit_platform_fee, 2)
@@ -102,6 +117,9 @@ def compute_net_returns(
         "terrain_corridor": terrain_corridor,
         "gross_rate": round(gross_rate, 2),
         "freight_deduction": unit_freight,
+        "base_corridor_freight": base_freight,
+        "detour_penalty": detour_penalty,
+        "consolidation_bonus": consolidation_bonus,
         "handling_deduction": unit_handling,
         "platform_fee": unit_platform_fee,
         "total_deductions_per_kg": total_deductions_per_kg,
@@ -109,6 +127,7 @@ def compute_net_returns(
         "total_take_home": total_farmer_take_home,
         "lot_weight_kg": lot_weight_kg,
         "distance_km": round(distance_km, 1),
+        "detour_km": round(detour_km, 1),
         "payment_terms_days": payment_terms_days,
         "savings_vs_middlemen_total": max(0.0, savings_vs_traditional)
     }

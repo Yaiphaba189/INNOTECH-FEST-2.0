@@ -7,6 +7,7 @@ from app.models.lot import HarvestLot
 from app.models.order import BuyerOrder
 from app.models.match import LotMatch
 from app.models.dispatch import DispatchRun
+from app.models.weather_cache import WeatherCache
 
 __all__ = [
     "Base",
@@ -18,4 +19,5 @@ __all__ = [
     "BuyerOrder",
     "LotMatch",
     "DispatchRun",
+    "WeatherCache",
 ]

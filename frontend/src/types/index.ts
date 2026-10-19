@@ -22,7 +22,14 @@ export type DiseaseClass =
   | 'heart_rot' 
   | 'black_rot' 
   | 'mealybug_wilt' 
-  | 'healthy';
+  | 'healthy'
+  | 'bacterial_leaf_blight'
+  | 'sheath_blight'
+  | 'blast'
+  | 'citrus_greening_hlb'
+  | 'citrus_canker'
+  | 'root_rot'
+  | string;
 
 export type TriageUrgency = 'high' | 'medium' | 'low';
 
@@ -30,17 +37,23 @@ export interface DiseaseDiagnosis {
   id: string;
   predicted_class: DiseaseClass;
   display_name: string;
+  crop_species?: 'pineapple' | 'rice' | 'orange' | string;
+  crop_display_name?: string;
+  plant_part?: string;
+  part_display_name?: string;
   local_name_beng?: string;
   local_name_mtei?: string;
   confidence_score: number;
   triage_status: 'confirmed' | 'preliminary' | 'inconclusive';
-  severity: 'CRITICAL' | 'MODERATE' | 'LOW' | 'NONE';
+  severity: 'CRITICAL' | 'MODERATE' | 'LOW' | 'NONE' | 'UNKNOWN';
+  inference_mode?: 'trained_model' | 'colour_heuristic' | 'offline_preset';
+  evidence?: Record<string, number>;
   symptoms_detected: string[];
   organic_treatments: string[];
   chemical_treatments: string[];
   cultural_practices: string[];
   refer_to_expert: boolean;
-  image_angle: 'crown' | 'base_stalk' | 'lateral';
+  image_angle?: 'crown' | 'base_stalk' | 'lateral' | string;
   timestamp: string;
 }
 
@@ -59,7 +72,19 @@ export interface PhenologyStage {
 
 export interface HarvestForecastData {
   crop_record_id: string;
-  variety: 'Queen' | 'Kew';
+  variety: 'Queen' | 'Kew' | string;
+  crop_name?: string;
+  is_planted?: boolean;
+  planting_status?: 'Established Stand' | 'Sparse Vegetation' | 'Unplanted Fallow Ground' | string;
+  canopy_coverage_pct?: number;
+  crop_condition?: 'OPTIMAL' | 'WATER_DEFICIT' | 'ROOT_ROT_ONSET' | 'MATURE_HARVEST' | 'FALLOW' | string;
+  condition_score?: number;
+  water_status?: 'OPTIMAL' | 'LACKING_WATER' | 'WATERLOGGED' | string;
+  soil_moisture_pct?: number;
+  root_rot_status?: 'HEALTHY' | 'EARLY_ONSET' | 'CRITICAL_ROT' | string;
+  root_rot_details?: string;
+  harvest_readiness_pct?: number;
+  harvest_recommendation?: string;
   district: string;
   farm_area_ha: number;
   days_in_field: number;
@@ -202,3 +227,31 @@ export interface EscalationPayload {
   latitude: number;
   longitude: number;
 }
+
+export interface AIAdvisorRequest {
+  prompt: string;
+  query_type?: 'disease_triage' | 'harvest_decision' | 'market_negotiation' | 'general_copilot';
+  crop?: string;
+  context?: Record<string, any>;
+  include_manipuri?: boolean;
+  preferred_model?: string;
+}
+
+export interface AIAdvisorResponse {
+  source: 'openrouter' | 'expert_fallback';
+  model: string;
+  response: string;
+  actionable_steps: string[];
+  urgency: 'low' | 'medium' | 'high' | 'critical';
+  manipuri_summary?: string;
+  cached: boolean;
+}
+
+export interface AIStatus {
+  openrouter_configured: boolean;
+  primary_model: string;
+  available_models: string[];
+  cache_ttl_seconds: number;
+  environment: string;
+}
+

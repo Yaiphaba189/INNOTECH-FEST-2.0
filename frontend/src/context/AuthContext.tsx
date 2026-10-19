@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthUser, UserRole } from '@/types';
-import { api, DEMO_USERS } from '@/lib/api-client';
+import { api, DEMO_USERS, markAuthReady } from '@/lib/api-client';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -26,40 +26,64 @@ interface AuthContextType {
   authModalTab: 'login' | 'signup';
 }
 
+export const DEFAULT_DEMO_FARMER: AuthUser = {
+  id: 'usr-farmer-tombi-001',
+  phone_number: '+919862000001',
+  full_name: 'Tombi Singh',
+  role: 'farmer',
+  preferred_language: 'en',
+};
+
+export const DEFAULT_DEMO_TOKEN = 'mock-jwt-farmer-tombi-001';
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<AuthUser | null>(DEFAULT_DEMO_FARMER);
+  const [token, setToken] = useState<string | null>(DEFAULT_DEMO_TOKEN);
+  const [isLoading, setIsLoading] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'signup'>('login');
 
-  // Initialize active user from localStorage or fallback to default farmer demo
+  // Initialize the session. A stored real JWT is reused; otherwise (first visit, or a leftover
+  // simulated 'mock-' token that the API rejects with 401) sign in the demo account against the
+  // backend so the UI shows live data. If the backend is down, api.auth.login falls back to a
+  // simulated session and the app keeps working offline.
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const storedUser = localStorage.getItem('harvestlink_user_active');
+    let cancelled = false;
+    const hydrate = async () => {
+      try {
+        const storedUserRaw = localStorage.getItem('harvestlink_user_active');
         const storedToken = localStorage.getItem('harvestlink_token_active');
+        const storedUser: AuthUser | null = storedUserRaw ? JSON.parse(storedUserRaw) : null;
 
-        if (storedUser && storedToken) {
-          setUser(JSON.parse(storedUser));
-          setToken(storedToken);
-          setIsLoading(false);
+        if (storedUser && storedToken && !storedToken.startsWith('mock-')) {
+          if (!cancelled) {
+            setUser(storedUser);
+            setToken(storedToken);
+          }
           return;
         }
 
-        // Unauthenticated by default until user signs in or creates an account
-        setUser(null);
-        setToken(null);
+        const demo = storedUser ? Object.values(DEMO_USERS).find((u) => u.phone === storedUser.phone_number) : null;
+        const phone = demo?.phone ?? DEFAULT_DEMO_FARMER.phone_number;
+        const pass = demo?.pass ?? 'innotech2026';
+        const res = await api.auth.login(phone, pass);
+        if (!cancelled) {
+          setUser(res.user);
+          setToken(res.access_token);
+        }
+      } catch (err) {
+        console.warn('Error hydrating auth state:', err);
+      } finally {
+        markAuthReady();
+        if (!cancelled) setIsLoading(false);
       }
-    } catch (err) {
-      console.warn('Error hydrating auth state:', err);
-      setUser(null);
-      setToken(null);
-    } finally {
-      setIsLoading(false);
-    }
+    };
+    hydrate();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = async (phone: string, pass: string): Promise<AuthUser> => {

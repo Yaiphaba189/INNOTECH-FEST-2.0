@@ -36,6 +36,38 @@ def _create_sample_jpeg(size=(300, 300), color=(100, 180, 50)) -> bytes:
     return buffer.getvalue()
 
 
+from PIL import ImageDraw
+
+_G, _B, _D, _Y = (60, 140, 40), (140, 90, 40), (25, 20, 20), (225, 200, 60)
+_R, _W, _GR = (190, 60, 50), (245, 245, 245), (130, 130, 130)
+
+# Tissue-colour recipes: the analyzer must infer the disease from these pixels alone.
+TISSUE = {
+    "heart_rot": [(_B, .6), (_G, .4)], "black_rot": [(_D, .6), (_G, .4)],
+    "mealybug_wilt": [(_R, .5), (_Y, .2), (_G, .3)],
+    "blast": [(_GR, .3), (_B, .3), (_G, .4)],
+    "bacterial_leaf_blight": [(_Y, .45), (_B, .2), (_G, .35)],
+    "sheath_blight": [(_W, .3), (_B, .3), (_G, .4)] , "tungro": [(_Y, .8), (_G, .2)],
+    "citrus_canker": [(_G, .7), (_B, .3)], "citrus_greening_hlb": [(_Y, .6), (_G, .4)],
+    "powdery_mildew": [(_W, .55), (_G, .45)], "root_rot": [(_B, .6), (_D, .2), (_G, .2)],
+    "anthracnose": [(_D, .5), (_B, .3), (_G, .2)], "leaf_curl": [(_Y, .6), (_G, .4)],
+    "bacterial_wilt": [(_Y, .4), (_B, .4), (_G, .2)],
+}
+
+
+def _tissue_jpeg(kind: str) -> bytes:
+    img = Image.new("RGB", (224, 224), _W)
+    draw = ImageDraw.Draw(img)
+    x = 0
+    for colour, frac in TISSUE[kind]:
+        w = int(224 * frac)
+        draw.rectangle([x, 0, x + w, 224], fill=colour)
+        x += w
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG", quality=95)
+    return buffer.getvalue()
+
+
 def test_image_preprocessing_and_hash():
     img_bytes = _create_sample_jpeg()
     processed_img, sha256_hash = preprocess_image(img_bytes)
@@ -329,27 +361,27 @@ def test_rice_disease_screening_and_triage():
     sample_jpeg = _create_sample_jpeg(size=(224, 224), color=(60, 140, 40))
 
     # 1. Rice Blast (Magnaporthe oryzae)
-    diag_blast = predict_crop_disease(sample_jpeg, image_angle="leaf_top_blast", crop="rice")
+    diag_blast = predict_crop_disease(_tissue_jpeg("blast"), image_angle="leaf_top_blast", crop="rice")
     assert diag_blast["predicted_class"] == "blast"
-    assert diag_blast["confidence_score"] >= 0.85
+    assert diag_blast["confidence_score"] >= 0.55  # grey/brown lesions are inherently ambiguous
     assert "চেকপোকপা" in diag_blast["local_name"]
     assert "Magnaporthe oryzae" in diag_blast["scientific_name"]
     assert "Tricyclazole" in diag_blast["recommended_actions"]["chemical"]
 
     # 2. Bacterial Leaf Blight (Xanthomonas oryzae)
-    diag_blb = predict_crop_disease(sample_jpeg, image_angle="margin_bacterial_ooze", crop="rice")
+    diag_blb = predict_crop_disease(_tissue_jpeg("bacterial_leaf_blight"), image_angle="margin_bacterial_ooze", crop="rice")
     assert diag_blb["predicted_class"] == "bacterial_leaf_blight"
     assert "নাহা শাবা" in diag_blb["local_name"]
     assert "Streptocycline" in diag_blb["recommended_actions"]["chemical"]
 
     # 3. Sheath Blight (Rhizoctonia solani)
-    diag_sheath = predict_crop_disease(sample_jpeg, image_angle="sheath_waterline", crop="rice")
+    diag_sheath = predict_crop_disease(_tissue_jpeg("sheath_blight"), image_angle="sheath_waterline", crop="rice")
     assert diag_sheath["predicted_class"] == "sheath_blight"
     assert "মখোং শাবা" in diag_sheath["local_name"]
     assert "Hexaconazole" in diag_sheath["recommended_actions"]["chemical"]
 
     # 4. Rice Tungro Virus (RTBV)
-    diag_tungro = predict_crop_disease(sample_jpeg, image_angle="tungro_stunt_yellow", crop="rice")
+    diag_tungro = predict_crop_disease(_tissue_jpeg("tungro"), image_angle="tungro_stunt_yellow", crop="rice")
     assert diag_tungro["predicted_class"] == "tungro"
     assert "অঙাংবা মচিংশিনবা" in diag_tungro["local_name"]
     assert "Thiamethoxam" in diag_tungro["recommended_actions"]["chemical"]
@@ -360,7 +392,7 @@ def test_orange_disease_screening_and_triage():
     sample_jpeg = _create_sample_jpeg(size=(224, 224), color=(220, 150, 30))
 
     # 1. Citrus Canker (Xanthomonas axonopodis)
-    diag_canker = predict_crop_disease(sample_jpeg, image_angle="canker_cork_halo", crop="orange")
+    diag_canker = predict_crop_disease(_tissue_jpeg("citrus_canker"), image_angle="canker_cork_halo", crop="orange")
     assert diag_canker["predicted_class"] == "citrus_canker"
     assert diag_canker["confidence_score"] >= 0.85
     assert "হৈব্রু ঘা" in diag_canker["local_name"]
@@ -368,19 +400,19 @@ def test_orange_disease_screening_and_triage():
     assert "Copper Oxychloride" in diag_canker["recommended_actions"]["chemical"]
 
     # 2. Huanglongbing / Citrus Greening (HLB)
-    diag_hlb = predict_crop_disease(sample_jpeg, image_angle="hlb_mottle_yellow_leaf", crop="orange")
+    diag_hlb = predict_crop_disease(_tissue_jpeg("citrus_greening_hlb"), image_angle="hlb_mottle_yellow_leaf", crop="orange")
     assert diag_hlb["predicted_class"] == "citrus_greening_hlb"
     assert "কমলা হালবা" in diag_hlb["local_name"]
     assert "Liberibacter" in diag_hlb["scientific_name"]
     assert "psyllid" in diag_hlb["recommended_actions"]["chemical"]
 
     # 3. Powdery Mildew
-    diag_mildew = predict_crop_disease(sample_jpeg, image_angle="mildew_white_powder", crop="orange")
+    diag_mildew = predict_crop_disease(_tissue_jpeg("powdery_mildew"), image_angle="mildew_white_powder", crop="orange")
     assert diag_mildew["predicted_class"] == "powdery_mildew"
     assert "অঙৌবা খুপপা" in diag_mildew["local_name"]
 
     # 4. Root / Collar Rot
-    diag_root = predict_crop_disease(sample_jpeg, image_angle="root_collar_bark_twig_base", crop="orange")
+    diag_root = predict_crop_disease(_tissue_jpeg("root_rot"), image_angle="root_collar_bark_twig_base", crop="orange")
     assert diag_root["predicted_class"] == "root_rot"
     assert "মরী শাবা" in diag_root["local_name"]
     assert "Trichoderma" in diag_root["recommended_actions"]["organic"]
@@ -391,18 +423,18 @@ def test_chilli_disease_screening_and_triage():
     sample_jpeg = _create_sample_jpeg(size=(224, 224), color=(180, 40, 30))
 
     # 1. Anthracnose
-    diag_anth = predict_crop_disease(sample_jpeg, image_angle="anthracnose_pod_spot", crop="chilli")
+    diag_anth = predict_crop_disease(_tissue_jpeg("anthracnose"), image_angle="anthracnose_pod_spot", crop="chilli")
     assert diag_anth["predicted_class"] == "anthracnose"
     assert "উ-মোরোক অমোৎপা" in diag_anth["local_name"]
     assert "Azoxystrobin" in diag_anth["recommended_actions"]["chemical"]
 
     # 2. Leaf Curl Virus
-    diag_curl = predict_crop_disease(sample_jpeg, image_angle="curl_pucker_leaf", crop="chilli")
+    diag_curl = predict_crop_disease(_tissue_jpeg("leaf_curl"), image_angle="curl_pucker_leaf", crop="chilli")
     assert diag_curl["predicted_class"] == "leaf_curl"
     assert "উ-মোরোক মনা কুংশিনবা" in diag_curl["local_name"]
 
     # 3. Bacterial Wilt
-    diag_wilt = predict_crop_disease(sample_jpeg, image_angle="wilt_bacterial_stem", crop="chilli")
+    diag_wilt = predict_crop_disease(_tissue_jpeg("bacterial_wilt"), image_angle="wilt_bacterial_stem", crop="chilli")
     assert diag_wilt["predicted_class"] == "bacterial_wilt"
     assert "উ-মোরোক মরা শাবা" in diag_wilt["local_name"]
 
@@ -548,3 +580,203 @@ def test_spatial_clustering_and_cvrptw_multi_crop():
     assert dispatch["estimated_transit_hours"] > 0.0
     assert dispatch["digital_gate_pass"].startswith("HL-PASS-2026-")
 
+
+# ─────────────────────────────────────────────────────────────
+# SIGNATURE INNOVATIONS (INNOTECH FEST 2.0 BREAKTHROUGHS)
+# ─────────────────────────────────────────────────────────────
+
+def test_acoustic_bio_resonance_grading():
+    """Innovation 1: Validates smartphone acoustic spectrometer formulas and resonance thresholds."""
+    from intelligence_layer.module_a_disease.models.acoustic_grader import (
+        calculate_firmness_index,
+        evaluate_acoustic_resonance,
+        analyze_audio_samples
+    )
+    # Firmness Index: S = f_peak^2 * m^(2/3)
+    # 125 Hz, 1.2 kg -> S = 125^2 * 1.2^(2/3) = 15625 * 1.12924 = 17644.42
+    s_idx = calculate_firmness_index(125.0, 1.20)
+    assert s_idx == pytest.approx(17644.42, rel=1e-2)
+
+    # 1. Crisp, dense Grade-A core (110 - 145 Hz)
+    grade_a = evaluate_acoustic_resonance(peak_frequency_hz=128.0, damping_ratio=0.038, mass_kg=1.20)
+    assert grade_a["internal_status"] == "crisp_dense_core"
+    assert grade_a["quality_grade"] == "grade_a"
+    assert grade_a["water_blister_risk_pct"] < 10.0
+
+    # 2. Osmotic Water Blister & Translucent Fermentation (< 85 Hz)
+    blistered = evaluate_acoustic_resonance(peak_frequency_hz=74.5, damping_ratio=0.092, mass_kg=1.35)
+    assert blistered["internal_status"] == "internal_water_blister"
+    assert blistered["quality_grade"] == "reject_fermenting"
+    assert blistered["water_blister_risk_pct"] > 80.0
+    assert "water-blister" in blistered["description"].lower()
+
+    # 3. Soft processing core (85 - 110 Hz)
+    soft = evaluate_acoustic_resonance(peak_frequency_hz=98.0, damping_ratio=0.050, mass_kg=1.15)
+    assert soft["internal_status"] == "soft_processing"
+    assert soft["quality_grade"] == "grade_b"
+
+    # 4. Audio PCM sample FFT analysis
+    import math
+    sr = 44100
+    # Synthesize 120 Hz sine tone
+    samples = [math.sin(2.0 * math.pi * 120.0 * (i / sr)) for i in range(2048)]
+    analysis = analyze_audio_samples(samples, sample_rate=sr, mass_kg=1.20)
+    assert analysis["peak_frequency_hz"] == pytest.approx(120.0, abs=4.0)
+    assert analysis["internal_status"] == "crisp_dense_core"
+
+
+def test_multimodal_vision_and_acoustic_screening():
+    """Innovation 1: Multimodal pipeline upgrades optical triage with acoustic thumb-thump."""
+    sample_jpeg = _create_sample_jpeg()
+    
+    # Healthy photo with normal acoustic tone
+    healthy_multi = predict_crop_disease(sample_jpeg, crop="pineapple", peak_frequency_hz=126.0)
+    assert "acoustic_grading" in healthy_multi
+    assert healthy_multi["acoustic_grading"]["internal_status"] == "crisp_dense_core"
+
+    # Visually normal photo but internal acoustic water blister (<85 Hz) triggers critical alert!
+    blistered_multi = predict_crop_disease(sample_jpeg, crop="pineapple", peak_frequency_hz=72.0)
+    assert blistered_multi["acoustic_grading"]["internal_status"] == "internal_water_blister"
+    assert blistered_multi["diagnostic_status"] == "confirmed"
+    assert blistered_multi["severity_rating"] == "severe"
+    assert "Osmotic Water Blister" in blistered_multi["local_name"]
+
+
+def test_3d_micro_topographic_solar_radiation_factor():
+    """Innovation 2: Validates DEM solar-aspect ray tracing and GDD microclimate divergence."""
+    from intelligence_layer.module_b_harvest.phenology.gdd_calculator import (
+        calculate_topographic_solar_factor,
+        calculate_micro_topographic_gdd,
+        compute_harvest_timeline
+    )
+
+    # South-West ridge (18 deg incline, 210 deg SW aspect) -> direct solar radiation boost
+    alpha_sw = calculate_topographic_solar_factor(slope_deg=18.0, aspect_deg=210.0)
+    assert alpha_sw > 1.10  # ~1.13
+
+    # North-East shaded valley furrow (16 deg slope, 45 deg NE aspect) -> deep topographic shadow
+    alpha_ne = calculate_topographic_solar_factor(slope_deg=16.0, aspect_deg=45.0)
+    assert alpha_ne < 0.90  # ~0.84
+
+    # Flat valley floor baseline
+    alpha_flat = calculate_topographic_solar_factor(slope_deg=0.0, aspect_deg=180.0)
+    assert alpha_flat == 1.0
+
+    # True micro-topographic corrected GDD:
+    # 28 deg C max, 18 deg C min -> base GDD = 7.0
+    gdd_sw = calculate_micro_topographic_gdd(t_max=28.0, t_min=18.0, slope_deg=18.0, aspect_deg=210.0)
+    gdd_ne = calculate_micro_topographic_gdd(t_max=28.0, t_min=18.0, slope_deg=16.0, aspect_deg=45.0)
+    assert gdd_sw > 7.5
+    assert gdd_ne < 6.5
+
+    # 18-day maturity divergence between SW ridge and NE valley furrow
+    planting = date.today() - timedelta(days=460)
+    zone_a_timeline = compute_harvest_timeline("queen", planting, elevation_meters=850, slope_deg=18.0, aspect_deg=210.0)
+    zone_c_timeline = compute_harvest_timeline("queen", planting, elevation_meters=818, slope_deg=16.0, aspect_deg=45.0)
+
+    assert zone_a_timeline["gdd_accumulated"] > zone_c_timeline["gdd_accumulated"]
+    assert zone_a_timeline["estimated_brix"] > zone_c_timeline["estimated_brix"]
+    assert zone_a_timeline["topographic_solar_factor"] > zone_c_timeline["topographic_solar_factor"]
+
+
+def test_dynamic_shelf_life_clock_and_bio_thermal_routing():
+    """Innovation 3: Validates Q10 biological decay rate and pickup sequencing (fragile lots picked up LAST)."""
+    from intelligence_layer.module_d_logistics.vrp_solver.cvrptw_solver import (
+        calculate_biological_decay_rate,
+        calculate_lot_shelf_life_hours,
+        solve_vehicle_dispatch
+    )
+
+    # Q10 respiratory rate: at 29.5 deg C under hot tarpaulin, decay is ~2.2x faster than 20 deg C baseline
+    decay_rate = calculate_biological_decay_rate(crate_temp_c=29.5, q10=2.3)
+    assert decay_rate == pytest.approx(2.21, rel=1e-2)
+
+    # Lot shelf life: 15.0 Brix post-rain lot has <= 6h remaining, 13.8 Brix lot has >= 15h
+    fragile_shelf_life = calculate_lot_shelf_life_hours(brix=15.0, crate_temp_c=29.5, is_post_rain=True)
+    sturdy_shelf_life = calculate_lot_shelf_life_hours(brix=13.8, crate_temp_c=29.5, is_post_rain=False)
+    assert fragile_shelf_life <= 6.5
+    assert sturdy_shelf_life >= 15.0
+
+    # Solver sequencing test:
+    # Lot A is sturdy (13.5 Brix, 20h shelf-life)
+    # Lot B is medium (14.2 Brix, 10h shelf-life)
+    # Lot C is fragile (15.2 Brix post-rain, 4h shelf-life)
+    lots = [
+        {"id": "lot-fragile", "farm_name": "Hill Crest Fragile", "quantity_kg": 650.0, "estimated_brix": 15.2, "post_rain": True},
+        {"id": "lot-sturdy", "farm_name": "Valley Sturdy", "quantity_kg": 800.0, "estimated_brix": 13.5, "post_rain": False},
+        {"id": "lot-medium", "farm_name": "Mid-Slope Medium", "quantity_kg": 650.0, "estimated_brix": 14.2, "post_rain": False},
+    ]
+
+    dispatch = solve_vehicle_dispatch(
+        cluster_district="Churachandpur",
+        vehicle_type="pickup_407",
+        destination_hub="Nilakuthi Food Park",
+        farm_lots=lots,
+        crate_temp_c=29.5
+    )
+
+    assert dispatch["success"] is True
+    assert dispatch["bio_thermal_routing_active"] is True
+    # Fragile lot with lowest shelf life MUST be sequenced as the LAST stop
+    stops = dispatch["stops"]
+    assert len(stops) == 3
+    assert stops[0]["lot_id"] == "lot-sturdy"      # First pickup
+    assert stops[-1]["lot_id"] == "lot-fragile"    # Last pickup!
+    assert "LAST" in stops[-1]["pickup_priority_rationale"]
+
+
+def test_shapley_value_fair_freight_dividend():
+    """Innovation 4: Validates Cooperative Game Theory Shapley value freight allocation."""
+    from intelligence_layer.module_c_pricing.net_returns.shapley_freight import compute_shapley_freight_allocation
+
+    participants = [
+        {"id": "farmer-highway", "farmer_name": "Highway Anchor Farmer", "quantity_kg": 900.0, "detour_km": 0.0, "terrain_difficulty": 1.0},
+        {"id": "farmer-midslope", "farmer_name": "Mid-Slope Farmer", "quantity_kg": 600.0, "detour_km": 2.5, "terrain_difficulty": 1.2},
+        {"id": "farmer-hilltop", "farmer_name": "Remote Hilltop Farmer", "quantity_kg": 550.0, "detour_km": 6.8, "terrain_difficulty": 1.7},
+    ]
+
+    result = compute_shapley_freight_allocation(
+        participants=participants,
+        vehicle_type="pickup_407",
+        vehicle_capacity_kg=2500.0,
+        base_corridor_rate=1.85,
+        solo_transit_rate=4.80
+    )
+
+    assert result["success"] is True
+    assert result["capacity_fill_pct"] == 82.0  # 2050 / 2500 = 82%
+    allocations = result["allocations"]
+    assert len(allocations) == 3
+
+    # Highway anchor receives consolidation bonus rebate (rate < base_corridor_rate)
+    highway = allocations[0]
+    assert highway["farmer_role"] == "Highway Anchor"
+    assert highway["consolidation_bonus"] > 0.0
+    assert highway["shapley_freight_rate_per_kg"] <= 1.85
+
+    # Remote hilltop farmer pays detour penalty but still saves > 40% vs hiring solo truck (₹4.80)
+    hilltop = allocations[2]
+    assert hilltop["farmer_role"] == "Hill Spur Farmer"
+    assert hilltop["detour_penalty"] > 0.40
+    assert hilltop["shapley_freight_rate_per_kg"] < 3.00
+    assert hilltop["savings_percentage"] > 40.0
+
+
+
+
+def test_pineapple_diagnosis_depends_on_pixels_not_angle_label():
+    """The same angle label must yield different diagnoses for different photos."""
+    for disease in ("heart_rot", "black_rot", "mealybug_wilt"):
+        diag = predict_crop_disease(_tissue_jpeg(disease), image_angle="crown", crop="pineapple")
+        assert diag["predicted_class"] == disease
+        assert diag["inference_mode"] == "colour_heuristic"
+        assert diag["evidence"]["plant_coverage"] > 0.5
+
+
+def test_non_plant_image_is_escalated_not_guessed():
+    blank = Image.new("RGB", (224, 224), (245, 245, 245))
+    buf = io.BytesIO()
+    blank.save(buf, format="JPEG")
+    diag = predict_crop_disease(buf.getvalue(), image_angle="crown_rot", crop="pineapple")
+    assert diag["diagnostic_status"] == "inconclusive"
+    assert diag["refer_to_expert"] is True

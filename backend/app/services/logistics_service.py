@@ -10,7 +10,15 @@ from app.models.farm import Farm
 from app.models.user import User
 from app.models.crop import CropRecord
 from app.schemas.dispatch import DispatchPlanRequest
+from intelligence_layer.module_d_logistics.vrp_solver.cvrptw_solver import SOLO_TRANSIT_COST_PER_KG
 from intelligence_layer.pipelines.logistics_pipeline import solve_cvrp_dispatch, VEHICLE_PROFILES
+
+def _lot_code(lot_id: str) -> str:
+    short = str(lot_id).removeprefix("lot-")
+    return f"HL-{(short if len(short) <= 20 else short[:8]).upper()}"
+
+
+_CONSOLE_STATUS = {"scheduled": "approved", "in_transit": "en_route", "completed": "delivered"}
 
 
 class LogisticsService:
@@ -135,4 +143,64 @@ class LogisticsService:
             "manifest_stops": stops,
             "status": run.status,
             "created_at": run.created_at
+        }
+
+
+    @staticmethod
+    async def latest_run_for_district(db: AsyncSession, district: str) -> Dict[str, Any]:
+        """Most recent persisted dispatch run carrying lots from `district`, in FPO-console shape."""
+        query = (
+            select(DispatchRun)
+            .join(HarvestLot, HarvestLot.dispatch_run_id == DispatchRun.id)
+            .join(CropRecord, HarvestLot.crop_record_id == CropRecord.id)
+            .join(Farm, CropRecord.farm_id == Farm.id)
+        )
+        any_district = district.lower() in ("latest", "all")
+        if not any_district:
+            query = query.where(Farm.district.ilike(f"%{district}%"))
+        run = (await db.execute(query.order_by(DispatchRun.created_at.desc()).limit(1))).scalars().first()
+        if not run:
+            raise EntityNotFoundError("DispatchRun", f"No dispatch run found for district '{district}'.")
+
+        stops = json.loads(run.route_stops_json) if run.route_stops_json else []
+        lot_ids = [st["lot_id"] for st in stops if st.get("lot_id")]
+        phones: Dict[str, str] = {}
+        if lot_ids:
+            rows = await db.execute(
+                select(HarvestLot.id, User.phone_number)
+                .join(User, HarvestLot.farmer_id == User.id)
+                .where(HarvestLot.id.in_(lot_ids))
+            )
+            phones = {lot_id: phone for lot_id, phone in rows.all()}
+
+        pooled = float(run.estimated_cost_per_kg)
+        cluster_district = stops[0].get("district", district) if any_district and stops else district
+        return {
+            "run_id": run.id,
+            "cluster_district": cluster_district,
+            "vehicle_type": run.vehicle_type,
+            "vehicle_capacity_kg": float(run.max_capacity_kg),
+            "current_payload_kg": float(run.total_loaded_kg),
+            "capacity_fill_pct": float(run.capacity_fill_pct),
+            "driver_name": run.driver_name,
+            "driver_phone": run.driver_phone,
+            "vehicle_registration": "Assigned at loading",
+            "stops": [
+                {
+                    "order": st.get("stop_order", i + 1),
+                    "farmer_name": st.get("farmer_name", "Registered Grower"),
+                    "village": st.get("farm_name", ""),
+                    "district": st.get("district", district),
+                    "lot_code": _lot_code(st.get("lot_id", "")),
+                    "quantity_kg": float(st.get("quantity_kg", 0)),
+                    "grade": str(st.get("grade", "")).replace("_", " ").title(),
+                    "contact_phone": phones.get(st.get("lot_id"), ""),
+                }
+                for i, st in enumerate(stops)
+            ],
+            "destination_hub": run.destination_facility,
+            "cost_savings_per_kg": round(max(SOLO_TRANSIT_COST_PER_KG - pooled, 0.0), 2),
+            "digital_gate_pass_token": run.digital_gate_pass,
+            "timestamp": run.created_at,
+            "status": _CONSOLE_STATUS.get(run.status, "forming"),
         }

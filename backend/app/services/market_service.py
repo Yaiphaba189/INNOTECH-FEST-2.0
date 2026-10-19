@@ -9,8 +9,14 @@ from app.models.crop import CropRecord
 from app.models.order import BuyerOrder
 from app.models.match import LotMatch
 from app.models.user import User
+from app.models.farm import Farm
 from app.schemas.lot import HarvestLotCreate
 from app.schemas.order import BuyerOrderCreate
+from intelligence_layer.module_c_pricing.net_returns.geo_baseline import (
+    advantage_vs_broker,
+    broker_net_rate,
+    road_distance_km,
+)
 from intelligence_layer.pipelines.pricing_pipeline import calculate_net_returns, score_buyer_order
 
 
@@ -92,6 +98,9 @@ class MarketService:
         crop_res = await db.execute(select(CropRecord).where(CropRecord.id == lot.crop_record_id))
         crop = crop_res.scalars().first()
         crop_variety = crop.variety if crop else "queen"
+        farm = None
+        if crop:
+            farm = (await db.execute(select(Farm).where(Farm.id == crop.farm_id))).scalars().first()
 
         # Find compatible open buyer orders
         query = select(BuyerOrder, User).join(User, BuyerOrder.buyer_id == User.id).where(
@@ -109,7 +118,11 @@ class MarketService:
                 continue
 
             # Calculate deterministic Net Returns breakdown
-            dist = 38.0  # Regional transit average across Manipur hubs
+            dist = road_distance_km(
+                farm.latitude if farm else None,
+                farm.longitude if farm else None,
+                order.delivery_hub_district,
+            )
             pricing = calculate_net_returns(
                 gross_rate=float(order.offered_gross_rate),
                 lot_weight_kg=float(lot.quantity_kg),
@@ -159,6 +172,7 @@ class MarketService:
                 match_id = existing_match.id
                 match_status = existing_match.status
 
+            advantage, advantage_pct = advantage_vs_broker(pricing["net_rate"])
             match_records.append({
                 "match_id": match_id,
                 "order_id": order.id,
@@ -174,7 +188,11 @@ class MarketService:
                 "match_score": score,
                 "payment_terms_days": order.payment_terms_days,
                 "pickup_date": pickup_date,
-                "status": match_status
+                "status": match_status,
+                "distance_km": dist,
+                "broker_net_rate": broker_net_rate(),
+                "advantage_vs_broker": advantage,
+                "advantage_pct": advantage_pct,
             })
 
         # Sort matches by match_score descending (best net income & terms first)

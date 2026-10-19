@@ -105,6 +105,20 @@ async def test_complete_competition_pitch_closed_loop(client: AsyncClient):
     gate_pass = dispatch_plan["digital_gate_pass"]
     assert "HL-PASS" in gate_pass
 
+    # FPO console reads the persisted run back, in the shape the dispatch screen renders
+    run_res = await client.get("/api/logistics/dispatch-runs/Churachandpur", headers=fpo_headers)
+    assert run_res.status_code == 200
+    run_view = run_res.json()
+    assert run_view["digital_gate_pass_token"] == gate_pass
+    assert run_view["stops"][0]["quantity_kg"] == 450.0
+    assert run_view["stops"][0]["contact_phone"].startswith("+91")
+
+    latest = await client.get("/api/logistics/dispatch-runs/latest", headers=fpo_headers)
+    assert latest.status_code == 200 and latest.json()["cluster_district"] == "Churachandpur"
+
+    missing = await client.get("/api/logistics/dispatch-runs/Nowhereland", headers=fpo_headers)
+    assert missing.status_code == 404
+
     # Step 6: Destination Weighbridge Gate-Pass Scan
     verify_res = await client.get(f"/api/logistics/dispatch-passes/{gate_pass}", headers=fpo_headers)
     assert verify_res.status_code == 200

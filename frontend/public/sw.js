@@ -39,7 +39,7 @@ if (isDevHost) {
   // Do NOT register a fetch listener on localhost so all network requests flow directly to Next.js dev server.
 } else {
   const CACHE_NAME = 'harvestlink-v8';
-  const APP_SHELL = ['/', '/farmer', '/buyer', '/fpo', '/manifest.json', '/icons/icon.svg'];
+  const APP_SHELL = ['/', '/farmer', '/buyer', '/fpo', '/manifest.json', '/favicon.ico'];
 
   self.addEventListener('install', (event) => {
     event.waitUntil(

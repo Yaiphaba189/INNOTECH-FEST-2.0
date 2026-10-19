@@ -62,6 +62,16 @@ class Settings(BaseSettings):
     MODEL_WEIGHTS_PATH: str = os.path.join(REPO_ROOT, "data", "models", "pineapple_mobilenet_v1.pt")
     INFERENCE_DEVICE: str = "cpu"
 
+    # OpenRouter Free LLM Integration
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
+    OPENROUTER_MODEL: str = "meta-llama/llama-3.3-70b-instruct:free"
+    OPENROUTER_FALLBACK_MODELS: str = "google/gemini-2.0-flash-exp:free,mistralai/mistral-7b-instruct:free,deepseek/deepseek-r1:free"
+    OPENROUTER_SITE_URL: str = "https://harvestlink.ai"
+    OPENROUTER_SITE_NAME: str = "HARVESTLINK AI"
+    OPENROUTER_TIMEOUT_SECONDS: float = 8.0
+    LLM_CACHE_TTL_SECONDS: int = 1800
+
     ROOT_ENV_FILE: str = os.path.join(REPO_ROOT, ".env")
     BACKEND_ENV_FILE: str = os.path.join(REPO_ROOT, "backend", ".env")
 
@@ -78,3 +88,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+_DEFAULT_SECRET_KEY = Settings.model_fields["SECRET_KEY"].default
+if settings.ENVIRONMENT.lower() == "production" and settings.SECRET_KEY == _DEFAULT_SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be overridden via environment when ENVIRONMENT=production.")

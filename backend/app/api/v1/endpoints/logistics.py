@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.services.logistics_service import LogisticsService
-from app.schemas.dispatch import DispatchPlanRequest, DispatchPlanResponse, GatePassVerificationResponse
+from app.schemas.dispatch import DispatchPlanRequest, DispatchPlanResponse, DispatchRunView, GatePassVerificationResponse
 from app.api.deps import get_current_user, get_current_fpo
 from app.models.user import User
 
@@ -36,3 +36,13 @@ async def verify_gate_pass(
     """
     pass_data = await LogisticsService.verify_gate_pass(db, token=token)
     return GatePassVerificationResponse(**pass_data)
+
+
+@router.get("/dispatch-runs/{district}", response_model=DispatchRunView)
+async def get_latest_dispatch_run(
+    district: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Latest consolidated truck run for a district cluster, as shown on the FPO dispatch console."""
+    return DispatchRunView(**await LogisticsService.latest_run_for_district(db, district=district))

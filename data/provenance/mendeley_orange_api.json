@@ -1,0 +1,179 @@
+{
+  "id": "f7cr74mwpj",
+  "doi": {
+    "id": "10.17632/f7cr74mwpj.2",
+    "status": "allocated",
+    "prefix": "10.17632"
+  },
+  "name": "Multi-format open-source sweet orange leaf dataset for disease detection, classification, and analysis.",
+  "description": "The Sweet Orange Leaf Disease dataset offers a collection of images of sweet orange leaves collected from sweet orange growing gardens in Khemerdia, Bheramara, Kushtia, Bangladesh, pinpointed at geographical coordinates 35.3602\u00b0N and 113.9505\u00b0E. This data was collected from August 19 to August 22, 2023. The dataset comprises a total of 5,813 images. The dataset included healthy leaves and diseased leaves. In total, there are eleven classes: Citrus Canker, Citrus Greening, Citrus Mealybugs, Die Back, Foliage Damage, Spiny Whitefly, Powdery Mildew, Shot Hole, Yellow Dragon, Yellow Leaves, and Healthy Leaf. The photo was taken on a sunny day, so the image was captured in natural lighting, and the temperature was around 27-29\u00b0C. Using two devices explicitly employing the high-resolution camera of an iPhone. The original images, captured in JPEG format, boasted a dimension of 3024 x 4032 pixels. The two devices, the iPhone XS Max and iPhone SE 2nd Generation, captured the dataset's photos. The data are converted into 640*480 pixels and a resolution of 72 dpi. Moreover, the images are annotated based on the diseases. This annotation will aid in semantic segmentation, an area that has garnered significant attention among data scientists. Version 2, the dataset presents a new balanced and conditional GAN-optimized augmented dataset.",
+  "version": 2,
+  "contributors": [
+    {
+      "profile_id": "5024e166-6582-4c22-b527-a8c802dde221",
+      "first_name": "Yousuf Rayhan",
+      "last_name": "Emon"
+    },
+    {
+      "institution": {
+        "name": "Daffodil International University"
+      },
+      "contribution": "The investigator, Annotated Data",
+      "first_name": "Md Taimur",
+      "last_name": "Ahad"
+    },
+    {
+      "institution": {
+        "id": "77b65704-da7d-5770-a1e7-6ab7d1190d0f",
+        "name": "Bangladesh University of Engineering and Technology",
+        "ror_id": "https://ror.org/05a1qpv97"
+      },
+      "first_name": "Shahrin ",
+      "last_name": "Khan"
+    },
+    {
+      "institution": {
+        "id": "0ad97c43-5173-56e6-bbe6-46dad5323862",
+        "name": "Daffodil International University",
+        "ror_id": "https://ror.org/052t4a858"
+      },
+      "profile_id": "623343f9-e0b3-48e9-a591-932f27860166",
+      "first_name": "Sumaya",
+      "last_name": "Mustofa"
+    }
+  ],
+  "files": [
+    {
+      "filename": "Sweet_orange_cGAN_dataset.zip",
+      "id": "d7adb77c-76a0-495e-8a2d-e3f6c53fa801",
+      "content_details": {
+        "id": "3a61dfba-6f0b-46c0-9bfb-0906ab75790a",
+        "sha256_hash": "a57eae33a48e5b7191204cce86e685b5c9d89ef69407e4d3e2a32b74b65caa63",
+        "content_type": "application/zip",
+        "size": 272243091,
+        "created_date": "2025-07-27T04:31:53.833Z",
+        "download_url": "https://data.mendeley.com/public-files/datasets/f7cr74mwpj/files/d7adb77c-76a0-495e-8a2d-e3f6c53fa801/file_downloaded",
+        "view_url": "https://data.mendeley.com/public-files/datasets/f7cr74mwpj/files/d7adb77c-76a0-495e-8a2d-e3f6c53fa801/file_viewed",
+        "download_expiry_time": "2126-10-19T12:47:43.804907545Z"
+      },
+      "metrics": {
+        "downloads": 0,
+        "previews": 0
+      },
+      "size": 272243091,
+      "status": "COMPLETED"
+    },
+    {
+      "filename": "Sweetorange.zip",
+      "id": "7d9845f4-9900-4877-a7ad-7c35776c539b",
+      "content_details": {
+        "id": "39f7d875-5e60-41b2-8979-b4dd34147590",
+        "sha256_hash": "0b5dc701797a9af2ccd8ce4f19e3554d5bd0c96de22edfbc6d320d485d87c2f0",
+        "content_type": "application/zip",
+        "size": 5031477689,
+        "created_date": "2023-10-30T11:20:58.023Z",
+        "download_url": "https://data.mendeley.com/public-files/datasets/f7cr74mwpj/files/7d9845f4-9900-4877-a7ad-7c35776c539b/file_downloaded",
+        "view_url": "https://data.mendeley.com/public-files/datasets/f7cr74mwpj/files/7d9845f4-9900-4877-a7ad-7c35776c539b/file_viewed",
+        "download_expiry_time": "2126-10-19T12:47:43.804911495Z"
+      },
+      "metrics": {
+        "downloads": 0,
+        "previews": 0
+      },
+      "size": 5031477689,
+      "status": "COMPLETED"
+    }
+  ],
+  "versions": [
+    {
+      "version": 2,
+      "available": true,
+      "publish_date": "2025-07-28T15:32:00.798Z"
+    },
+    {
+      "version": 1,
+      "available": true,
+      "publish_date": "2023-10-31T20:04:46.378Z"
+    }
+  ],
+  "articles": [],
+  "categories": [
+    {
+      "id": "data.elsevier.com/vocabulary/OmniScience/Concept-170589394",
+      "label": "Agricultural Science"
+    },
+    {
+      "id": "data.elsevier.com/vocabulary/OmniScience/Concept-170589400",
+      "label": "Computer Science"
+    },
+    {
+      "id": "data.elsevier.com/vocabulary/OmniScience/Concept-189720738",
+      "label": "Artificial Intelligence"
+    },
+    {
+      "id": "data.elsevier.com/vocabulary/OmniScience/Concept-189720754",
+      "label": "Computer Vision"
+    },
+    {
+      "id": "data.elsevier.com/vocabulary/OmniScience/Concept-249523402",
+      "label": "Machine Learning"
+    },
+    {
+      "id": "data.elsevier.com/vocabulary/OmniScience/Concept-253232727",
+      "label": "Pattern Recognition"
+    },
+    {
+      "id": "data.elsevier.com/vocabulary/OmniScience/Concept-442095486",
+      "label": "Deep Learning"
+    }
+  ],
+  "institutions": [
+    {
+      "id": "0ad97c43-5173-56e6-bbe6-46dad5323862",
+      "name": "Daffodil International University",
+      "ror_id": "https://ror.org/052t4a858"
+    }
+  ],
+  "metrics": {
+    "views": 0,
+    "file_downloads": 0,
+    "file_previews": 0
+  },
+  "available": true,
+  "size": 5303720780,
+  "owner": {
+    "profile_id": "5024e166-6582-4c22-b527-a8c802dde221",
+    "first_name": "Yousuf Rayhan",
+    "last_name": "Emon"
+  },
+  "channel": "WEB",
+  "owner_id": "5024e166-6582-4c22-b527-a8c802dde221",
+  "publish_date": "2025-07-28T15:32:00.798Z",
+  "data_licence": {
+    "id": "01d9c749-3c4d-4431-9df3-620b2dcfe144",
+    "description": "You can share, copy and modify this dataset so long as you give appropriate credit, provide a link to the CC BY license, and indicate if changes were made, but you may not do so in a way that suggests the rights holder has endorsed you or your use of the dataset. Note that further permission may be required for any content within the dataset that is identified as belonging to a third party.",
+    "url": "http://creativecommons.org/licenses/by/4.0",
+    "category": "Creative",
+    "short_name": "CC BY 4.0",
+    "full_name": "Creative Commons Attribution 4.0 International"
+  },
+  "related_links": [
+    {
+      "type": "article",
+      "rel": "related_to",
+      "href": "https://www.sciencedirect.com/science/article/pii/S2352340924006802"
+    }
+  ],
+  "funders": [],
+  "customer_id": "7377952c-6404-4428-bbfc-77242cfc301e",
+  "modified_on": "2025-07-27T04:38:07.683Z",
+  "created_on": "2023-10-30T09:28:45.296Z",
+  "confidential": false,
+  "links": {
+    "view": "https://data.mendeley.com/datasets/f7cr74mwpj"
+  },
+  "repository": {
+    "id": "MENDELEY_DATA",
+    "name": "Mendeley Data"
+  }
+}

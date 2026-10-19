@@ -1,0 +1,111 @@
+{
+  "accuracy": 0.9775,
+  "macro_f1": 0.9768,
+  "mean_confidence": 0.987,
+  "expected_calibration_error": 0.0162,
+  "per_class": {
+    "bacterial_leaf_blight": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 17
+    },
+    "blast": {
+      "precision": 0.9444,
+      "recall": 0.9107,
+      "f1": 0.9273,
+      "support": 56
+    },
+    "healthy": {
+      "precision": 0.9909,
+      "recall": 1.0,
+      "f1": 0.9954,
+      "support": 109
+    },
+    "sheath_blight": {
+      "precision": 0.957,
+      "recall": 0.978,
+      "f1": 0.9674,
+      "support": 91
+    },
+    "tungro": {
+      "precision": 1.0,
+      "recall": 0.988,
+      "f1": 0.9939,
+      "support": 83
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "bacterial_leaf_blight",
+      "blast",
+      "healthy",
+      "sheath_blight",
+      "tungro"
+    ],
+    "rows_true_cols_pred": [
+      [
+        17,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        51,
+        1,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        109,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        89,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0,
+        82
+      ]
+    ]
+  },
+  "leakage_audit": {
+    "test_with_train_neighbour_within_4_bits": 0.0,
+    "test_with_train_neighbour_within_8_bits": 0.0253,
+    "test_with_train_neighbour_within_12_bits": 0.2444
+  },
+  "crop": "rice",
+  "trained_on": "2026-10-19",
+  "classes": [
+    "bacterial_leaf_blight",
+    "blast",
+    "healthy",
+    "sheath_blight",
+    "tungro"
+  ],
+  "temperature": 0.5,
+  "best_val_accuracy": 0.9811,
+  "images": {
+    "train": 2497,
+    "val": 370,
+    "test": 356
+  },
+  "split_method": "group-level 70/15/15, perceptual-hash near-duplicate clusters (Hamming <= 10)",
+  "backbone": "MobileNetV3-Small, ImageNet-pretrained",
+  "caveats": [
+    "Public leaf-image datasets, not Manipur field photos: expect lower accuracy on phone photos in the field.",
+    "Classes without licensed public data are not covered by this model."
+  ]
+}

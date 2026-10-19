@@ -1,4 +1,9 @@
-# Operating System Files
+# ==============================================================================
+# HARVESTLINK AI - Git Ignore Specification
+# Predictive Crop Intelligence and Smart Market Linkage for Manipur
+# ==============================================================================
+
+# --- Operating System & Filesystem Metadata ---
 .DS_Store
 .DS_Store?
 ._*
@@ -6,15 +11,31 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Environment Variables & Secrets
+# --- Secrets, Credentials & Local Environments ---
 .env
 .env.local
 .env.*.local
 *.pem
 *.key
+*.cert
+*.crt
+*.pfx
+id_rsa*
 
-# Python
+# --- Logs & Runtime State ---
+*.log
+logs/
+.demo-logs/
+dev_server.log
+frontend/dev_server.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Python & Virtual Environments ---
 __pycache__/
 *.py[cod]
 *$py.class
@@ -30,9 +51,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-/lib/
-/lib64/
-!frontend/src/lib/
 parts/
 sdist/
 var/
@@ -43,37 +61,64 @@ wheels/
 .pytest_cache/
 .coverage
 htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Preserve frontend/src/lib if /lib/ wildcard is used
+/lib/
+/lib64/
+!frontend/src/lib/
+
+# --- Databases & Local Storage ---
 *.db
+*.db-journal
+*.db-wal
+*.db.bak
 *.sqlite
 *.sqlite3
+harvestlink.db
+harvestlink.db.bak
 
-# Machine Learning Large Weights (Track weights in external storage or releases)
-*.h5
-*.tflite
-*.onnx
-# Allow placeholder gitkeep in models directories
-!data/models/.gitkeep
-!intelligence_layer/module_a_disease/models/.gitkeep
-
-# Node.js & Frontend
+# --- Node.js & Next.js Frontend ---
+frontend/node_modules/
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+frontend/.next/
 .next/
+frontend/out/
 out/
 .turbo/
+frontend/tsconfig.tsbuildinfo
+*.tsbuildinfo
 
-# IDE & Editor Specific
-.vscode/
+# --- Testing & Browser Automation ---
+.playwright-mcp/
+playwright-report/
+test-results/
+
+# --- IDEs & Code Editors ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
 *~
 
-# Curated public training images are large local artifacts. Recreate them with
-# scripts/prepare_public_datasets.py; keep source/provenance metadata trackable.
+# --- Machine Learning Artifacts & Checkpoints ---
+*.h5
+*.tflite
+*.onnx
+*.ckpt
+checkpoints/
+
+# Explicitly track lightweight production models and metadata
+!data/models/.gitkeep
+!data/models/*.json
+!data/models/disease_mobilenetv3_*.pt
+!intelligence_layer/module_a_disease/models/.gitkeep
+
+# Curated raw public training images are generated via scripts/prepare_public_datasets.py
+# Keep raw bulk training images ignored while tracking provenance manifests
 data/training/**/*.jpg
 data/training/**/*.jpeg
 data/training/**/*.png

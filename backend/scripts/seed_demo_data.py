@@ -21,6 +21,8 @@ from app.models.lot import HarvestLot
 from app.models.order import BuyerOrder
 from app.models.assessment import DiseaseAssessment
 from app.models.dispatch import DispatchRun
+from app.schemas.dispatch import DispatchPlanRequest
+from app.services.logistics_service import LogisticsService
 from PIL import Image
 
 
@@ -32,7 +34,7 @@ def create_sample_image(filepath: str, color: tuple = (235, 160, 40)):
         img.save(filepath, format="JPEG")
 
 
-async def seed_all():
+async def seed_all(pregenerate_dispatch: bool = True):
     print("Initializing database tables...")
     await init_db()
 
@@ -88,6 +90,27 @@ async def seed_all():
             is_simulated=True
         )
 
+        # Farmers 4 & 5: further Thoubal growers pooled into the same truck run
+        farmer4 = User(
+            id="usr-farmer-wangbal-004",
+            phone_number="+919862000007",
+            full_name="Wangbal Ibotombi",
+            password_hash=default_pw,
+            role="farmer",
+            preferred_language="mn_mayek",
+            is_simulated=True
+        )
+
+        farmer5 = User(
+            id="usr-farmer-yumnam-005",
+            phone_number="+919862000008",
+            full_name="Yumnam Ibomcha",
+            password_hash=default_pw,
+            role="farmer",
+            preferred_language="en",
+            is_simulated=True
+        )
+
         # Buyer 1: Manipur Fruit Processing Co-op (Nilakuthi Food Park, Imphal)
         buyer1 = User(
             id="usr-buyer-nilakuthi-001",
@@ -121,7 +144,7 @@ async def seed_all():
             is_simulated=True
         )
 
-        session.add_all([farmer1, farmer2, farmer3, buyer1, buyer2, fpo_admin])
+        session.add_all([farmer1, farmer2, farmer3, farmer4, farmer5, buyer1, buyer2, fpo_admin])
         await session.flush()
 
         # --- FARMS ---
@@ -164,7 +187,31 @@ async def seed_all():
             elevation_meters=780
         )
 
-        session.add_all([farm1, farm2, farm3])
+        farm4 = Farm(
+            id="farm-thoubal-004",
+            farmer_id=farmer4.id,
+            farm_name="Wangbal Pineapple Terraces",
+            district="Thoubal",
+            sub_division="Wangbal",
+            latitude=24.6107,
+            longitude=94.0431,
+            total_area_ha=1.60,
+            elevation_meters=802
+        )
+
+        farm5 = Farm(
+            id="farm-thoubal-005",
+            farmer_id=farmer5.id,
+            farm_name="Yumnam Collection Orchard",
+            district="Thoubal",
+            sub_division="Lilong",
+            latitude=24.6588,
+            longitude=93.9876,
+            total_area_ha=2.00,
+            elevation_meters=776
+        )
+
+        session.add_all([farm1, farm2, farm3, farm4, farm5])
         await session.flush()
 
         # --- CROPS ---
@@ -203,7 +250,27 @@ async def seed_all():
             estimated_plant_count=18000
         )
 
-        session.add_all([crop1, crop2, crop3])
+        crop4 = CropRecord(
+            id="crop-queen-wangbal-004",
+            farm_id=farm4.id,
+            crop_type="pineapple",
+            variety="queen",
+            planting_date=today - timedelta(days=478),
+            current_stage="mature",
+            estimated_plant_count=22000
+        )
+
+        crop5 = CropRecord(
+            id="crop-queen-yumnam-005",
+            farm_id=farm5.id,
+            crop_type="pineapple",
+            variety="queen",
+            planting_date=today - timedelta(days=490),
+            current_stage="mature",
+            estimated_plant_count=28000
+        )
+
+        session.add_all([crop1, crop2, crop3, crop4, crop5])
         await session.flush()
 
         # --- ASSESSMENTS (Module A baseline) ---
@@ -216,7 +283,7 @@ async def seed_all():
             confidence_score=0.914,
             severity_rating="moderate",
             expert_referred=False,
-            model_version="pineapple-mobilenet-v1.2",
+            model_version="seed-demo-fixture",
             image_hash_sha256="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             remedy_notes="Dip slips in Trichoderma viride (10g/L); spray Copper Oxychloride (0.25%) at heart base."
         )
@@ -255,8 +322,8 @@ async def seed_all():
         await session.flush()
 
         # --- HARVEST LOTS (Module D consolidation baseline) ---
-        # 4 Farm lots in Thoubal/Churachandpur cluster totaling 2,050 kg
-        # (Optimal for Tata 407 LCV capacity of 2,500 kg -> 82.0% payload saturation!)
+        # Three Thoubal lots from three growers total 1,950 kg: 78% of a Tata 407 (2,500 kg),
+        # above the 75% payload gate, pooled into a dispatch run below.
         lot1 = HarvestLot(
             id="lot-thoubal-linthoi-450",
             farmer_id=farmer2.id,
@@ -271,8 +338,8 @@ async def seed_all():
 
         lot2 = HarvestLot(
             id="lot-thoubal-wangbal-600",
-            farmer_id=farmer2.id,
-            crop_record_id=crop2.id,
+            farmer_id=farmer4.id,
+            crop_record_id=crop4.id,
             quantity_kg=600.0,
             quality_grade="grade_a",
             brix_reading=15.1,
@@ -283,8 +350,8 @@ async def seed_all():
 
         lot2_b = HarvestLot(
             id="lot-thoubal-hub-900",
-            farmer_id=farmer2.id,
-            crop_record_id=crop2.id,
+            farmer_id=farmer5.id,
+            crop_record_id=crop5.id,
             quantity_kg=900.0,
             quality_grade="grade_a",
             brix_reading=14.9,
@@ -320,17 +387,33 @@ async def seed_all():
         session.add_all([lot1, lot2, lot2_b, lot3, lot4])
         await session.commit()
 
-        print("=================================================================")
-        print("SEEDING COMPLETED SUCCESSFULLY!")
-        print("Demo Accounts Created (Password: 'innotech2026'):")
-        print(" - Farmer 1 (Churachandpur): +919862000001 (Tombi Singh)")
-        print(" - Farmer 2 (Thoubal):        +919862000002 (Linthoingambi Devi)")
-        print(" - Farmer 3 (Bishnupur):      +919862000003 (Chaoba Singh)")
-        print(" - Wholesale Buyer 1:        +919862000004 (Manipur Fruit Processing Co-op)")
-        print(" - Wholesale Buyer 2:        +919862000005 (Imphal Organic Traders)")
-        print(" - FPO Coordinator:          +919862000006 (Rajen Meitei)")
-        print("Consolidation cluster ready: 4 lots totaling 2,050 kg (82% Tata 407 fill)")
-        print("=================================================================")
+    # Pre-generate the pooled Thoubal truck run so the FPO console opens on a passing 78% load.
+    # Tests pass pregenerate_dispatch=False to keep the lots unassigned for their own dispatch calls.
+    if pregenerate_dispatch:
+        async with get_session() as session:
+            await LogisticsService.generate_dispatch_plan(
+                session,
+                DispatchPlanRequest(
+                    cluster_district="Thoubal",
+                    vehicle_type="pickup_407",
+                    destination_hub="Nilakuthi Food Park Processing Unit",
+                    enforce_threshold=True,
+                    lot_ids=["lot-thoubal-linthoi-450", "lot-thoubal-wangbal-600", "lot-thoubal-hub-900"],
+                ),
+            )
+
+    print("=================================================================")
+    print("SEEDING COMPLETED SUCCESSFULLY!")
+    print("Demo Accounts Created (Password: 'innotech2026'):")
+    print(" - Farmer 1 (Churachandpur): +919862000001 (Tombi Singh)")
+    print(" - Farmer 2 (Thoubal):        +919862000002 (Linthoingambi Devi)")
+    print(" - Farmer 3 (Bishnupur):      +919862000003 (Chaoba Singh)")
+    print(" - Wholesale Buyer 1:        +919862000004 (Manipur Fruit Processing Co-op)")
+    print(" - Wholesale Buyer 2:        +919862000005 (Imphal Organic Traders)")
+    print(" - FPO Coordinator:          +919862000006 (Rajen Meitei)")
+    print(" - Farmers 4 & 5 (Thoubal):  +919862000007, +919862000008")
+    print("Thoubal truck run ready: 3 lots from 3 growers, 1,950 kg (78% Tata 407 fill)")
+    print("=================================================================")
 
 
 if __name__ == "__main__":
