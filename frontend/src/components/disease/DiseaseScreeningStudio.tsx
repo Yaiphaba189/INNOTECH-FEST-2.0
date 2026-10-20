@@ -16,6 +16,7 @@ import {
   Volume2,
   Waves,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { DiseaseDiagnosis } from '@/types';
 import { INITIAL_DISEASE_DIAGNOSIS, MOCK_DISEASE_CATALOG } from '@/lib/mock-data';
@@ -189,8 +190,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isSimulatedCamera, setIsSimulatedCamera] = useState(false);
+  const [isCameraLoading, setIsCameraLoading] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('user');
   const simCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const simAnimIdRef = useRef<number | null>(null);
 
@@ -225,6 +227,12 @@ export const DiseaseScreeningStudio: React.FC = () => {
     }
   };
 
+  // Helper to detect if device is mobile
+  const isMobileDevice = () => {
+    if (typeof navigator === 'undefined') return false;
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  };
+
   // Keep videoRef.current.srcObject synchronized whenever stream or state changes
   useEffect(() => {
     const video = videoRef.current;
@@ -233,6 +241,8 @@ export const DiseaseScreeningStudio: React.FC = () => {
       if (video.srcObject !== stream) {
         video.srcObject = stream;
       }
+      video.muted = true;
+      video.playsInline = true;
       video.play().catch((err) => {
         console.warn('Video auto-play warning:', err);
       });
@@ -240,66 +250,93 @@ export const DiseaseScreeningStudio: React.FC = () => {
   }, [isCameraActive, previewImage]);
 
   // Start live hardware camera stream with progressive fallbacks
-  const startLiveCamera = async (mode: 'environment' | 'user' = facingMode) => {
+  const startLiveCamera = async (mode?: 'environment' | 'user') => {
     setCameraError(null);
+    setIsCameraLoading(true);
     stopCurrentStream();
 
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-      setCameraError('Hardware camera not supported on this browser context. Starting Simulated Field Stream...');
-      startFieldSimulationStream();
+      setCameraError('Camera API is not supported in this browser. Please use Chrome, Safari, or Edge.');
+      setIsCameraLoading(false);
       return;
     }
 
+    // Default: 'environment' on mobile phones/tablets; 'user' on desktop/laptop webcams
+    const isMobile = isMobileDevice();
+    const targetMode: 'environment' | 'user' = mode || (isMobile ? 'environment' : 'user');
+
+    let stream: MediaStream | null = null;
+    let lastError: any = null;
+
+    // Strategy 1: Ideal facingMode for target device with HD resolution
     try {
-      let stream: MediaStream | null = null;
-      // Try 1: Requested facing mode & HD resolution
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: targetMode },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+    } catch (err1) {
+      lastError = err1;
+      // Strategy 2: Without resolution restriction
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: mode },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
+          video: { facingMode: targetMode },
           audio: false,
         });
-      } catch {
-        // Try 2: Generic video constraint without resolution restriction
+      } catch (err2) {
+        lastError = err2;
+        // Strategy 3: Pure basic video constraint (guaranteed to grab default webcam on Mac/PC)
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: false,
           });
-        } catch (innerErr) {
-          throw innerErr;
+        } catch (err3) {
+          lastError = err3;
         }
       }
-
-      if (stream) {
-        mediaStreamRef.current = stream;
-        setIsSimulatedCamera(false);
-        setIsCameraActive(true);
-        setFacingMode(mode);
-        setPreviewImage(null);
-        setCameraError(null);
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play().catch((e) => console.warn('Autoplay error:', e));
-          };
-          videoRef.current.play().catch(() => {});
-        }
-      }
-    } catch (err: any) {
-      console.warn('Camera access error:', err);
-      setCameraError(
-        err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
-          ? 'Camera permission denied. Activated Simulated Field Stream so you can test live detection.'
-          : 'No hardware camera detected. Activated Simulated Field Stream.'
-      );
-      // Automatically activate field simulation so detection pipeline is active!
-      startFieldSimulationStream();
     }
+
+    if (stream) {
+      mediaStreamRef.current = stream;
+      setIsSimulatedCamera(false);
+      setIsCameraActive(true);
+      setFacingMode(targetMode);
+      setPreviewImage(null);
+      setCameraError(null);
+      setIsCameraLoading(false);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch((e) => console.warn('Autoplay error:', e));
+        };
+        videoRef.current.play().catch(() => {});
+      }
+      return;
+    }
+
+    // If all strategies failed, handle error without hiding it behind simulation!
+    console.warn('Live camera access failed:', lastError);
+    setIsCameraLoading(false);
+    setIsCameraActive(false);
+
+    let errorMsg = 'Could not access live camera.';
+    if (lastError?.name === 'NotAllowedError' || lastError?.name === 'PermissionDeniedError') {
+      errorMsg = 'Camera permission was blocked. Please click the camera or lock icon in your browser address bar, click "Allow", then try "Use Live Camera" again.';
+    } else if (lastError?.name === 'NotFoundError' || lastError?.name === 'DevicesNotFoundError') {
+      errorMsg = 'No physical webcam detected on this device. You can test detection using the Demo Field Stream.';
+    } else if (lastError?.name === 'NotReadableError' || lastError?.name === 'TrackStartError') {
+      errorMsg = 'Your camera is already in use by another app (e.g. FaceTime, Zoom, or another browser tab). Close it and retry.';
+    } else if (lastError?.message) {
+      errorMsg = `Camera error: ${lastError.message}`;
+    }
+    setCameraError(errorMsg);
   };
 
   // Canvas-based Live Simulated Field Camera Stream
@@ -386,7 +423,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
   };
 
   useEffect(() => {
-    startLiveCamera('environment');
+    startLiveCamera();
     return () => {
       stopCurrentStream();
     };
@@ -936,46 +973,77 @@ export const DiseaseScreeningStudio: React.FC = () => {
                 <img
                   src={currentOrgans[0]?.img || '/samples/crown_view.jpg'}
                   alt="Crop Preview"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.35 }}
                 />
                 <div
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    background: 'rgba(15, 23, 42, 0.82)',
+                    background: 'rgba(15, 23, 42, 0.85)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '1rem',
+                    padding: '1.2rem',
                     textAlign: 'center',
-                    gap: '0.5rem',
+                    gap: '0.6rem',
                   }}
                 >
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#FFFFFF' }}>
-                    Continuous AI Disease Detection
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                    <Camera size={20} color="#F97316" />
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#FFFFFF' }}>
+                      Real-Time AI Disease Scanner
+                    </span>
                   </div>
-                  <p style={{ fontSize: '0.74rem', color: '#94A3B8', maxWidth: '300px', margin: 0, lineHeight: 1.4 }}>
-                    {cameraError ||
-                      'Point camera at Pineapple, Rice, or Orange plants for automatic real-time disease detection.'}
-                  </p>
-                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.3rem' }}>
+
+                  {cameraError ? (
+                    <div
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.15)',
+                        border: '1px solid rgba(239, 68, 68, 0.45)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.5rem 0.8rem',
+                        color: '#FCA5A5',
+                        fontSize: '0.74rem',
+                        maxWidth: '340px',
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {cameraError}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.74rem', color: '#94A3B8', maxWidth: '300px', margin: 0, lineHeight: 1.4 }}>
+                      Point your live camera at Pineapple, Rice, or Orange plants for automatic real-time disease detection.
+                    </p>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.35rem' }}>
                     <button
                       type="button"
-                      onClick={() => startLiveCamera('environment')}
+                      onClick={() => startLiveCamera()}
+                      disabled={isCameraLoading}
                       className="tap-target btn-primary"
-                      style={{ padding: '0.35rem 0.85rem', fontSize: '0.76rem', gap: '0.35rem' }}
+                      style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', gap: '0.4rem', fontWeight: 700 }}
                     >
-                      <Video size={13} />
-                      <span>Start Live Camera</span>
+                      {isCameraLoading ? (
+                        <>
+                          <Loader2 size={14} className="animate-spin" />
+                          <span>Connecting Camera...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Video size={14} />
+                          <span>Use Live Camera</span>
+                        </>
+                      )}
                     </button>
                     <button
                       type="button"
                       onClick={startFieldSimulationStream}
                       className="tap-target btn-secondary"
                       style={{
-                        padding: '0.35rem 0.85rem',
-                        fontSize: '0.76rem',
+                        padding: '0.45rem 0.85rem',
+                        fontSize: '0.78rem',
                         gap: '0.35rem',
                         background: 'rgba(30, 41, 59, 0.85)',
                         color: '#38BDF8',
@@ -1015,10 +1083,10 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   <span className={isSimulatedCamera ? "pulse-dot pulse-dot-blue" : "pulse-dot pulse-dot-green"} style={{ width: '6px', height: '6px' }} />
                   <span>
                     {isSimulatedCamera
-                      ? 'Simulated Field Feed (Active)'
+                      ? 'Simulated Field Stream'
                       : autoScanActive
-                      ? 'Auto-Scan Live'
-                      : 'Camera Feed'}
+                      ? 'Live Camera: Active'
+                      : 'Live Camera'}
                   </span>
                 </div>
 
@@ -1027,24 +1095,24 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   {isSimulatedCamera ? (
                     <button
                       type="button"
-                      onClick={() => startLiveCamera('environment')}
-                      title="Switch to hardware webcam"
+                      onClick={() => startLiveCamera()}
+                      title="Switch to real physical webcam"
                       style={{
-                        padding: '0.25rem 0.55rem',
+                        padding: '0.25rem 0.6rem',
                         borderRadius: 'var(--radius-full)',
-                        background: 'rgba(15, 23, 42, 0.85)',
+                        background: 'rgba(15, 23, 42, 0.9)',
                         color: '#4ADE80',
-                        border: '1px solid rgba(74, 222, 128, 0.4)',
+                        border: '1px solid rgba(74, 222, 128, 0.5)',
                         fontSize: '0.68rem',
-                        fontWeight: 600,
+                        fontWeight: 700,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.3rem',
+                        gap: '0.35rem',
                       }}
                     >
-                      <Video size={11} />
-                      <span>Use Webcam</span>
+                      <Video size={12} />
+                      <span>Use Live Camera</span>
                     </button>
                   ) : (
                     <>
@@ -1225,12 +1293,22 @@ export const DiseaseScreeningStudio: React.FC = () => {
               </button>
             ) : (
               <button
-                onClick={() => startLiveCamera('environment')}
+                onClick={() => startLiveCamera()}
+                disabled={isCameraLoading}
                 className="tap-target btn-primary"
                 style={{ fontSize: '0.8rem', gap: '0.35rem', justifyContent: 'center' }}
               >
-                <Video size={14} />
-                <span>Start Live Cam</span>
+                {isCameraLoading ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>Connecting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Video size={14} />
+                    <span>Use Live Camera</span>
+                  </>
+                )}
               </button>
             )}
 
