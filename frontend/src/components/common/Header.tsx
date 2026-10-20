@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
-import { AICopilotModal } from '@/components/common/AICopilotModal';
 
 interface HeaderProps {
   currentRole: UserRole;
@@ -39,7 +38,6 @@ export const Header: React.FC<HeaderProps> = ({
   } = useAuth();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isSuperAdmin = user?.role === 'admin' || user?.role === 'superadmin';
@@ -220,33 +218,8 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </nav>
 
-        {/* Right Side: Auth User Badge & AI Copilot */}
+        {/* Right Side: Auth User Badge */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          {/* AI Copilot Button */}
-          <button
-            type="button"
-            onClick={() => setIsCopilotOpen(true)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.38rem 0.8rem',
-              borderRadius: 'var(--radius-full)',
-              background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
-              color: '#FFFFFF',
-              border: 'none',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)',
-              transition: 'all 0.15s ease',
-            }}
-            title="Open HARVESTLINK AI Copilot (OpenRouter Free LLM)"
-          >
-            <Sparkles size={14} color="#38BDF8" />
-            <span>AI Copilot</span>
-          </button>
-
           {/* User Account Chip with Dropdown */}
           <div ref={menuRef} style={{ position: 'relative' }}>
             {isAuthenticated && user ? (
@@ -398,12 +371,6 @@ export const Header: React.FC<HeaderProps> = ({
         isOpen={isAuthModalOpen}
         onClose={closeAuthModal}
         initialTab={authModalTab}
-      />
-
-      {/* AI Copilot Modal (OpenRouter Free LLM) */}
-      <AICopilotModal
-        isOpen={isCopilotOpen}
-        onClose={() => setIsCopilotOpen(false)}
       />
     </>
   );
