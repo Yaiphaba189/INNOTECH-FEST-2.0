@@ -328,7 +328,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
     let errorMsg = 'Could not access live camera.';
     if (lastError?.name === 'NotAllowedError' || lastError?.name === 'PermissionDeniedError') {
-      errorMsg = 'Camera permission was blocked. Please click the camera or lock icon in your browser address bar, click "Allow", then try "Use Live Camera" again.';
+      errorMsg = 'Camera permission was not granted. In Chrome, click the tune/lock icon next to http://localhost:3000 in the address bar, toggle Camera to "Allow", and click "Use Live Camera". Also check macOS System Settings > Privacy & Security > Camera > Chrome is ON.';
     } else if (lastError?.name === 'NotFoundError' || lastError?.name === 'DevicesNotFoundError') {
       errorMsg = 'No physical webcam detected on this device. You can test detection using the Demo Field Stream.';
     } else if (lastError?.name === 'NotReadableError' || lastError?.name === 'TrackStartError') {
@@ -423,7 +423,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
   };
 
   useEffect(() => {
-    startLiveCamera();
+    // Only cleanup stream on unmount; camera is started via direct user click
     return () => {
       stopCurrentStream();
     };
