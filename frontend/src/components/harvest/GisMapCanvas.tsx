@@ -37,12 +37,22 @@ export type NdviStatus =
 
 export type ZoomCommand = { id: number; kind: 'in' | 'out' | 'reset' };
 
+export interface FarmerPin {
+  lat: number;
+  lng: number;
+  farmerName: string;
+  parcelName: string;
+}
+
 interface Props {
   cluster: CanvasCluster;
   selectedZoneId: string;
   layers: CanvasLayers;
   zoomCommand: ZoomCommand | null;
+  farmerPin?: FarmerPin | null;
+  isPinpointMode?: boolean;
   onSelectZone: (zoneId: string) => void;
+  onPinpoint?: (coords: { lat: number; lng: number }) => void;
   onHover: (pos: { lat: number; lng: number } | null) => void;
   onNdviStatus: (status: NdviStatus) => void;
   onRadarStatus: (status: 'loading' | 'ready' | 'unavailable') => void;
@@ -62,11 +72,13 @@ export const GisMapCanvas: React.FC<Props> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const markersRef = useRef<Marker[]>([]);
+  const pinMarkerRef = useRef<Marker | null>(null);
   const readyRef = useRef(false);
   const propsRef = useRef(props);
   propsRef.current = props;
   const ndviCache = useRef<Record<string, NdviScene | null>>({});
   const radarTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+
 
   // Create the map once.
   useEffect(() => {
@@ -131,8 +143,16 @@ export const GisMapCanvas: React.FC<Props> = (props) => {
           const id = e.features?.[0]?.properties?.id;
           if (id) propsRef.current.onSelectZone(String(id));
         });
+        map.on('click', (e) => {
+          if (propsRef.current.onPinpoint) {
+            propsRef.current.onPinpoint({
+              lat: Number(e.lngLat.lat.toFixed(4)),
+              lng: Number(e.lngLat.lng.toFixed(4)),
+            });
+          }
+        });
         map.on('mouseenter', 'zones-fill', () => (map.getCanvas().style.cursor = 'pointer'));
-        map.on('mouseleave', 'zones-fill', () => (map.getCanvas().style.cursor = ''));
+        map.on('mouseleave', 'zones-fill', () => (map.getCanvas().style.cursor = propsRef.current.isPinpointMode ? 'crosshair' : ''));
         map.on('mousemove', (e) => propsRef.current.onHover({ lat: e.lngLat.lat, lng: e.lngLat.lng }));
         map.on('mouseout', () => propsRef.current.onHover(null));
 
@@ -148,6 +168,10 @@ export const GisMapCanvas: React.FC<Props> = (props) => {
       disposed = true;
       if (radarTimer.current) clearInterval(radarTimer.current);
       markersRef.current.forEach((m) => m.remove());
+      if (pinMarkerRef.current) {
+        pinMarkerRef.current.remove();
+        pinMarkerRef.current = null;
+      }
       mapRef.current?.remove();
       mapRef.current = null;
       readyRef.current = false;
@@ -212,6 +236,79 @@ export const GisMapCanvas: React.FC<Props> = (props) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cluster, selectedZoneId, layers.gdd]);
+
+  // Render and update Farmer Pinpoint Marker
+  useEffect(() => {
+    let cancelled = false;
+    const poll = setInterval(() => {
+      const map = mapRef.current;
+      if (!map || !readyRef.current) return;
+      clearInterval(poll);
+
+      if (pinMarkerRef.current) {
+        pinMarkerRef.current.remove();
+        pinMarkerRef.current = null;
+      }
+
+      const pin = props.farmerPin;
+      if (!pin) return;
+
+      if (typeof document !== 'undefined' && !document.getElementById('hl-pinpoint-styles')) {
+        const style = document.createElement('style');
+        style.id = 'hl-pinpoint-styles';
+        style.textContent = `
+          @keyframes hl-pin-pulse {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2.2); opacity: 0; }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
+      import('maplibre-gl').then(({ default: maplibregl }) => {
+        if (cancelled || !mapRef.current) return;
+        const el = document.createElement('div');
+        el.className = 'hl-farmer-pin-container';
+        el.style.cssText =
+          'position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none;z-index:999;';
+        el.innerHTML = `
+          <div style="background:rgba(11,17,32,0.95);border:1.5px solid #F97316;box-shadow:0 4px 14px rgba(0,0,0,0.6),0 0 12px rgba(249,115,22,0.45);border-radius:8px;padding:4px 8px;font:800 11px system-ui,sans-serif;color:#fff;white-space:nowrap;margin-bottom:4px;display:flex;flex-direction:column;align-items:center;gap:2px;">
+            <div style="display:flex;align-items:center;gap:5px;">
+              <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#10B981;box-shadow:0 0 6px #10B981;"></span>
+              <span style="letter-spacing:0.02em;">${pin.farmerName} · ${pin.parcelName}</span>
+            </div>
+            <div style="font-size:9px;color:#38BDF8;font-family:monospace;font-weight:700;">
+              LAT: ${pin.lat.toFixed(4)}°N &nbsp;LNG: ${pin.lng.toFixed(4)}°E
+            </div>
+          </div>
+          <div style="position:absolute;bottom:0px;width:34px;height:34px;border-radius:50%;background:rgba(249,115,22,0.3);border:2px solid #F97316;animation:hl-pin-pulse 1.8s infinite ease-out;pointer-events:none;"></div>
+          <svg width="26" height="34" viewBox="0 0 24 32" fill="none" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,0.6));">
+            <path d="M12 0C5.37258 0 0 5.37258 0 12C0 19.5 12 32 12 32C12 32 24 19.5 24 12C24 5.37258 18.6274 0 12 0Z" fill="#EA580C"/>
+            <circle cx="12" cy="11" r="5" fill="#FFFFFF"/>
+            <circle cx="12" cy="11" r="2.5" fill="#EA580C"/>
+          </svg>
+        `;
+
+        const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([pin.lng, pin.lat])
+          .addTo(mapRef.current);
+        pinMarkerRef.current = marker;
+      });
+    }, 50);
+
+    return () => {
+      cancelled = true;
+      clearInterval(poll);
+    };
+  }, [props.farmerPin]);
+
+  // Cursor handling for pinpoint mode
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && readyRef.current) {
+      map.getCanvas().style.cursor = props.isPinpointMode ? 'crosshair' : '';
+    }
+  }, [props.isPinpointMode]);
 
   // Frame the cluster when it changes.
   useEffect(() => {

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { GisMapCanvas, NdviStatus, ZoomCommand } from './GisMapCanvas';
+import { GisMapCanvas, NdviStatus, ZoomCommand, FarmerPin } from './GisMapCanvas';
 import { useFarmer } from '@/context/FarmerContext';
+import { useAuth } from '@/context/AuthContext';
 import {
   Map,
   MapPin,
@@ -242,13 +243,30 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
   onSelectZone,
   onTagForPooling,
 }) => {
+  const { user } = useAuth();
   const { rain, lot } = useFarmer();
   const rainMm = Math.round(rain.mm);
-  // Open on the cluster that holds the farmer's lot so the map, header and market all describe the same farm.
-  const [selectedClusterId, setSelectedClusterId] = useState<string>(
-    () => GIS_CLUSTERS.find((c) => c.district.startsWith(lot.district))?.id ?? 'thoubal_andro'
-  );
-  const [selectedZoneId, setSelectedZoneId] = useState<string>('zone-a');
+  const farmerName =
+    user?.full_name ||
+    (lot.farmer_name ? lot.farmer_name.split(' ')[0] + ' ' + (lot.farmer_name.split(' ')[1] || '') : 'Tombi Singh');
+
+  // Open on Khousabung Hill Crest (Churachandpur Cluster) for the logged-in farmer
+  const initialCluster = useMemo(() => {
+    if (user?.role === 'farmer' || lot.district.toLowerCase().includes('churachandpur')) {
+      return GIS_CLUSTERS.find((c) => c.id === 'ccp_khousabung') || GIS_CLUSTERS[0];
+    }
+    return GIS_CLUSTERS.find((c) => c.district.startsWith(lot.district)) || GIS_CLUSTERS[0];
+  }, [user?.role, lot.district]);
+
+  const [selectedClusterId, setSelectedClusterId] = useState<string>(initialCluster.id);
+  const [selectedZoneId, setSelectedZoneId] = useState<string>(initialCluster.zones[0]?.id || 'ccp-z1');
+  const [isPinpointMode, setIsPinpointMode] = useState<boolean>(false);
+  const [pinnedCoords, setPinnedCoords] = useState<{ lat: number; lng: number }>({
+    lat: initialCluster.centerLat,
+    lng: initialCluster.centerLng,
+  });
+  const [pinToast, setPinToast] = useState<string | null>(null);
+
   const [activeLayers, setActiveLayers] = useState<{
     satellite: boolean;
     ndvi: boolean;
@@ -281,12 +299,57 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
     return cluster.zones.find((z) => z.id === selectedZoneId) || cluster.zones[0];
   }, [cluster, selectedZoneId]);
 
+  const farmerPin: FarmerPin = useMemo(() => {
+    return {
+      lat: pinnedCoords.lat,
+      lng: pinnedCoords.lng,
+      farmerName: farmerName.trim(),
+      parcelName: activeZone.name.split('(')[0].trim(),
+    };
+  }, [pinnedCoords, farmerName, activeZone.name]);
+
   const handleSelectZone = (zoneId: string) => {
     setSelectedZoneId(zoneId);
     const z = cluster.zones.find((item) => item.id === zoneId);
-    if (z && onSelectZone) {
-      onSelectZone(z.name, z.maturityPct, z.sugarBrix);
+    if (z) {
+      if (cluster.id === 'ccp_khousabung') {
+        if (z.id === 'ccp-z1') {
+          setPinnedCoords({ lat: 24.3312, lng: 93.6821 });
+        } else if (z.id === 'ccp-z2') {
+          setPinnedCoords({ lat: 24.3298, lng: 93.6835 });
+        }
+      } else {
+        setPinnedCoords({ lat: cluster.centerLat, lng: cluster.centerLng });
+      }
+      if (onSelectZone) {
+        onSelectZone(z.name, z.maturityPct, z.sugarBrix);
+      }
     }
+  };
+
+  const handleSelectCluster = (clusterId: string) => {
+    setSelectedClusterId(clusterId);
+    const c = GIS_CLUSTERS.find((x) => x.id === clusterId);
+    if (c && c.zones.length > 0) {
+      setSelectedZoneId(c.zones[0].id);
+      setPinnedCoords({ lat: c.centerLat, lng: c.centerLng });
+      sendZoom('reset');
+    }
+  };
+
+  const handleMapPinpoint = (coords: { lat: number; lng: number }) => {
+    setPinnedCoords(coords);
+    setPinToast(`📍 Farm stand pinpointed: ${coords.lat.toFixed(4)}°N, ${coords.lng.toFixed(4)}°E`);
+    setTimeout(() => setPinToast(null), 3500);
+  };
+
+  const handleLocateFarmerStand = () => {
+    setSelectedClusterId('ccp_khousabung');
+    setSelectedZoneId('ccp-z1');
+    setPinnedCoords({ lat: 24.3312, lng: 93.6821 });
+    sendZoom('reset');
+    setPinToast(`🎯 Focused on ${farmerName}'s Khousabung High Bench (24.3312°N, 93.6821°E)`);
+    setTimeout(() => setPinToast(null), 3500);
   };
 
   const handleTagPooling = () => {
@@ -373,10 +436,7 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
             return (
               <button
                 key={c.id}
-                onClick={() => {
-                  setSelectedClusterId(c.id);
-                  setSelectedZoneId(c.zones[0].id);
-                }}
+                onClick={() => handleSelectCluster(c.id)}
                 style={{
                   padding: '0.25rem 0.6rem',
                   borderRadius: 'var(--radius-full)',
@@ -566,6 +626,70 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
             <RotateCcw size={13} />
           </button>
 
+          {/* Locate Farmer's Stand Button */}
+          <button
+            onClick={handleLocateFarmerStand}
+            style={{
+              padding: '0.22rem 0.65rem',
+              borderRadius: '6px',
+              border:
+                selectedClusterId === 'ccp_khousabung' && selectedZoneId === 'ccp-z1'
+                  ? '1px solid #F97316'
+                  : '1px solid var(--border-subtle)',
+              background:
+                selectedClusterId === 'ccp_khousabung' && selectedZoneId === 'ccp-z1'
+                  ? '#FFF7ED'
+                  : '#FFFFFF',
+              color:
+                selectedClusterId === 'ccp_khousabung' && selectedZoneId === 'ccp-z1'
+                  ? '#EA580C'
+                  : 'var(--text-secondary)',
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow:
+                selectedClusterId === 'ccp_khousabung' && selectedZoneId === 'ccp-z1'
+                  ? '0 1px 3px rgba(234, 88, 12, 0.2)'
+                  : 'none',
+            }}
+            title="Focus Farmer Stand (Khousabung High Bench)"
+          >
+            <Crosshair size={12} color="#EA580C" />
+            <span>Locate Farm Stand</span>
+          </button>
+
+          {/* Pinpoint Mode Toggle */}
+          <button
+            onClick={() => {
+              setIsPinpointMode((m) => !m);
+              setPinToast(
+                !isPinpointMode
+                  ? '🎯 Pinpoint Mode Active: Click anywhere on the map or terrace to drop your farm pin'
+                  : null
+              );
+            }}
+            style={{
+              padding: '0.22rem 0.65rem',
+              borderRadius: '6px',
+              border: isPinpointMode ? '1px solid #10B981' : '1px solid var(--border-subtle)',
+              background: isPinpointMode ? '#ECFDF5' : '#FFFFFF',
+              color: isPinpointMode ? '#065F46' : 'var(--text-secondary)',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+            title="Toggle Pinpoint Mode: Click map to place custom pin"
+          >
+            <MapPin size={12} color={isPinpointMode ? '#10B981' : 'currentColor'} />
+            <span>{isPinpointMode ? 'Pinpoint: ON' : 'Pinpoint Map'}</span>
+          </button>
+
           <button
             onClick={() => setIsInspectorOpen((open) => !open)}
             style={{
@@ -613,11 +737,62 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
             selectedZoneId={activeZone.id}
             layers={activeLayers}
             zoomCommand={zoomCommand}
+            farmerPin={farmerPin}
+            isPinpointMode={isPinpointMode}
             onSelectZone={handleSelectZone}
+            onPinpoint={handleMapPinpoint}
             onHover={setHoverCoord}
             onNdviStatus={setNdviStatus}
             onRadarStatus={setRadarStatus}
           />
+
+          {/* Pinpoint Notification Toast */}
+          {pinToast && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '50px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(11, 17, 32, 0.95)',
+                color: '#FFFFFF',
+                border: '1.5px solid #F97316',
+                borderRadius: 'var(--radius-full)',
+                padding: '0.35rem 0.9rem',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(249, 115, 22, 0.4)',
+                zIndex: 20,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <Crosshair size={13} color="#F97316" />
+              <span>{pinToast}</span>
+            </div>
+          )}
+
+          {/* 50m Scale Badge */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              right: '10px',
+              background: 'rgba(11, 17, 32, 0.88)',
+              color: '#F8FAFC',
+              padding: '0.2rem 0.5rem',
+              borderRadius: '4px',
+              fontSize: '0.62rem',
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              zIndex: 5,
+            }}
+          >
+            50 m
+          </div>
 
           {/* GIS Map Corner Overlay: Live Coordinates & North Arrow */}
           <div
@@ -636,14 +811,17 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
               display: 'flex',
               flexDirection: 'column',
               gap: '0.15rem',
+              zIndex: 5,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#38BDF8', fontWeight: 800 }}>
               <Navigation size={11} style={{ transform: 'rotate(-45deg)' }} />
               <span>
                 {hoverCoord
-                  ? `LAT: ${hoverCoord.lat}°N  LNG: ${hoverCoord.lng}°E`
-                  : `LAT: ${cluster.centerLat}°N  LNG: ${cluster.centerLng}°E`}
+                  ? `LAT: ${hoverCoord.lat.toFixed(4)}°N  LNG: ${hoverCoord.lng.toFixed(4)}°E`
+                  : pinnedCoords
+                    ? `LAT: ${pinnedCoords.lat.toFixed(4)}°N  LNG: ${pinnedCoords.lng.toFixed(4)}°E`
+                    : `LAT: ${cluster.centerLat.toFixed(4)}°N  LNG: ${cluster.centerLng.toFixed(4)}°E`}
               </span>
             </div>
             <div style={{ color: '#94A3B8' }}>
