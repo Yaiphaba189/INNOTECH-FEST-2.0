@@ -188,8 +188,11 @@ export const DiseaseScreeningStudio: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isSimulatedCamera, setIsSimulatedCamera] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const simCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const simAnimIdRef = useRef<number | null>(null);
 
   // Snapshot Freeze state
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -208,23 +211,48 @@ export const DiseaseScreeningStudio: React.FC = () => {
   const activeCropKey = cropScope === 'auto' ? detectedCropLive.id : cropScope;
   const currentOrgans = CROP_ORGANS[activeCropKey] || CROP_ORGANS.pineapple;
 
-  // Start live camera stream
-  const startLiveCamera = async (mode: 'environment' | 'user' = facingMode) => {
-    setCameraError(null);
-
+  const stopCurrentStream = () => {
+    if (simAnimIdRef.current) {
+      cancelAnimationFrame(simAnimIdRef.current);
+      simAnimIdRef.current = null;
+    }
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       mediaStreamRef.current = null;
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  // Keep videoRef.current.srcObject synchronized whenever stream or state changes
+  useEffect(() => {
+    const video = videoRef.current;
+    const stream = mediaStreamRef.current;
+    if (video && stream && isCameraActive && !previewImage) {
+      if (video.srcObject !== stream) {
+        video.srcObject = stream;
+      }
+      video.play().catch((err) => {
+        console.warn('Video auto-play warning:', err);
+      });
+    }
+  }, [isCameraActive, previewImage]);
+
+  // Start live hardware camera stream with progressive fallbacks
+  const startLiveCamera = async (mode: 'environment' | 'user' = facingMode) => {
+    setCameraError(null);
+    stopCurrentStream();
 
     if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-      setCameraError('Live camera not supported in this browser.');
-      setIsCameraActive(false);
+      setCameraError('Hardware camera not supported on this browser context. Starting Simulated Field Stream...');
+      startFieldSimulationStream();
       return;
     }
 
     try {
-      let stream: MediaStream;
+      let stream: MediaStream | null = null;
+      // Try 1: Requested facing mode & HD resolution
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
@@ -235,33 +263,121 @@ export const DiseaseScreeningStudio: React.FC = () => {
           audio: false,
         });
       } catch {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
-        });
+        // Try 2: Generic video constraint without resolution restriction
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+        } catch (innerErr) {
+          throw innerErr;
+        }
       }
 
-      mediaStreamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch((e) => console.warn('Autoplay error:', e));
-        };
+      if (stream) {
+        mediaStreamRef.current = stream;
+        setIsSimulatedCamera(false);
+        setIsCameraActive(true);
+        setFacingMode(mode);
+        setPreviewImage(null);
+        setCameraError(null);
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().catch((e) => console.warn('Autoplay error:', e));
+          };
+          videoRef.current.play().catch(() => {});
+        }
       }
-      setIsCameraActive(true);
-      setFacingMode(mode);
-      setPreviewImage(null);
     } catch (err: any) {
       console.warn('Camera access error:', err);
-      setIsCameraActive(false);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setCameraError('Camera access denied. Click "Start Live Camera" to enable continuous detection.');
-      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        setCameraError('No physical camera detected.');
-      } else {
-        setCameraError('Camera stream temporarily unavailable.');
-      }
+      setCameraError(
+        err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
+          ? 'Camera permission denied. Activated Simulated Field Stream so you can test live detection.'
+          : 'No hardware camera detected. Activated Simulated Field Stream.'
+      );
+      // Automatically activate field simulation so detection pipeline is active!
+      startFieldSimulationStream();
     }
+  };
+
+  // Canvas-based Live Simulated Field Camera Stream
+  const startFieldSimulationStream = () => {
+    stopCurrentStream();
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 480;
+    simCanvasRef.current = canvas;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const sampleImg = new Image();
+    sampleImg.crossOrigin = 'anonymous';
+    const sampleSrc =
+      activeCropKey === 'rice'
+        ? '/samples/rice_blight.jpg'
+        : activeCropKey === 'orange'
+        ? '/samples/orange_canker.jpg'
+        : '/samples/crown_view.jpg';
+    sampleImg.src = sampleSrc;
+
+    let scanY = 0;
+    const renderFrame = () => {
+      if (ctx) {
+        ctx.drawImage(sampleImg, 0, 0, 640, 480);
+        // Add subtle natural camera wobble
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.05)';
+        ctx.fillRect(0, 0, 640, 480);
+
+        // Simulated focus reticle
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(170, 90, 300, 300);
+
+        scanY = (scanY + 2.5) % 480;
+        const grad = ctx.createLinearGradient(0, scanY - 15, 0, scanY + 15);
+        grad.addColorStop(0, 'rgba(16, 185, 129, 0)');
+        grad.addColorStop(0.5, 'rgba(16, 185, 129, 0.35)');
+        grad.addColorStop(1, 'rgba(16, 185, 129, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, scanY - 15, 640, 30);
+      }
+      simAnimIdRef.current = requestAnimationFrame(renderFrame);
+    };
+
+    const activateStream = () => {
+      const simStream = (canvas as any).captureStream ? (canvas as any).captureStream(25) : null;
+      if (simStream) {
+        mediaStreamRef.current = simStream;
+        setIsSimulatedCamera(true);
+        setIsCameraActive(true);
+        setPreviewImage(null);
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = simStream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().catch(() => {});
+          };
+          videoRef.current.play().catch(() => {});
+        }
+      }
+    };
+
+    sampleImg.onload = () => {
+      renderFrame();
+      activateStream();
+    };
+
+    sampleImg.onerror = () => {
+      ctx.fillStyle = '#0F172A';
+      ctx.fillRect(0, 0, 640, 480);
+      ctx.fillStyle = '#38BDF8';
+      ctx.font = 'bold 20px system-ui';
+      ctx.fillText('Live Field Camera Feed', 180, 240);
+      activateStream();
+    };
   };
 
   const toggleFacingMode = () => {
@@ -272,9 +388,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
   useEffect(() => {
     startLiveCamera('environment');
     return () => {
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      }
+      stopCurrentStream();
     };
   }, []);
 
@@ -443,8 +557,13 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
   const handleResumeLiveFeed = () => {
     setPreviewImage(null);
-    if (!isCameraActive) {
+    if (!isCameraActive || !mediaStreamRef.current) {
       startLiveCamera();
+    } else if (videoRef.current && mediaStreamRef.current) {
+      if (videoRef.current.srcObject !== mediaStreamRef.current) {
+        videoRef.current.srcObject = mediaStreamRef.current;
+      }
+      videoRef.current.play().catch(() => {});
     }
   };
 
@@ -738,9 +857,26 @@ export const DiseaseScreeningStudio: React.FC = () => {
               boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)',
             }}
           >
-            {/* 1. Captured / Preset Frozen Snapshot */}
-            {previewImage ? (
-              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            {/* Live Video Feed - Always mounted so videoRef is never null */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: isCameraActive && !previewImage ? 'block' : 'none',
+                transform: !isSimulatedCamera && facingMode === 'user' ? 'scaleX(-1)' : 'none',
+              }}
+            />
+
+            {/* Frozen / Captured Snapshot Overlay */}
+            {previewImage && (
+              <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 5 }}>
                 <img
                   src={previewImage}
                   alt="Captured Crop Frame"
@@ -792,33 +928,83 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   <span>Resume Live Cam</span>
                 </button>
               </div>
-            ) : isCameraActive ? (
-              /* 2. Real-Time Camera Video Stream */
-              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
-                  }}
-                />
+            )}
 
+            {/* Inactive Camera Fallback State */}
+            {!isCameraActive && !previewImage && (
+              <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 6 }}>
+                <img
+                  src={currentOrgans[0]?.img || '/samples/crown_view.jpg'}
+                  alt="Crop Preview"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'rgba(15, 23, 42, 0.82)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1rem',
+                    textAlign: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#FFFFFF' }}>
+                    Continuous AI Disease Detection
+                  </div>
+                  <p style={{ fontSize: '0.74rem', color: '#94A3B8', maxWidth: '300px', margin: 0, lineHeight: 1.4 }}>
+                    {cameraError ||
+                      'Point camera at Pineapple, Rice, or Orange plants for automatic real-time disease detection.'}
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.3rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => startLiveCamera('environment')}
+                      className="tap-target btn-primary"
+                      style={{ padding: '0.35rem 0.85rem', fontSize: '0.76rem', gap: '0.35rem' }}
+                    >
+                      <Video size={13} />
+                      <span>Start Live Camera</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={startFieldSimulationStream}
+                      className="tap-target btn-secondary"
+                      style={{
+                        padding: '0.35rem 0.85rem',
+                        fontSize: '0.76rem',
+                        gap: '0.35rem',
+                        background: 'rgba(30, 41, 59, 0.85)',
+                        color: '#38BDF8',
+                        border: '1px solid rgba(56, 189, 248, 0.4)',
+                      }}
+                    >
+                      <Sparkles size={13} />
+                      <span>Demo Field Stream</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Live Camera Overlays (Status badges, Controls, Reticle, HUD) */}
+            {isCameraActive && !previewImage && (
+              <>
                 {/* Top-Left: Live Auto-Detect Status */}
                 <div
                   style={{
                     position: 'absolute',
                     top: '10px',
                     left: '10px',
+                    zIndex: 4,
                     padding: '0.25rem 0.6rem',
                     borderRadius: 'var(--radius-full)',
                     background: 'rgba(15, 23, 42, 0.85)',
-                    border: '1px solid rgba(34, 197, 94, 0.4)',
-                    color: '#4ADE80',
+                    border: isSimulatedCamera ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(34, 197, 94, 0.4)',
+                    color: isSimulatedCamera ? '#38BDF8' : '#4ADE80',
                     fontSize: '0.68rem',
                     fontWeight: 700,
                     display: 'flex',
@@ -826,35 +1012,87 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     gap: '0.35rem',
                   }}
                 >
-                  <span className="pulse-dot pulse-dot-green" style={{ width: '6px', height: '6px' }} />
-                  <span>{autoScanActive ? 'Auto-Scan Live' : 'Camera Feed'}</span>
+                  <span className={isSimulatedCamera ? "pulse-dot pulse-dot-blue" : "pulse-dot pulse-dot-green"} style={{ width: '6px', height: '6px' }} />
+                  <span>
+                    {isSimulatedCamera
+                      ? 'Simulated Field Feed (Active)'
+                      : autoScanActive
+                      ? 'Auto-Scan Live'
+                      : 'Camera Feed'}
+                  </span>
                 </div>
 
-                {/* Top-Right: Camera Flip Toggle */}
-                <button
-                  type="button"
-                  onClick={toggleFacingMode}
-                  title="Switch camera"
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    padding: '0.25rem 0.55rem',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'rgba(15, 23, 42, 0.85)',
-                    color: '#FFFFFF',
-                    border: '1px solid rgba(255, 255, 255, 0.25)',
-                    fontSize: '0.68rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                  }}
-                >
-                  <FlipHorizontal size={12} />
-                  <span>{facingMode === 'environment' ? 'Rear' : 'Front'}</span>
-                </button>
+                {/* Top-Right: Camera Stream Switch & Flip Buttons */}
+                <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 4, display: 'flex', gap: '0.35rem' }}>
+                  {isSimulatedCamera ? (
+                    <button
+                      type="button"
+                      onClick={() => startLiveCamera('environment')}
+                      title="Switch to hardware webcam"
+                      style={{
+                        padding: '0.25rem 0.55rem',
+                        borderRadius: 'var(--radius-full)',
+                        background: 'rgba(15, 23, 42, 0.85)',
+                        color: '#4ADE80',
+                        border: '1px solid rgba(74, 222, 128, 0.4)',
+                        fontSize: '0.68rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                      }}
+                    >
+                      <Video size={11} />
+                      <span>Use Webcam</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={startFieldSimulationStream}
+                        title="Switch to Demo Field Stream"
+                        style={{
+                          padding: '0.25rem 0.55rem',
+                          borderRadius: 'var(--radius-full)',
+                          background: 'rgba(15, 23, 42, 0.85)',
+                          color: '#38BDF8',
+                          border: '1px solid rgba(56, 189, 248, 0.4)',
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                        }}
+                      >
+                        <Sparkles size={11} />
+                        <span>Demo Feed</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={toggleFacingMode}
+                        title="Flip Camera"
+                        style={{
+                          padding: '0.25rem 0.55rem',
+                          borderRadius: 'var(--radius-full)',
+                          background: 'rgba(15, 23, 42, 0.85)',
+                          color: '#FFFFFF',
+                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                          fontSize: '0.68rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                        }}
+                      >
+                        <FlipHorizontal size={11} />
+                        <span>{facingMode === 'environment' ? 'Rear' : 'Front'}</span>
+                      </button>
+                    </>
+                  )}
+                </div>
 
                 {/* Clean HUD Badges Overlaid on Live Stream */}
                 <div
@@ -863,6 +1101,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     bottom: '10px',
                     left: '10px',
                     right: '10px',
+                    zIndex: 4,
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '0.35rem',
@@ -919,6 +1158,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   style={{
                     position: 'absolute',
                     inset: 0,
+                    zIndex: 3,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -950,56 +1190,17 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     />
                   </div>
                 </div>
-              </div>
-            ) : (
-              /* 3. Fallback View when camera is inactive */
-              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                <img
-                  src={currentOrgans[0]?.img || '/samples/crown_view.jpg'}
-                  alt="Crop Preview"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'rgba(15, 23, 42, 0.75)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '1rem',
-                    textAlign: 'center',
-                    gap: '0.45rem',
-                  }}
-                >
-                  <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#FFFFFF' }}>
-                    Continuous AI Disease Detection
-                  </div>
-                  <p style={{ fontSize: '0.74rem', color: '#94A3B8', maxWidth: '280px', margin: 0 }}>
-                    {cameraError ||
-                      'Point camera at Pineapple, Rice, or Orange plants for automatic disease detection.'}
-                  </p>
-                  <button
-                    onClick={() => startLiveCamera('environment')}
-                    className="tap-target btn-primary"
-                    style={{ padding: '0.35rem 0.85rem', fontSize: '0.76rem', gap: '0.35rem', marginTop: '0.25rem' }}
-                  >
-                    <Video size={13} />
-                    <span>Start Live Camera</span>
-                  </button>
-                </div>
-              </div>
+              </>
             )}
 
             {/* Scanning Laser Line */}
-            {isScanningFrame && <div className="animate-scan-line" />}
+            {isScanningFrame && <div className="animate-scan-line" style={{ zIndex: 5 }} />}
 
             {/* Corner Reticle Brackets */}
-            <div style={{ position: 'absolute', top: 10, left: 10, width: 14, height: 14, borderTop: '2px solid #F97316', borderLeft: '2px solid #F97316', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 10, right: 10, width: 14, height: 14, borderTop: '2px solid #F97316', borderRight: '2px solid #F97316', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', bottom: 10, left: 10, width: 14, height: 14, borderBottom: '2px solid #F97316', borderLeft: '2px solid #F97316', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', bottom: 10, right: 10, width: 14, height: 14, borderBottom: '2px solid #F97316', borderRight: '2px solid #F97316', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 10, left: 10, width: 14, height: 14, borderTop: '2px solid #F97316', borderLeft: '2px solid #F97316', pointerEvents: 'none', zIndex: 4 }} />
+            <div style={{ position: 'absolute', top: 10, right: 10, width: 14, height: 14, borderTop: '2px solid #F97316', borderRight: '2px solid #F97316', pointerEvents: 'none', zIndex: 4 }} />
+            <div style={{ position: 'absolute', bottom: 10, left: 10, width: 14, height: 14, borderBottom: '2px solid #F97316', borderLeft: '2px solid #F97316', pointerEvents: 'none', zIndex: 4 }} />
+            <div style={{ position: 'absolute', bottom: 10, right: 10, width: 14, height: 14, borderBottom: '2px solid #F97316', borderRight: '2px solid #F97316', pointerEvents: 'none', zIndex: 4 }} />
           </div>
 
           {/* Action Toolbar */}
