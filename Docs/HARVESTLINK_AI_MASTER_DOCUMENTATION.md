@@ -3,6 +3,8 @@
 > **Prepared for INNOTECH FEST 2.0 Hackathon**  
 > **Platform Version:** 2.0.0 • **Status:** Production-Ready Hackathon Prototype • **License:** Academic & Innovation Open License
 
+> **Implementation status (disease coverage):** The shipped pineapple checkpoint is a fine-tuned MobileNetV3-Small trained on public leaf images for **Healthy vs Mealybug Wilt only** (97.0% accuracy on a held-out public split; not validated on Manipur field data). **Heart Rot and Black Rot have no trained coverage yet** and are screened by an explainable colour-rule heuristic with expert-referral triage (see `Docs/DATA.md`). Class lists and accuracy targets elsewhere in this document describe the design goal, not the current model.
+
 ---
 
 ## Table of Contents
@@ -79,14 +81,14 @@ flowchart TD
         API_Screen["Disease Screening (/api/assessments)"]
         API_Harvest["Harvest & GIS (/api/crops, /api/harvest)"]
         API_Market["Market Linkage (/api/lots, /api/market)"]
-        API_Logistics["OR-Tools Logistics (/api/logistics)"]
+        API_Logistics["dispatch solver Logistics (/api/logistics)"]
     end
 
     subgraph IntelligenceLayer ["Dedicated AI/ML Engine"]
         ModA["Module A: MobileNetV3\nCV Disease Classifier + Triage"]
         ModB["Module B: Phenology GDD Engine\n+ Doppler Rain Isohyets"]
         ModC["Module C: Transparent Pricing\nNet-Returns Deduction Engine"]
-        ModD["Module D: Google OR-Tools\nCVRPTW Payload Saturation Solver"]
+        ModD["Module D: capacity-constrained dispatch solver\nCVRPTW Payload Saturation Solver"]
     end
 
     subgraph DataLayer ["Data & Storage Layer"]
@@ -202,7 +204,7 @@ $$U_{\text{buyer}} = 0.50 \cdot \left(\frac{P_{\text{net}}}{P_{\max}}\right) + 0
 ### 3.4 Module D: Collective FPO Logistics & Vehicle Consolidation Solver
 
 #### 3.4.1 Formulation of CVRPTW Solver
-The logistics engine employs **Google OR-Tools** to solve the Capacitated Vehicle Routing Problem with Time Windows:
+The logistics engine employs a **custom capacity-constrained heuristic solver** for the Capacitated Vehicle Routing Problem with Time Windows:
 - **Objective:** $\min \sum_{(i,j)} c_{ij} x_{ij}$ (minimise total transport expenditure and empty return miles).
 - **Hard Payload Constraint:**
   $$\sum_{i \in \text{Route}} q_i \ge 0.75 \cdot K_{\text{vehicle}}$$
@@ -316,7 +318,7 @@ The FastAPI backend exposes versioned, OpenAPI-compliant endpoints (`http://loca
 | `GET` | `/api/market/orders` | All Roles | Browse institutional buyer demand orders and quotas. |
 | `GET` | `/api/market/matches/{crop_id}` | Farmer | Rank buyers by true take-home net return per kg. |
 | `GET` | `/api/logistics/dispatch-runs/{dist}` | FPO | List active vehicle routes for a regional cluster. |
-| `POST` | `/api/logistics/dispatch-plans/generate` | FPO | Solve OR-Tools CVRPTW pooling with $\ge 75\%$ fill constraint. |
+| `POST` | `/api/logistics/dispatch-plans/generate` | FPO | Solve dispatch solver CVRPTW pooling with $\ge 75\%$ fill constraint. |
 | `GET` | `/api/logistics/dispatch-passes/{token}` | All Roles | Validate digital QR gate-pass manifest at weighbridge. |
 
 ---
@@ -355,7 +357,7 @@ Use this script during live jury evaluations at **INNOTECH FEST 2.0**:
 | **0:45 - 1:45** | **Module A: AI Disease Screening** | [Farmer -> Module A](http://localhost:3000/farmer) | *"First, disease screening. When a farmer sees leaf yellowing, they take a photo. Our MobileNetV3 model detects Phytophthora Heart Rot with 94.2% calibrated confidence in 120ms. It issues an instant bio-fungicide remedy (Trichoderma viride @ 5g/L) and logs a SHA-256 tamper-proof hash for insurance audit."* |
 | **1:45 - 2:45** | **Module B: GIS Spatial Harvest Radar** | [Farmer -> Module B](http://localhost:3000/farmer) | *"Next, the Harvest Radar. Look at our new GIS Spatial Radar. It overlays Sentinel-2 satellite imagery, NDVI biomass vigor, and Doppler weather radar over the Andro terraces. The system flags that a 65mm monsoon downpour will hit in 48 hours. If the farmer waits, rainfall will dilute sugar Brix from 14.8° to 12.5°. The radar issues an urgent action: harvest Zone A before Wednesday morning."* |
 | **2:45 - 3:45** | **Module C: Transparent Market Matching** | [Farmer -> Module C](http://localhost:3000/farmer) | *"The farmer registers their 450 kg lot with one click. Instantly, our transparent pricing engine ranks verified institutional buyers. Unlike middlemen who quote ₹28 gross but pay ₹16 after secret deductions, HARVESTLINK AI clearly shows every deduction: freight, crates, and fees. Net take-home: ₹24.38/kg — earning the farmer ₹2.65 more per kg than cash brokers."* |
-| **3:45 - 4:45** | **Module D: Collective FPO Logistics** | [FPO Hub](http://localhost:3000/fpo) | *"Finally, logistics pooling. In the FPO Hub, our Google OR-Tools routing solver aggregates 4 small farm lots into an 82% full Tata 407 payload (2,050 kg / 2,500 kg capacity). We enforce a strict 75% fill threshold so trucks never cross mountain roads half-empty. It prints a digital QR gate-pass for instant weighbridge check-in at the Nilakuthi processing plant."* |
+| **3:45 - 4:45** | **Module D: Collective FPO Logistics** | [FPO Hub](http://localhost:3000/fpo) | *"Finally, logistics pooling. In the FPO Hub, our capacity-constrained dispatch solver routing solver aggregates 4 small farm lots into an 82% full Tata 407 payload (2,050 kg / 2,500 kg capacity). We enforce a strict 75% fill threshold so trucks never cross mountain roads half-empty. It prints a digital QR gate-pass for instant weighbridge check-in at the Nilakuthi processing plant."* |
 | **4:45 - 5:00** | **Conclusion & Q&A** | [System Architecture Summary](http://localhost:3000/farmer) | *"HARVESTLINK AI transforms fragmented smallholder agriculture into a synchronized, high-margin horticulture supply chain. Fully responsive, offline-ready with Meiteilon language support, and production-ready for Manipur. Thank you!"* |
 
 ---

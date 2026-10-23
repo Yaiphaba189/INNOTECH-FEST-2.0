@@ -72,13 +72,6 @@ async def list_free_models():
                 "best_for": "Complex agronomic reasoning and disease protocol formulation",
             },
             {
-                "id": "google/gemini-2.0-flash-exp:free",
-                "name": "Gemini 2.0 Flash Experimental (Free)",
-                "provider": "Google via OpenRouter",
-                "context_length": 1048576,
-                "best_for": "Ultra-low latency streaming and multi-crop synthesis",
-            },
-            {
                 "id": "mistralai/mistral-7b-instruct:free",
                 "name": "Mistral 7B Instruct (Free)",
                 "provider": "Mistral via OpenRouter",

@@ -141,7 +141,7 @@ The system follows a modular 3-tier enterprise architecture designed for low-lat
 | **Styling & Design System** | Vanilla CSS Tokens + CSS Modules | Tailwind CSS, Material UI | Total control over high-contrast theme variables, zero-runtime overhead, lightweight bundle. |
 | **Backend Framework** | FastAPI (Python 3.11+) | Django, Node.js / Express | Native asynchronous concurrency; seamless integration with Python ML/scientific libraries. |
 | **Vision Inference** | PyTorch / TorchVision | TensorFlow, Cloud Vision APIs | Exceptional speed on CPU nodes; fine-grained model optimization for agricultural classification. |
-| **Optimization Solver** | Google OR-Tools | Custom Heuristics, Linear Solvers | Production-proven vehicle routing (VRP) and knapsack solvers with strict constraint handling. |
+| **Optimization Solver** | Custom capacity-constrained Python heuristic | Google OR-Tools, Linear Solvers | Lightweight, dependency-free, deterministic and fast for regional FPO clusters; OR-Tools is a possible future upgrade. |
 | **Relational Database** | PostgreSQL 16 + PostGIS | MongoDB, MySQL | Native spatial radius calculations (identifying farms within 10 km); strict transactional consistency. |
 | **Client Storage** | Dexie.js (IndexedDB) | LocalStorage, SQLite Wasm | IndexedDB handles binary image blobs efficiently without memory leak risks on low-end smartphones. |
 
@@ -358,7 +358,7 @@ For reliable development and clear reproducibility during competition evaluation
 │ Phase 2 │ Core Intelligence    │ • PyTorch vision pipeline (Top 3 diseases) │
 │         │ Engines              │ • Phenology & GDD harvest window rules     │
 │         │                      │ • Deterministic net-return pricing logic   │
-│         │                      │ • OR-Tools logistics aggregation solver    │
+│         │                      │ • dispatch solver logistics aggregation solver    │
 ├─────────┼──────────────────────┼────────────────────────────────────────────┤
 │ Phase 3 │ Frontend UI & PWA    │ • High-contrast agrarian design system     │
 │         │ System               │ • Client image compression (<300KB)        │

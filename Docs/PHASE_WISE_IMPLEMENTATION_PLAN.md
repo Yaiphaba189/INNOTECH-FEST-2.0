@@ -44,7 +44,7 @@ To transform the HARVESTLINK AI concept into a working, defensible prototype for
 │         │                              │ spatial queries, 7 entities ready. │
 ├─────────┼──────────────────────────────┼────────────────────────────────────┤
 │ Phase 2 │ AI Engines & Mathematical    │ PyTorch vision model, GDD thermal  │
-│         │ Algorithms                   │ rules, Net-Return, OR-Tools solver.│
+│         │ Algorithms                   │ rules, Net-Return, dispatch solver solver.│
 ├─────────┼──────────────────────────────┼────────────────────────────────────┤
 │ Phase 3 │ Web Services & Security      │ FastAPI endpoints, JWT auth, RBAC, │
 │         │                              │ asynchronous service pipelines.    │
@@ -74,7 +74,7 @@ To transform the HARVESTLINK AI concept into a working, defensible prototype for
 │ (Days 1) │ Phase 1: Database & PostGIS schema   │ all tables & indices live.│
 ├──────────┼──────────────────────────────────────┼───────────────────────────┤
 │ Sprint 2 │ Phase 2: PyTorch model, GDD rules,   │ Vision inference <800ms;  │
-│ (Days 2) │          net pricing & OR-Tools      │ solver converges in <3s.  │
+│ (Days 2) │          net pricing & dispatch solver      │ solver converges in <3s.  │
 ├──────────┼──────────────────────────────────────┼───────────────────────────┤
 │ Sprint 3 │ Phase 3: FastAPI endpoints, JWT auth │ OpenAPI docs passing;     │
 │ (Days 3) │          & service orchestration     │ auth & RBAC validated.    │
@@ -154,7 +154,7 @@ Build, calibrate, and validate the four core intelligence engines independently 
 3. **Module C (Net-Return Pricing Formulation):**
    - Implement true net return formula: $\text{Gross Rate} - \text{Freight} - \text{Crates} - \text{Platform Fee}$.
    - Build multi-criteria buyer ranking utility function weighting net price ($50\%$), distance ($20\%$), payment terms ($20\%$), and quality ($10\%$).
-4. **Module D (OR-Tools Logistics Optimizer):**
+4. **Module D (dispatch solver Logistics Optimizer):**
    - Formulate Capacitated Vehicle Routing Problem with Time Windows ($\text{CVRPTW}$).
    - Enforce capacity threshold constraint requiring vehicle payload saturation $\ge 75\%$.
 
@@ -270,7 +270,7 @@ Package the full application stack into a portable, one-command Docker environme
 │       │ verified across 7 entities   │                            │         │
 ├───────┼──────────────────────────────┼────────────────────────────┼─────────┤
 │ Ph. 2 │ Vision model inference &     │ Member 1 (AI / ML Lead)    │ READY   │
-│       │ OR-Tools solvers validated   │                            │         │
+│       │ dispatch solver solvers validated   │                            │         │
 ├───────┼──────────────────────────────┼────────────────────────────┼─────────┤
 │ Ph. 3 │ FastAPI endpoints & JWT auth │ Member 2 (Backend Lead)    │ READY   │
 │       │ passed test suite            │                            │         │

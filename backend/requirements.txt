@@ -19,3 +19,6 @@ pytest-asyncio>=0.23.5
 geoalchemy2>=0.14.7
 shapely>=2.0.3
 python-dotenv>=1.0.1
+numpy>=1.26.0
+torch>=2.2.0
+torchvision>=0.17.0

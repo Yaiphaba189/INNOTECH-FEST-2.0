@@ -55,7 +55,7 @@ class CapacityThresholdFailError(AppError):
 
 
 class SolverTimeoutError(AppError):
-    def __init__(self, msg: str = "OR-Tools solver exceeded time limit. Falling back to heuristic."):
+    def __init__(self, msg: str = "Dispatch solver exceeded time limit. Falling back to heuristic."):
         super().__init__(status.HTTP_503_SERVICE_UNAVAILABLE, "SOLVER_TIMEOUT", msg)
 
 

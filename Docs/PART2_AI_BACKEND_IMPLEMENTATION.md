@@ -1,5 +1,7 @@
 # HARVESTLINK AI — Implementation Plan
 
+> **Implementation status (disease coverage):** The shipped pineapple checkpoint is a fine-tuned MobileNetV3-Small trained on public leaf images for **Healthy vs Mealybug Wilt only** (97.0% accuracy on a held-out public split; not validated on Manipur field data). **Heart Rot and Black Rot have no trained coverage yet** and are screened by an explainable colour-rule heuristic with expert-referral triage (see `Docs/DATA.md`). Class lists and accuracy targets elsewhere in this document describe the design goal, not the current model.
+
 ## Part 2: AI Backend, Algorithmic Engine & Intelligence Specification
 
 ---
@@ -63,7 +65,7 @@ The HARVESTLINK AI backend operates on a high-throughput, asynchronous service l
 │   │    • Vision Model    │  │    • Immutable assessment audit logs      │  │
 │   │    • Phenology Math  │  └───────────────────────────────────────────┘  │
 │   │    • Net Returns     │                                                  │
-│   │    • OR-Tools Solver │                                                  │
+│   │    • dispatch solver Solver │                                                  │
 │   └───────────┬──────────┘                                                  │
 │               │ Computed Intelligence Result                                │
 │               ▼                                                             │
@@ -412,7 +414,7 @@ All endpoints consume and return JSON payloads and require standard Bearer token
 │ 422 Unproc  │ `CAPACITY_THRESHOLD_FAIL`│ Aggregate load < 75% vehicle fill. │
 │             │                          │ Add more nearby lots before run.   │
 ├─────────────┼──────────────────────────┼────────────────────────────────────┤
-│ 503 Overload│ `SOLVER_TIMEOUT`         │ OR-Tools exceeded time limit.      │
+│ 503 Overload│ `SOLVER_TIMEOUT`         │ dispatch solver exceeded time limit.      │
 │             │                          │ Fallback to nearest-neighbor rule. │
 └─────────────┴──────────────────────────┴────────────────────────────────────┘
 ```

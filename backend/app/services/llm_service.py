@@ -1,7 +1,7 @@
 """HARVESTLINK AI - OpenRouter Free LLM Agronomic & Decision Intelligence Service.
 
 Provides high-efficiency LLM advisory using OpenRouter's free-tier models
-(e.g., Llama 3.3 70B, Gemini 2.0 Flash, Mistral 7B, DeepSeek R1) with:
+(e.g., Llama 3.3 70B, Mistral 7B, DeepSeek R1) with:
 1. Multi-model cascading fallback
 2. High-speed in-memory TTL caching
 3. Resilient offline deterministic expert fallback (ICAR / CAU agronomy protocols)

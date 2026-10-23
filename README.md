@@ -7,13 +7,15 @@
 
 ## Overview
 
+> **Implementation status (disease coverage):** The shipped pineapple checkpoint is a fine-tuned MobileNetV3-Small trained on public leaf images for **Healthy vs Mealybug Wilt only** (97.0% accuracy on a held-out public split; not validated on Manipur field data). **Heart Rot and Black Rot have no trained coverage yet** and are screened by an explainable colour-rule heuristic with expert-referral triage (see `Docs/DATA.md`). Class lists and accuracy targets elsewhere in this document describe the design goal, not the current model.
+
 HARVESTLINK AI is an integrated agricultural decision-support system designed for horticulture in Manipur (specifically Queen & Kew pineapple clusters across Churachandpur, Thoubal, Imphal East, and Bishnupur).
 
 The platform links:
-1. **Module A — Crop Disease Screening:** MobileNetV3 computer vision model screening for *Heart Rot*, *Black Rot*, and *Mealybug Wilt* with calibrated triage.
+1. **Module A — Crop Disease Screening:** MobileNetV3 model trained for *Mealybug Wilt* vs healthy, plus explainable colour-rule screening for *Heart Rot* and *Black Rot* (no trained coverage yet), with calibrated triage.
 2. **Module B — Harvest Readiness & Risk:** Phenological Growing Degree Day ($\text{GDD}$) accumulation tracking and 48-hour monsoon downpour alerts.
 3. **Module C — Transparent Market Linkage:** Transparent pricing showing true net take-home returns per kg after freight, handling, and fees.
-4. **Module D — Collective Logistics:** Google OR-Tools vehicle consolidation solver pooling small farm lots into full truck payloads ($\ge 75\%$ fill) with digital QR gate-passes.
+4. **Module D — Collective Logistics:** Capacity-constrained vehicle consolidation solver (custom Python heuristic) pooling small farm lots into full truck payloads ($\ge 75\%$ fill) with digital QR gate-passes.
 
 ---
 
@@ -34,11 +36,11 @@ Complete project specifications are located in the [`Docs/`](Docs/) directory:
 ```
 .
 ├── Docs/                    # Project specifications & competition blueprints
-├── intelligence_layer/      # Dedicated AI/ML models, phenology rules & OR-Tools
+├── intelligence_layer/      # Dedicated AI/ML models, phenology rules & logistics solver
 │   ├── module_a_disease/    # Computer vision screening, weights, triage
 │   ├── module_b_harvest/    # Phenological GDD rules & weather risk alerts
 │   ├── module_c_pricing/    # Transparent net-return deductions & ranking
-│   ├── module_d_logistics/  # Google OR-Tools CVRPTW vehicle route solver
+│   ├── module_d_logistics/  # Capacity-constrained vehicle dispatch solver
 │   ├── pipelines/           # Unified inference and calculation interfaces
 │   ├── notebooks/           # Training notebooks & exploratory analysis
 │   └── tests/               # Model and algorithmic unit tests
@@ -69,7 +71,7 @@ Complete project specifications are located in the [`Docs/`](Docs/) directory:
 
 ## Team Execution Roles (3-Member Allocation)
 
-- **Member 1 (AI / ML Engineer):** Owns `intelligence_layer/` (computer vision pipeline, phenology rules engine, net pricing model, OR-Tools routing solver).
+- **Member 1 (AI / ML Engineer):** Owns `intelligence_layer/` (computer vision pipeline, phenology rules engine, net pricing model, logistics dispatch solver).
 - **Member 2 (Backend & Systems Engineer):** Owns `backend/` (PostgreSQL/PostGIS database, FastAPI service layer, JWT auth & RBAC, Docker deployment).
 - **Member 3 (Frontend & UI/UX Engineer):** Owns `frontend/` (Next.js 14 responsive application, agrarian design system, camera compression, trilingual Meiteilon engine, live pitch flow).
 

@@ -66,7 +66,7 @@ class Settings(BaseSettings):
     OPENROUTER_API_KEY: str = ""
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
     OPENROUTER_MODEL: str = "meta-llama/llama-3.3-70b-instruct:free"
-    OPENROUTER_FALLBACK_MODELS: str = "google/gemini-2.0-flash-exp:free,mistralai/mistral-7b-instruct:free,deepseek/deepseek-r1:free"
+    OPENROUTER_FALLBACK_MODELS: str = "mistralai/mistral-7b-instruct:free,deepseek/deepseek-r1:free"
     OPENROUTER_SITE_URL: str = "https://harvestlink.ai"
     OPENROUTER_SITE_NAME: str = "HARVESTLINK AI"
     OPENROUTER_TIMEOUT_SECONDS: float = 8.0

@@ -63,7 +63,7 @@ Rather than working in silos, each member owns a clear layer of the platform wit
 │   │ • Module A: PyTorch Computer Vision disease model (MobileNetV3)     │   │
 │   │ • Module B: Phenological harvest rules & GDD thermal accumulation   │   │
 │   │ • Module C: Transparent net-returns pricing formulation             │   │
-│   │ • Module D: Google OR-Tools vehicle routing & capacity solver       │   │
+│   │ • Module D: capacity-constrained dispatch solver vehicle routing & capacity solver       │   │
 │   │ • Scientific defensibility, evaluation metrics & validation data    │   │
 │   └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                             │
@@ -97,7 +97,7 @@ Rather than working in silos, each member owns a clear layer of the platform wit
 │ 10. Module C: Net-Return Pricing Formula     │ A / R        │ C            │ I            │
 │ 11. Module C: Market Matching Endpoints      │ C            │ A / R        │ I            │
 │ 12. Module C: Transparent Deductions UI      │ I            │ C            │ A / R        │
-│ 13. Module D: OR-Tools Logistics Solver      │ A / R        │ C            │ I            │
+│ 13. Module D: dispatch solver Logistics Solver      │ A / R        │ C            │ I            │
 │ 14. Module D: Dispatch Manifest Generation   │ C            │ A / R        │ I            │
 │ 15. Module D: FPO Capacity & Gate-Pass UI    │ I            │ C            │ A / R        │
 │ 16. JWT Auth & Role-Based Access Control     │ I            │ A / R        │ C            │
@@ -135,12 +135,12 @@ The AI/ML Engineer is responsible for the **scientific validity, algorithmic for
 - Design the multi-criteria buyer ranking utility function weighting net return ($50\%$), transit distance ($20\%$), payment terms ($20\%$), and quality alignment ($10\%$).
 
 #### Module D: Collective Logistics Solver
-- Formulate the Capacitated Vehicle Routing Problem with Time Windows ($\text{CVRPTW}$) using Google OR-Tools.
+- Formulate the Capacitated Vehicle Routing Problem with Time Windows ($\text{CVRPTW}$) using capacity-constrained dispatch solver.
 - Define constraints: vehicle payload limits (Tata 407, 3-wheeler), $75\%$ minimum payload threshold, and farmer pickup windows.
 
 ### 3.3 Key Deliverables & Artifacts
 1. **Model Weights & Inference Pipeline:** Lightweight PyTorch model artifact (`.pt` / TorchScript) optimized for fast CPU inference ($<800\text{ms}$).
-2. **Algorithmic Module Functions:** Pure Python modules with clean functional signatures for disease prediction, harvest window calculation, net return pricing, and OR-Tools route solving.
+2. **Algorithmic Module Functions:** Pure Python modules with clean functional signatures for disease prediction, harvest window calculation, net return pricing, and dispatch solver route solving.
 3. **Scientific Documentation:** Model evaluation tables (Accuracy, Precision, Recall, F1-Score) and mathematical formulas for the competition presentation.
 
 ---
@@ -163,7 +163,7 @@ The Backend Engineer is responsible for the **core system infrastructure, data p
 
 #### API Orchestration & Service Layer
 - Develop RESTful API endpoints adhering to standard HTTP verbs and status codes.
-- Integrate Member 1’s PyTorch model and OR-Tools solver into non-blocking asynchronous service pipelines.
+- Integrate Member 1’s PyTorch model and dispatch solver solver into non-blocking asynchronous service pipelines.
 - Create file upload handlers for diagnostic crop images with validation and storage management.
 
 #### Containerization & Demonstration Seeding
@@ -267,7 +267,7 @@ To eliminate integration friction, the three members interact through standardiz
 │ deployed         │                      │ schema from Day 1 to build screens│
 │                  │                      │ independently.                    │
 ├──────────────────┼──────────────────────┼───────────────────────────────────┤
-│ OR-Tools solver  │ Member 2 (Backend)   │ Fallback to a greedy nearest-     │
+│ dispatch solver solver  │ Member 2 (Backend)   │ Fallback to a greedy nearest-     │
 │ convergence      │                      │ neighbor clustering algorithm     │
 │ edge cases       │                      │ for regional demo clusters.       │
 ├──────────────────┼──────────────────────┼───────────────────────────────────┤
@@ -306,7 +306,7 @@ To eliminate integration friction, the three members interact through standardiz
 │       │ • First successful end-to-end photo diagnostic test.                │
 ├───────┼─────────────────────────────────────────────────────────────────────┤
 │ DAY 4 │ Second Integration Point: Module C & D                              │
-│       │ • Member 1 delivers net return pricing & OR-Tools routing solver.   │
+│       │ • Member 1 delivers net return pricing & dispatch solver routing solver.   │
 │       │ • Member 2 wires matching engine and dispatch plan generation.      │
 │       │ • Member 3 implements Net-Return Quote card & FPO Truck gauge.      │
 ├───────┼─────────────────────────────────────────────────────────────────────┤
@@ -361,7 +361,7 @@ During the 5-minute live judging evaluation, all three members take the floor to
 │         │                      │             │ • Demonstrate 1-tap accept   │
 │         │                      │             │   and transactional lock.    │
 ├─────────┼──────────────────────┼─────────────┼──────────────────────────────┤
-│ 3:30 to │ Module D: Collective │ Member 2    │ • Show OR-Tools vehicle      │
+│ 3:30 to │ Module D: Collective │ Member 2    │ • Show dispatch solver vehicle      │
 │ 4:30    │ Logistics & QR Pass  │ (Backend)   │   consolidation (82% fill).  │
 │         │                      │             │ • Show generated QR manifest │
 │         │                      │             │   and ₹1.85/kg cost savings. │
@@ -382,7 +382,7 @@ During the 5-minute live judging evaluation, all three members take the floor to
 - [x] Confidence thresholding and triage decision rules verified.
 - [x] Phenological GDD calculation validated against Queen pineapple lifecycle.
 - [x] Net-return mathematical formulation and ranking logic completed.
-- [x] OR-Tools CVRPTW solver converging in $<3$ seconds on 25-stop regional clusters.
+- [x] dispatch solver CVRPTW solver converging in $<3$ seconds on 25-stop regional clusters.
 
 ### Member 2: Backend Engineer Sign-Off
 - [x] PostgreSQL + PostGIS schema deployed with all constraints and indices.

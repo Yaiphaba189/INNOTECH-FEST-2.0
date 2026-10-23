@@ -66,7 +66,7 @@ class LogisticsService:
                 "quality_grade": lot.quality_grade
             })
 
-        # 2. Run OR-Tools / CVRPTW solver
+        # 2. Run capacity-constrained dispatch solver
         solution = solve_cvrp_dispatch(
             cluster_district=plan_req.cluster_district,
             vehicle_type=plan_req.vehicle_type,
