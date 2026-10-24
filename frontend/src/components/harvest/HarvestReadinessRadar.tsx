@@ -437,68 +437,68 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '0.65rem',
+          gap: '0.75rem',
         }}
       >
-        <div className="glass-card" style={{ padding: '0.75rem 0.95rem' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #F1E4D8', borderRadius: '8px', padding: '1rem 1.15rem' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: '#6E5A4A' }}>
             STAND STATUS
           </div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.15rem' }}>
+          <div style={{ fontSize: '16px', fontWeight: 700, color: '#21170F', marginTop: '0.2rem' }}>
             {fieldEvaluation.isPlanted ? fieldEvaluation.cropName.split('(')[0].trim() : 'Unplanted Fallow'}
           </div>
-          <div style={{ fontSize: '0.7rem', color: fieldEvaluation.isPlanted ? '#059669' : '#EA580C', fontWeight: 700 }}>
+          <div style={{ fontSize: '12px', color: fieldEvaluation.isPlanted ? '#F97316' : '#9a5b13', fontWeight: 600, marginTop: '0.2rem' }}>
             {fieldEvaluation.isPlanted ? `${fieldEvaluation.canopyCoverage}% Canopy Coverage` : 'Bare Soil Bed'}
           </div>
         </div>
 
-        <div className="glass-card" style={{ padding: '0.75rem 0.95rem' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #F1E4D8', borderRadius: '8px', padding: '1rem 1.15rem' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: '#6E5A4A' }}>
             HARVEST READINESS
           </div>
-          <div className="tabular-nums" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#059669', marginTop: '0.15rem' }}>
+          <div className="tabular-nums" style={{ fontSize: '18px', fontWeight: 700, color: '#F97316', marginTop: '0.2rem' }}>
             {fieldEvaluation.harvestReadinessPct}%
           </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '12px', color: '#6E5A4A', marginTop: '0.2rem' }}>
             {fieldEvaluation.isPlanted ? fieldEvaluation.optimalHarvestWindow : 'N/A - Planting Required'}
           </div>
         </div>
 
-        <div className="glass-card" style={{ padding: '0.75rem 0.95rem' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #F1E4D8', borderRadius: '8px', padding: '1rem 1.15rem' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: '#6E5A4A' }}>
             WATER MOISTURE
           </div>
           <div
             className="tabular-nums"
             style={{
-              fontSize: '1.05rem',
-              fontWeight: 900,
-              color: fieldEvaluation.waterStatus === 'LACKING_WATER' ? '#EA580C' : fieldEvaluation.waterStatus === 'WATERLOGGED' ? '#DC2626' : '#059669',
-              marginTop: '0.15rem',
+              fontSize: '18px',
+              fontWeight: 700,
+              color: fieldEvaluation.waterStatus === 'LACKING_WATER' ? '#9a5b13' : fieldEvaluation.waterStatus === 'WATERLOGGED' ? '#a11920' : '#F97316',
+              marginTop: '0.2rem',
             }}
           >
             {fieldEvaluation.soilMoisturePct}%
           </div>
-          <div style={{ fontSize: '0.7rem', fontWeight: 700, color: fieldEvaluation.waterStatus === 'LACKING_WATER' ? '#EA580C' : fieldEvaluation.waterStatus === 'WATERLOGGED' ? '#DC2626' : '#059669' }}>
+          <div style={{ fontSize: '12px', fontWeight: 600, color: fieldEvaluation.waterStatus === 'LACKING_WATER' ? '#9a5b13' : fieldEvaluation.waterStatus === 'WATERLOGGED' ? '#a11920' : '#F97316', marginTop: '0.2rem' }}>
             {fieldEvaluation.waterStatus === 'LACKING_WATER' ? 'Deficit (Lacking Water)' : fieldEvaluation.waterStatus === 'WATERLOGGED' ? 'Waterlogged' : 'Optimal Hydration'}
           </div>
         </div>
 
-        <div className="glass-card" style={{ padding: '0.75rem 0.95rem' }}>
-          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid #F1E4D8', borderRadius: '8px', padding: '1rem 1.15rem' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: '#6E5A4A' }}>
             ROOT ROT WARNING
           </div>
           <div
             style={{
-              fontSize: '1.05rem',
-              fontWeight: 900,
-              color: fieldEvaluation.rootRotStatus === 'EARLY_ONSET' ? '#DC2626' : '#059669',
-              marginTop: '0.15rem',
+              fontSize: '18px',
+              fontWeight: 700,
+              color: fieldEvaluation.rootRotStatus === 'EARLY_ONSET' ? '#a11920' : '#F97316',
+              marginTop: '0.2rem',
             }}
           >
             {fieldEvaluation.rootRotStatus === 'EARLY_ONSET' ? 'Early Rot Onset' : fieldEvaluation.rootRotStatus === 'N/A' ? 'N/A' : 'Healthy Root'}
           </div>
-          <div style={{ fontSize: '0.7rem', color: fieldEvaluation.rootRotStatus === 'EARLY_ONSET' ? '#DC2626' : '#059669', fontWeight: 700 }}>
+          <div style={{ fontSize: '12px', color: fieldEvaluation.rootRotStatus === 'EARLY_ONSET' ? '#a11920' : '#F97316', fontWeight: 600, marginTop: '0.2rem' }}>
             {fieldEvaluation.rootRotStatus === 'EARLY_ONSET' ? 'Drainage Trench Urgent' : 'Firm Basal Collar'}
           </div>
         </div>
@@ -605,7 +605,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                   borderRadius: 'var(--radius-full)',
                   border: isSelected ? '1px solid var(--brand-orange)' : '1px solid var(--border-subtle)',
                   background: isSelected ? '#FFF7ED' : '#FFFFFF',
-                  color: isSelected ? '#EA580C' : 'var(--text-secondary)',
+                  color: isSelected ? '#FB923C' : 'var(--text-secondary)',
                   fontWeight: isSelected ? 800 : 500,
                   cursor: 'pointer',
                   transition: 'all 0.12s ease',
@@ -668,9 +668,9 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                 borderRadius: 'var(--radius-full)',
                 background: 'rgba(15, 23, 42, 0.88)',
                 border: fieldEvaluation.isPlanted
-                  ? '1px solid rgba(34, 197, 94, 0.5)'
-                  : '1px solid rgba(249, 115, 22, 0.5)',
-                color: fieldEvaluation.isPlanted ? '#4ADE80' : '#FED7AA',
+                  ? '1px solid rgba(251, 146, 60, 0.5)'
+                  : '1px solid rgba(251, 146, 60, 0.5)',
+                color: fieldEvaluation.isPlanted ? '#FB923C' : '#FED7AA',
                 fontSize: '0.68rem',
                 fontWeight: 700,
                 display: 'flex',
@@ -684,7 +684,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                   width: '6px',
                   height: '6px',
                   borderRadius: '50%',
-                  background: fieldEvaluation.isPlanted ? '#10B981' : '#F97316',
+                  background: fieldEvaluation.isPlanted ? '#FB923C' : '#FB923C',
                 }}
               />
               <span>{fieldEvaluation.isPlanted ? 'PLANTED STAND' : 'UNPLANTED FALLOW'}</span>
@@ -708,7 +708,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
               }}
             >
               <span>{fieldEvaluation.cropName}</span>
-              <span style={{ color: '#4ADE80', fontWeight: 800 }}>
+              <span style={{ color: '#FB923C', fontWeight: 800 }}>
                 {fieldEvaluation.canopyCoverage}% Cover
               </span>
             </div>
@@ -723,7 +723,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                 borderRadius: 'var(--radius-md)',
                 background:
                   fieldEvaluation.condition === 'MATURE_HARVEST'
-                    ? '#F0FDF4'
+                    ? 'var(--accent-green-light)'
                     : fieldEvaluation.condition === 'WATER_DEFICIT'
                     ? '#FFFBEB'
                     : fieldEvaluation.condition === 'ROOT_ROT_ONSET'
@@ -731,7 +731,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                     : '#F8FAFC',
                 border:
                   fieldEvaluation.condition === 'MATURE_HARVEST'
-                    ? '1px solid #BBF7D0'
+                    ? '1px solid #E5D2C2'
                     : fieldEvaluation.condition === 'WATER_DEFICIT'
                     ? '1px solid #FDE68A'
                     : fieldEvaluation.condition === 'ROOT_ROT_ONSET'
@@ -746,7 +746,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                     fontWeight: 800,
                     color:
                       fieldEvaluation.condition === 'MATURE_HARVEST'
-                        ? '#166534'
+                        ? '#F97316'
                         : fieldEvaluation.condition === 'WATER_DEFICIT'
                         ? '#92400E'
                         : fieldEvaluation.condition === 'ROOT_ROT_ONSET'
@@ -786,7 +786,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                   style={{
                     fontSize: '0.68rem',
                     fontWeight: 700,
-                    color: fieldEvaluation.waterStatus === 'LACKING_WATER' ? '#DC2626' : '#059669',
+                    color: fieldEvaluation.waterStatus === 'LACKING_WATER' ? '#DC2626' : '#F97316',
                     marginTop: '0.1rem',
                   }}
                 >
@@ -813,7 +813,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                   style={{
                     fontSize: '0.68rem',
                     fontWeight: 700,
-                    color: fieldEvaluation.rootRotStatus === 'EARLY_ONSET' ? '#DC2626' : '#059669',
+                    color: fieldEvaluation.rootRotStatus === 'EARLY_ONSET' ? '#DC2626' : '#F97316',
                     marginTop: '0.1rem',
                   }}
                 >
@@ -835,7 +835,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)' }}>
                   WHEN TO HARVEST:
                 </span>
-                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#EA580C' }}>
+                <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#FB923C' }}>
                   {fieldEvaluation.recommendedPickDate}
                 </span>
               </div>
@@ -885,36 +885,33 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                     background: stage.is_active
                       ? '#FFF7ED'
                       : stage.is_completed
-                      ? '#F0FDF4'
+                      ? 'var(--accent-green-light)'
                       : '#F8FAFC',
                     border: stage.is_active
                       ? '1px solid var(--brand-orange)'
                       : stage.is_completed
-                      ? '1px solid #DCFCE7'
+                      ? '1px solid var(--accent-green-border)'
                       : '1px solid var(--border-subtle)',
                   }}
                 >
-                  <div
+                  <span
                     style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      background: stage.is_active
+                      width: '20px',
+                      color: stage.is_active
                         ? '#F97316'
                         : stage.is_completed
-                        ? '#10B981'
-                        : '#E2E8F0',
-                      color: stage.is_active || stage.is_completed ? '#FFFFFF' : 'var(--text-muted)',
-                      display: 'flex',
+                        ? '#F97316'
+                        : '#8A6D55',
+                      fontWeight: 700,
+                      fontSize: '0.82rem',
+                      flexShrink: 0,
+                      display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontWeight: 800,
-                      fontSize: '0.7rem',
-                      flexShrink: 0,
                     }}
                   >
-                    {stage.is_completed ? <Check size={12} strokeWidth={2.8} /> : idx + 1}
-                  </div>
+                    {stage.is_completed ? <Check size={14} strokeWidth={2.8} /> : `${idx + 1}.`}
+                  </span>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -922,7 +919,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                         style={{
                           fontWeight: 700,
                           fontSize: '0.8rem',
-                          color: stage.is_active ? '#EA580C' : 'var(--text-primary)',
+                          color: stage.is_active ? '#F97316' : 'var(--text-primary)',
                         }}
                       >
                         {stage.name}
@@ -966,26 +963,12 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <div
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  background: '#FFEDD5',
-                  color: '#EA580C',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <CloudRain size={16} />
-              </div>
+              <CloudRain size={22} color="#F97316" style={{ flexShrink: 0 }} />
               <div>
-                <div style={{ fontWeight: 800, fontSize: '0.84rem', color: '#9A3412' }}>
+                <div style={{ fontWeight: 800, fontSize: '0.84rem', color: '#EA580C' }}>
                   65.0mm Downpour in 48 Hours
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#C2410C' }}>
+                <div style={{ fontSize: '0.7rem', color: '#7C2D12' }}>
                   Thoubal & Churachandpur Clusters
                 </div>
               </div>
@@ -1009,7 +992,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
               }}
             >
               <span style={{ color: 'var(--text-muted)' }}>Optimal Harvest Window:</span>
-              <span style={{ color: '#EA580C', fontWeight: 800 }}>Next 24 to 36 Hours</span>
+              <span style={{ color: '#F97316', fontWeight: 800 }}>Next 24 to 36 Hours</span>
             </div>
           </div>
 
@@ -1041,8 +1024,24 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
             <button
               onClick={handleRegisterClick}
               disabled={lotRegistered}
-              className="tap-target btn-primary"
-              style={{ width: '100%', gap: '0.45rem', fontSize: '0.82rem', marginTop: '0.2rem' }}
+              className="tap-target"
+              style={{
+                width: '100%',
+                gap: '0.45rem',
+                fontSize: '0.82rem',
+                marginTop: '0.2rem',
+                minHeight: '40px',
+                fontWeight: 700,
+                background: lotRegistered ? '#F97316' : '#F97316',
+                color: '#FFFFFF',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: lotRegistered ? 'default' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 'none',
+              }}
             >
               <PackageCheck size={15} />
               {lotRegistered ? (

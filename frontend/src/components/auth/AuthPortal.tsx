@@ -117,7 +117,7 @@ export const AuthPortal: React.FC = () => {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: 'radial-gradient(ellipse at 50% 15%, #FFF7ED 0%, #F8FAFC 65%, #F1F5F9 100%)',
+        background: 'var(--bg-app)',
       }}
     >
       {/* Brand Navigation Header */}
@@ -128,22 +128,20 @@ export const AuthPortal: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: '1px solid var(--border-subtle)',
-          background: 'rgba(255, 255, 255, 0.85)',
-          backdropFilter: 'blur(20px)',
+          background: '#ffffff',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div
             style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+              width: '36px',
+              height: '36px',
+              borderRadius: '6px',
+              background: '#FB923C',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#FFFFFF',
-              boxShadow: '0 3px 10px rgba(249, 115, 22, 0.25)',
             }}
           >
             <Sprout size={20} strokeWidth={2.4} />
@@ -153,7 +151,7 @@ export const AuthPortal: React.FC = () => {
               <span style={{ fontWeight: 900, fontSize: '1.25rem', color: '#0F172A', letterSpacing: '-0.025em' }}>
                 HARVESTLINK
               </span>
-              <span style={{ fontWeight: 900, fontSize: '1.25rem', color: '#F97316' }}>
+              <span style={{ fontWeight: 900, fontSize: '1.25rem', color: '#FB923C' }}>
                 AI
               </span>
               <span className="badge badge-orange" style={{ fontSize: '0.62rem' }}>
@@ -166,7 +164,7 @@ export const AuthPortal: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#059669', fontSize: '0.74rem', fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#F97316', fontSize: '0.74rem', fontWeight: 700 }}>
           <span className="pulse-dot pulse-dot-green" />
           <span>RBAC Security Active</span>
         </div>
@@ -203,7 +201,7 @@ export const AuthPortal: React.FC = () => {
                 borderRadius: 'var(--radius-full)',
                 background: '#FFF7ED',
                 border: '1px solid #FED7AA',
-                color: '#EA580C',
+                color: '#FB923C',
                 fontSize: '0.72rem',
                 fontWeight: 800,
                 marginBottom: '0.85rem',
@@ -244,7 +242,7 @@ export const AuthPortal: React.FC = () => {
                   boxShadow: 'var(--shadow-subtle)',
                 }}
               >
-                <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#ECFDF5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'var(--accent-green-light)', color: '#F97316', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Sprout size={18} />
                 </div>
                 <div>
@@ -286,7 +284,7 @@ export const AuthPortal: React.FC = () => {
                   boxShadow: 'var(--shadow-subtle)',
                 }}
               >
-                <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#FFF7ED', color: '#EA580C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: '#FFF7ED', color: '#FB923C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Truck size={18} />
                 </div>
                 <div>
@@ -333,7 +331,7 @@ export const AuthPortal: React.FC = () => {
                   fontWeight: 700,
                   cursor: 'pointer',
                   background: activeTab === 'login' ? '#FFFFFF' : 'transparent',
-                  color: activeTab === 'login' ? '#EA580C' : 'var(--text-muted)',
+                  color: activeTab === 'login' ? '#FB923C' : 'var(--text-muted)',
                   boxShadow: activeTab === 'login' ? '0 1px 3px rgba(15, 23, 42, 0.08)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
@@ -356,7 +354,7 @@ export const AuthPortal: React.FC = () => {
                   fontWeight: 700,
                   cursor: 'pointer',
                   background: activeTab === 'signup' ? '#FFFFFF' : 'transparent',
-                  color: activeTab === 'signup' ? '#EA580C' : 'var(--text-muted)',
+                  color: activeTab === 'signup' ? '#FB923C' : 'var(--text-muted)',
                   boxShadow: activeTab === 'signup' ? '0 1px 3px rgba(15, 23, 42, 0.08)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
@@ -395,9 +393,9 @@ export const AuthPortal: React.FC = () => {
                   gap: '0.45rem',
                   padding: '0.65rem 0.85rem',
                   borderRadius: 'var(--radius-md)',
-                  background: '#ECFDF5',
-                  border: '1px solid #A7F3D0',
-                  color: '#059669',
+                  background: 'var(--accent-green-light)',
+                  border: '1px solid var(--accent-green-border)',
+                  color: '#F97316',
                   fontSize: '0.78rem',
                   fontWeight: 600,
                   marginBottom: '1rem',
@@ -499,7 +497,7 @@ export const AuthPortal: React.FC = () => {
 
                 {/* Streamlined 1-Tap Demo Switcher */}
                 <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.65rem', color: '#EA580C', fontSize: '0.72rem', fontWeight: 800 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.65rem', color: '#FB923C', fontSize: '0.72rem', fontWeight: 800 }}>
                     <Sparkles size={13} />
                     <span>QUICK DEMO ACCESS (1-TAP)</span>
                   </div>
@@ -515,12 +513,12 @@ export const AuthPortal: React.FC = () => {
                         gap: '0.45rem',
                         padding: '0.45rem 0.65rem',
                         borderRadius: 'var(--radius-sm)',
-                        border: '1px solid #C7D2FE',
-                        background: '#EEF2FF',
+                        border: '1px solid #E5D2C2',
+                        background: '#FFF5ED',
                         cursor: 'pointer',
-                        fontSize: '0.76rem',
-                        fontWeight: 700,
-                        color: '#4F46E5',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#21170F',
                         textAlign: 'left',
                       }}
                     >
@@ -538,12 +536,12 @@ export const AuthPortal: React.FC = () => {
                         gap: '0.45rem',
                         padding: '0.45rem 0.65rem',
                         borderRadius: 'var(--radius-sm)',
-                        border: '1px solid #A7F3D0',
-                        background: '#ECFDF5',
+                        border: '1px solid var(--accent-green-border)',
+                        background: 'var(--accent-green-light)',
                         cursor: 'pointer',
                         fontSize: '0.76rem',
                         fontWeight: 700,
-                        color: '#059669',
+                        color: '#F97316',
                         textAlign: 'left',
                       }}
                     >
@@ -589,7 +587,7 @@ export const AuthPortal: React.FC = () => {
                         cursor: 'pointer',
                         fontSize: '0.76rem',
                         fontWeight: 700,
-                        color: '#EA580C',
+                        color: '#FB923C',
                         textAlign: 'left',
                       }}
                     >

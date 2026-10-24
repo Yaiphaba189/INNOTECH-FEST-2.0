@@ -26,8 +26,8 @@ export const Logo: React.FC<LogoProps> = ({ size = 38, showText = true }) => {
             <stop offset="100%" stopColor="#D97706" />
           </linearGradient>
           <linearGradient id="hlGreenGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-            <stop offset="0%" stopColor="#059669" />
-            <stop offset="100%" stopColor="#34D399" />
+            <stop offset="0%" stopColor="#F97316" />
+            <stop offset="100%" stopColor="#FB923C" />
           </linearGradient>
           <radialGradient id="hlBackGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.25" />
@@ -59,12 +59,12 @@ export const Logo: React.FC<LogoProps> = ({ size = 38, showText = true }) => {
         {/* Left leaf */}
         <path
           d="M22 17C19.5 13.5 16 11 14 11C15 14 17.5 17 21 18Z"
-          fill="#10B981"
+          fill="#FB923C"
         />
         {/* Right leaf */}
         <path
           d="M26 17C28.5 13.5 32 11 34 11C33 14 30.5 17 27 18Z"
-          fill="#059669"
+          fill="#F97316"
         />
 
         {/* Pineapple Body Core */}

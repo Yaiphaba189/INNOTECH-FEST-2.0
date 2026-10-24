@@ -188,7 +188,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
     const xMin110 = freqToX(110);
     const xMax145 = freqToX(145);
 
-    ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+    ctx.fillStyle = 'rgba(251, 146, 60, 0.15)';
     ctx.fillRect(xMin110, 0, xMax145 - xMin110, height);
 
     // Water Blister Warning Zone: < 85Hz
@@ -201,7 +201,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
     ctx.lineWidth = 2.5;
     const isBlister = peakHz < 85;
     const isOptimal = peakHz >= 110 && peakHz <= 145;
-    ctx.strokeStyle = isBlister ? '#EF4444' : isOptimal ? '#10B981' : '#F59E0B';
+    ctx.strokeStyle = isBlister ? '#EF4444' : isOptimal ? '#FB923C' : '#F59E0B';
 
     for (let x = 0; x < width; x++) {
       const currentHz = (x / width) * 220;
@@ -223,7 +223,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
     ctx.fillStyle = isBlister
       ? 'rgba(239, 68, 68, 0.20)'
       : isOptimal
-      ? 'rgba(16, 185, 129, 0.22)'
+      ? 'rgba(251, 146, 60, 0.22)'
       : 'rgba(245, 158, 11, 0.20)';
     ctx.fill();
 
@@ -245,7 +245,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
     ctx.fillText(`f_peak: ${peakHz.toFixed(1)} Hz`, Math.min(width - 55, Math.max(55, peakX)), 22);
 
     // Threshold Markers
-    ctx.fillStyle = '#10B981';
+    ctx.fillStyle = '#FB923C';
     ctx.font = '10px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('Grade-A Window [110-145 Hz]', (xMin110 + xMax145) / 2, height - 8);
@@ -421,34 +421,36 @@ export const AcousticBioResonanceStudio: React.FC = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span
-              className="badge"
               style={{
-                background: '#EEF2FF',
-                color: '#4F46E5',
-                border: '1px solid #C7D2FE',
-                fontSize: '0.68rem',
-                fontWeight: 800,
+                background: '#FFF7ED',
+                color: '#FB923C',
+                border: '1px solid #FED7AA',
+                fontSize: '12px',
+                fontWeight: 600,
+                padding: '2px 8px',
+                borderRadius: '4px',
               }}
             >
-              SIGNATURE INNOVATION #1
+              Non-Destructive Acoustic Screening
             </span>
             <span
-              className="badge"
               style={{
-                background: '#ECFDF5',
-                color: '#059669',
-                border: '1px solid #A7F3D0',
-                fontSize: '0.68rem',
-                fontWeight: 700,
+                background: 'var(--accent-green-light)',
+                color: '#F97316',
+                border: '1px solid var(--accent-green-border)',
+                fontSize: '12px',
+                fontWeight: 600,
+                padding: '2px 8px',
+                borderRadius: '4px',
               }}
             >
-              ZERO EXTERNAL HARDWARE
+              Hardware-Free
             </span>
           </div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.35rem' }}>
             Acoustic &ldquo;Thumb-Thump&rdquo; Bio-Resonance Spectrometer
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '0.15rem' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '0.15rem' }}>
             Smartphone mic captures 1.5s thumb-flick impulse response → Browser FFT extracts peak resonance (f<sub>peak</sub>) and internal rot risk.
           </p>
         </div>
@@ -462,15 +464,14 @@ export const AcousticBioResonanceStudio: React.FC = () => {
               alignItems: 'center',
               gap: '0.5rem',
               padding: '0.55rem 1rem',
-              borderRadius: 'var(--radius-full)',
-              background: isRecording ? '#DC2626' : '#4F46E5',
+              borderRadius: '6px',
+              background: isRecording ? '#9f1239' : '#21170F',
               color: '#FFFFFF',
               border: 'none',
-              fontSize: '0.82rem',
-              fontWeight: 800,
+              fontSize: '13px',
+              fontWeight: 600,
               cursor: 'pointer',
-              boxShadow: isRecording ? '0 0 15px rgba(220, 38, 38, 0.5)' : '0 2px 6px rgba(79, 70, 229, 0.25)',
-              transition: 'all 0.15s ease',
+              transition: 'background 0.15s ease',
             }}
           >
             {isRecording ? (
@@ -510,11 +511,12 @@ export const AcousticBioResonanceStudio: React.FC = () => {
       {/* Interactive Hackathon Preset Buttons */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>
             DEMO PRESET ACOUSTIC IMPULSES (CLICK TO AUDIT FREQUENCY FFT):
           </span>
-          <span style={{ fontSize: '0.7rem', color: '#6366F1', fontWeight: 700 }}>
-            Plays authentic synthetic bio-sound 🔊
+          <span style={{ fontSize: '12px', color: '#FB923C', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <Volume2 size={13} />
+            <span>Synthetic bio-sound preview</span>
           </span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.5rem' }}>
@@ -523,9 +525,9 @@ export const AcousticBioResonanceStudio: React.FC = () => {
               key: 'crisp_grade_a',
               label: 'Grade-A Core (128 Hz)',
               sub: 'Dense locular partitions',
-              color: '#059669',
-              border: '#10B981',
-              bg: '#ECFDF5',
+              color: '#F97316',
+              border: '#FB923C',
+              bg: 'var(--accent-green-light)',
             },
             {
               key: 'water_blister',
@@ -547,9 +549,9 @@ export const AcousticBioResonanceStudio: React.FC = () => {
               key: 'fibrous_immature',
               label: 'Fibrous Stand (154 Hz)',
               sub: 'Immature woody cellulose',
-              color: '#4F46E5',
-              border: '#6366F1',
-              bg: '#EEF2FF',
+              color: '#FB923C',
+              border: '#FED7AA',
+              bg: '#FFF7ED',
             },
           ].map((preset) => {
             const isSelected = selectedPresetKey === preset.key;
@@ -603,7 +605,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
             <span
               style={{
                 fontSize: '0.68rem',
-                color: isBlister ? '#F87171' : isOptimal ? '#34D399' : '#FBBF24',
+                color: isBlister ? '#F87171' : isOptimal ? '#FB923C' : '#FBBF24',
                 fontWeight: 800,
                 fontFamily: 'var(--font-mono)',
               }}
@@ -662,35 +664,35 @@ export const AcousticBioResonanceStudio: React.FC = () => {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>
                 NON-DESTRUCTIVE HARVEST METRIC
               </span>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#4F46E5' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#FB923C' }}>
                 Mass-Compensated
               </span>
             </div>
             <div
               style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.88rem',
-                fontWeight: 800,
-                color: '#0F172A',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#21170F',
                 marginTop: '0.2rem',
               }}
             >
               Firmness Index (S) = f<sub>peak</sub>² · m<sup>2/3</sup>
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
               = ({result.peakFrequencyHz.toFixed(1)})² · ({massKg.toFixed(2)})<sup>2/3</sup> ={' '}
-              <strong style={{ color: '#4F46E5' }}>{result.firmnessIndex.toLocaleString()}</strong>
+              <strong style={{ color: '#FB923C' }}>{result.firmnessIndex.toLocaleString()}</strong>
             </div>
           </div>
 
           {/* Fruit Mass Slider */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', marginBottom: '0.2rem' }}>
-              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Estimated Fruit Mass (m):</span>
-              <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{massKg.toFixed(2)} kg</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '0.2rem' }}>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Estimated Fruit Mass (m):</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{massKg.toFixed(2)} kg</span>
             </div>
             <input
               type="range"
@@ -699,7 +701,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
               step="0.05"
               value={massKg}
               onChange={(e) => setMassKg(parseFloat(e.target.value))}
-              style={{ width: '100%', accentColor: '#4F46E5', cursor: 'pointer' }}
+              style={{ width: '100%', accentColor: '#FB923C', cursor: 'pointer' }}
             />
           </div>
 
@@ -707,7 +709,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
             <div style={{ background: '#FFFFFF', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', display: 'block' }}>Damping Ratio (ζ)</span>
-              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: result.dampingRatio > 0.08 ? '#DC2626' : '#059669' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: result.dampingRatio > 0.08 ? '#DC2626' : '#F97316' }}>
                 {result.dampingRatio.toFixed(4)}
               </span>
               <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', display: 'block' }}>
@@ -717,7 +719,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
 
             <div style={{ background: '#FFFFFF', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', display: 'block' }}>Water Blister Risk</span>
-              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: result.waterBlisterRiskPct > 50 ? '#DC2626' : '#059669' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 800, color: result.waterBlisterRiskPct > 50 ? '#DC2626' : '#F97316' }}>
                 {result.waterBlisterRiskPct.toFixed(1)}%
               </span>
               <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)', display: 'block' }}>
@@ -731,8 +733,8 @@ export const AcousticBioResonanceStudio: React.FC = () => {
       {/* Diagnostic Action Banner */}
       <div
         style={{
-          background: isBlister ? '#FEF2F2' : isOptimal ? '#ECFDF5' : '#FFFBEB',
-          border: `1px solid ${isBlister ? '#FECACA' : isOptimal ? '#A7F3D0' : '#FDE68A'}`,
+          background: isBlister ? '#FEF2F2' : isOptimal ? 'var(--accent-green-light)' : '#FFFBEB',
+          border: `1px solid ${isBlister ? '#FECACA' : isOptimal ? 'var(--accent-green-border)' : '#FDE68A'}`,
           borderRadius: 'var(--radius-md)',
           padding: '0.85rem 1rem',
           display: 'flex',
@@ -744,7 +746,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
           {isBlister ? (
             <ShieldAlert size={22} color="#DC2626" />
           ) : isOptimal ? (
-            <CheckCircle2 size={22} color="#059669" />
+            <CheckCircle2 size={22} color="#F97316" />
           ) : (
             <AlertTriangle size={22} color="#D97706" />
           )}
@@ -755,7 +757,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
               style={{
                 fontSize: '0.88rem',
                 fontWeight: 800,
-                color: isBlister ? '#991B1B' : isOptimal ? '#065F46' : '#92400E',
+                color: isBlister ? '#991B1B' : isOptimal ? '#F97316' : '#92400E',
               }}
             >
               {result.title}
@@ -765,7 +767,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
               style={{
                 fontSize: '0.68rem',
                 fontWeight: 800,
-                background: isBlister ? '#DC2626' : isOptimal ? '#059669' : '#D97706',
+                background: isBlister ? '#DC2626' : isOptimal ? '#F97316' : '#D97706',
                 color: '#FFFFFF',
               }}
             >
@@ -775,7 +777,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
           <p
             style={{
               fontSize: '0.76rem',
-              color: isBlister ? '#7F1D1D' : isOptimal ? '#064E3B' : '#78350F',
+              color: isBlister ? '#7F1D1D' : isOptimal ? '#F97316' : '#78350F',
               marginTop: '0.2rem',
               lineHeight: 1.45,
             }}
@@ -787,7 +789,7 @@ export const AcousticBioResonanceStudio: React.FC = () => {
               marginTop: '0.4rem',
               fontSize: '0.74rem',
               fontWeight: 700,
-              color: isBlister ? '#991B1B' : isOptimal ? '#065F46' : '#92400E',
+              color: isBlister ? '#991B1B' : isOptimal ? '#F97316' : '#92400E',
             }}
           >
             Recommended Action: <em>{result.recommendation}</em>

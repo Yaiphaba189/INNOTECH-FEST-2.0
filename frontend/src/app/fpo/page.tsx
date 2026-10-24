@@ -11,23 +11,24 @@ export default function FpoPage() {
   const router = useRouter();
 
   return (
-    <RoleGuard allowedRoles={['fpo']}>
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
-        <Header
-          currentRole="fpo"
-          onSelectRole={(role) => {
-            if (role === 'farmer') router.push('/farmer');
-            else if (role === 'buyer') router.push('/buyer');
-            else router.push('/fpo');
-          }}
-        />
+    <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
+      <Header
+        currentRole="fpo"
+        onSelectRole={(role) => {
+          if (role === 'farmer') router.push('/farmer');
+          else if (role === 'buyer') router.push('/buyer');
+          else router.push('/fpo');
+        }}
+      />
 
-        <main style={{ flex: 1, maxWidth: '1240px', width: '100%', margin: '0 auto', padding: '1.75rem 1.25rem' }}>
+      <main className="app-sheet">
+        <RoleGuard allowedRoles={['fpo']}>
           <FpoLogisticsConsole />
-        </main>
+        </RoleGuard>
+      </main>
 
-        <Footer />
-      </div>
-    </RoleGuard>
+      <Footer />
+    </div>
   );
 }
+

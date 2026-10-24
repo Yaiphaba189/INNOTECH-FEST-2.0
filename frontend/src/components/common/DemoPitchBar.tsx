@@ -122,10 +122,9 @@ export const DemoPitchBar: React.FC<DemoPitchBarProps> = ({
   return (
     <div style={{
       position: 'relative',
-      background: 'linear-gradient(135deg, #0F172A, #080C14)',
-      borderBottom: '2px solid var(--pineapple-gold)',
-      padding: '1rem 1.5rem',
-      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.6)',
+      background: '#0f172a',
+      borderBottom: '1px solid #FB923C',
+      padding: '0.85rem 1.5rem',
       zIndex: 40,
     }}>
       {/* Top Bar Info */}
@@ -218,7 +217,7 @@ export const DemoPitchBar: React.FC<DemoPitchBarProps> = ({
                   background: isCurrent 
                     ? 'var(--pineapple-gold)' 
                     : isPassed 
-                    ? 'rgba(16, 185, 129, 0.12)' 
+                    ? 'rgba(251, 146, 60, 0.12)' 
                     : 'var(--bg-surface-elevated)',
                   color: isCurrent 
                     ? '#0F172A' 
@@ -228,7 +227,7 @@ export const DemoPitchBar: React.FC<DemoPitchBarProps> = ({
                   border: isCurrent 
                     ? '1px solid var(--pineapple-gold)' 
                     : isPassed 
-                    ? '1px solid rgba(16, 185, 129, 0.3)' 
+                    ? '1px solid rgba(251, 146, 60, 0.3)' 
                     : '1px solid var(--border-medium)',
                   fontWeight: isCurrent ? 700 : 500,
                   fontSize: '0.78rem',

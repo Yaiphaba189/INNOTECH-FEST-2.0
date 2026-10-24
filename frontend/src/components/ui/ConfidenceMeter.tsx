@@ -19,27 +19,27 @@ export function classifyConfidence(score: number): TriageBand {
 
 const BANDS: Record<
   TriageBand,
-  { label: string; hint: string; color: string; gradient: string; Icon: typeof CheckCircle2 }
+  { label: string; hint: string; color: string; fill: string; Icon: typeof CheckCircle2 }
 > = {
   confirmed: {
     label: 'Confirmed Triage',
     hint: 'High-confidence screen — follow the protocol below.',
-    color: 'var(--plantation-green)',
-    gradient: 'linear-gradient(90deg, #10B981, #059669)',
+    color: '#F97316',
+    fill: '#F97316',
     Icon: CheckCircle2,
   },
   preliminary: {
     label: 'Preliminary Screening — Subject to Visual Progression',
     hint: 'Re-capture under daylight in 48 hours to confirm progression.',
-    color: 'var(--pineapple-gold)',
-    gradient: 'linear-gradient(90deg, #F59E0B, #D97706)',
+    color: '#9a5b13',
+    fill: '#9a5b13',
     Icon: AlertTriangle,
   },
   inconclusive: {
     label: 'Inconclusive — Human Verification Required',
     hint: 'Re-capture with better lighting or escalate to an extension officer.',
-    color: 'var(--alert-crimson)',
-    gradient: 'linear-gradient(90deg, #DC2626, #B91C1C)',
+    color: '#a11920',
+    fill: '#a11920',
     Icon: HelpCircle,
   },
 };
@@ -56,32 +56,32 @@ export const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({ score }) => {
   return (
     <div
       style={{
-        background: 'var(--bg-surface-elevated)',
-        padding: '0.85rem',
-        borderRadius: 'var(--radius-md)',
-        border: `1px solid ${config.color}`,
+        background: '#ffffff',
+        padding: '14px',
+        borderRadius: '6px',
+        border: '1px solid var(--border-subtle)',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-        <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+        <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>
           Model Confidence
         </span>
         <span
           className="tabular-nums"
-          style={{ fontSize: '1rem', fontWeight: 800, color: config.color }}
+          style={{ fontSize: '15px', fontWeight: 600, color: config.color }}
         >
           {score.toFixed(1)}%
         </span>
       </div>
 
-      <div style={{ height: '10px', background: 'var(--border-subtle)', borderRadius: '5px', overflow: 'hidden' }}>
+      <div style={{ height: '8px', background: '#F1E4D8', borderRadius: '4px', overflow: 'hidden' }}>
         <div
           style={{
             height: '100%',
             width: `${score}%`,
-            background: config.gradient,
-            borderRadius: '5px',
-            transition: 'width 0.8s ease',
+            background: config.fill,
+            borderRadius: '4px',
+            transition: 'width 0.4s ease',
           }}
         />
       </div>

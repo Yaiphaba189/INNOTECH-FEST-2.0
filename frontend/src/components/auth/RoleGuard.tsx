@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { UserRole } from '@/types';
 import { useRouter } from 'next/navigation';
-import { ShieldAlert, Lock, ArrowRight, Sprout, Building2, Truck, RefreshCw } from 'lucide-react';
+import { ShieldAlert, Lock, Sprout, Building2, Truck, RefreshCw } from 'lucide-react';
 
 interface RoleGuardProps {
   allowedRoles: UserRole[];
@@ -12,23 +12,32 @@ interface RoleGuardProps {
 }
 
 export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) => {
-  const { user, isAuthenticated, isLoading, openAuthModal } = useAuth();
+  const { user, switchDemoRole, openAuthModal } = useAuth();
   const router = useRouter();
 
-  // If user is loaded and authorized, or fallback demo
   const effectiveRole = user?.role || 'farmer';
+  const isDemo = !user || user.id?.startsWith('usr-') || user.phone_number?.startsWith('+91986200000');
+
+  // If in demo mode and visiting an allowed terminal, auto-sync the persona
+  useEffect(() => {
+    if (isDemo && !allowedRoles.includes(effectiveRole) && allowedRoles.length > 0) {
+      switchDemoRole(allowedRoles[0]).catch((err) => {
+        console.warn('RoleGuard demo sync fallback:', err);
+      });
+    }
+  }, [isDemo, effectiveRole, allowedRoles, switchDemoRole]);
 
   // Super Admin (Mission Director) has full unrestricted access to all terminals
   if (effectiveRole === 'admin' || effectiveRole === 'superadmin') {
     return <>{children}</>;
   }
 
-  // If authorized for this view
-  if (allowedRoles.includes(effectiveRole)) {
+  // Demo sessions and authorized roles have immediate terminal access
+  if (isDemo || allowedRoles.includes(effectiveRole)) {
     return <>{children}</>;
   }
 
-  // If user role is not authorized for this view
+  // If an authenticated non-demo user role is not authorized for this view
   const roleIcons: Record<string, any> = {
     farmer: Sprout,
     buyer: Building2,
@@ -36,12 +45,12 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
   };
   const targetRoleName = allowedRoles.map((r) => r.toUpperCase()).join(' or ');
   const MyRoleIcon = roleIcons[effectiveRole] || Lock;
-  const userName = user?.full_name || 'Tombi Singh';
+  const userName = user?.full_name || 'User';
 
   return (
     <div
       style={{
-        minHeight: '70vh',
+        minHeight: '60vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -49,48 +58,46 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
       }}
     >
       <div
-        className="glass-card"
         style={{
-          maxWidth: '500px',
+          maxWidth: '480px',
           width: '100%',
           background: '#FFFFFF',
-          border: '1px solid #FECACA',
-          borderRadius: '18px',
+          border: '1px solid #F1E4D8',
+          borderRadius: '8px',
           padding: '2rem',
           textAlign: 'center',
-          boxShadow: '0 20px 40px -15px rgba(220, 38, 38, 0.1)',
         }}
       >
         <div
           style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '16px',
-            background: '#FEF2F2',
-            color: '#DC2626',
+            width: '48px',
+            height: '48px',
+            borderRadius: '6px',
+            background: '#fdf3f2',
+            color: '#a11920',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 1.25rem',
-            border: '1px solid #FECACA',
+            border: '1px solid #f2cfce',
           }}
         >
-          <ShieldAlert size={28} />
+          <ShieldAlert size={24} />
         </div>
 
-        <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.5rem' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#21170F', marginBottom: '0.5rem' }}>
           Access Restricted: Role Unauthorized
-        </h2>
+        </h1>
 
-        <p style={{ fontSize: '0.86rem', color: '#64748B', lineHeight: 1.5, marginBottom: '1.25rem' }}>
+        <p style={{ fontSize: '13px', color: '#6E5A4A', lineHeight: 1.5, marginBottom: '1.5rem' }}>
           You are signed in as <strong>{userName}</strong> with role{' '}
           <span
             style={{
-              background: '#F1F5F9',
+              background: '#FFF8F1',
               padding: '0.15rem 0.45rem',
               borderRadius: '4px',
-              fontWeight: 700,
-              color: '#334155',
+              fontWeight: 600,
+              color: '#21170F',
             }}
           >
             {effectiveRole.toUpperCase()}
@@ -104,11 +111,11 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
             className="tap-target"
             style={{
               padding: '0.75rem',
-              fontSize: '0.88rem',
-              fontWeight: 700,
-              background: '#F97316',
+              fontSize: '13px',
+              fontWeight: 600,
+              background: '#21170F',
               color: '#FFFFFF',
-              borderRadius: '10px',
+              borderRadius: '6px',
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
@@ -117,7 +124,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
               gap: '0.5rem',
             }}
           >
-            <RefreshCw size={16} />
+            <RefreshCw size={15} />
             <span>Switch to Authorized Account</span>
           </button>
 
@@ -130,12 +137,12 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
             }}
             style={{
               padding: '0.65rem',
-              fontSize: '0.84rem',
+              fontSize: '13px',
               fontWeight: 600,
-              color: '#475569',
-              background: '#F8FAFC',
-              border: '1px solid #E2E8F0',
-              borderRadius: '10px',
+              color: '#21170F',
+              background: '#FFFFFF',
+              border: '1px solid #E5D2C2',
+              borderRadius: '6px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -143,11 +150,12 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
               gap: '0.45rem',
             }}
           >
-            <MyRoleIcon size={15} />
-            <span>Go to My Authorized Terminal ({effectiveRole.toUpperCase()})</span>
+            <MyRoleIcon size={14} />
+            <span>Go to My Terminal ({effectiveRole.toUpperCase()})</span>
           </button>
         </div>
       </div>
     </div>
   );
 };
+

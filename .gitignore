@@ -122,3 +122,9 @@ checkpoints/
 data/training/**/*.jpg
 data/training/**/*.jpeg
 data/training/**/*.png
+
+# --- AI agent / skill tooling (local only) ---
+.agents/
+.taste-skill/
+skills-lock.json
+.claude/

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
+import '@/styles/redesign.css';
 import { I18nProvider } from '@/lib/i18n';
 import { AuthProvider } from '@/context/AuthContext';
 import { ServiceWorkerRegistrar } from '@/components/common/ServiceWorkerRegistrar';
@@ -32,9 +33,9 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: '#F8FAFC',
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#FFF8F1',
 };
 
 export default function RootLayout({
@@ -48,7 +49,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Meetei+Mayek:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Sans+Meetei+Mayek:wght@400;600;700&display=swap"
           rel="stylesheet"
         />
         {process.env.NODE_ENV !== 'production' && (

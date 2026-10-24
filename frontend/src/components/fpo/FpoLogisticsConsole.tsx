@@ -11,6 +11,7 @@ import {
   QrCode,
   Phone,
   X,
+  CheckCircle,
 } from 'lucide-react';
 import { DispatchRun } from '@/types';
 import { MOCK_DISPATCH_RUN } from '@/lib/mock-data';
@@ -67,10 +68,9 @@ export const FpoLogisticsConsole: React.FC = () => {
   const stops = run.stops || [];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Console Header */}
       <div
-        className="glass-card"
         style={{
           padding: '1.25rem 1.5rem',
           display: 'flex',
@@ -78,27 +78,30 @@ export const FpoLogisticsConsole: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '1rem',
+          background: '#FFFFFF',
+          border: '1px solid #F1E4D8',
+          borderRadius: '8px',
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className="badge badge-orange" style={{ fontSize: '0.66rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <span className="badge badge-orange" style={{ fontSize: '11px', fontWeight: 600 }}>
               FPO LOGISTICS
             </span>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+            <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#21170F' }}>
               Collective Logistics & Route Dispatch
             </h1>
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '0.2rem' }}>
+          <p style={{ color: '#6E5A4A', fontSize: '13px', marginTop: '0.25rem' }}>
             Consolidating smallholder harvest lots into ≥75% saturated transit payloads.
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span className="badge badge-slate" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem' }}>
+          <span className="badge badge-slate" style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 600 }}>
             RUN: {displayRunId}
           </span>
-          <span className="badge badge-green" style={{ fontSize: '0.72rem' }}>
+          <span className="badge badge-orange" style={{ fontSize: '12px', fontWeight: 600 }}>
             {run.cluster_district} Cluster
           </span>
         </div>
@@ -113,16 +116,26 @@ export const FpoLogisticsConsole: React.FC = () => {
         }}
       >
         {/* Left Column: Vehicle Saturation & QR Gate-Pass */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            background: '#FFFFFF',
+            border: '1px solid #F1E4D8',
+            borderRadius: '8px',
+            padding: '1.25rem',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: '14px', fontWeight: 700, color: '#21170F' }}>
               Vehicle Saturation Meter
             </span>
             <span
-              className={`badge ${run.capacity_fill_pct >= 75 ? 'badge-green' : 'badge-orange'}`}
-              style={{ fontSize: '0.68rem' }}
+              className={`badge ${run.capacity_fill_pct >= 75 ? 'badge-orange' : 'badge-slate'}`}
+              style={{ fontSize: '12px', fontWeight: 600 }}
             >
-              <span className={`pulse-dot ${run.capacity_fill_pct >= 75 ? 'pulse-dot-green' : ''}`} />
+              <span className={`pulse-dot ${run.capacity_fill_pct >= 75 ? 'pulse-dot-orange' : ''}`} />
               {run.capacity_fill_pct}% Full ({run.capacity_fill_pct >= 75 ? 'Pass' : 'Below 75% gate'})
             </span>
           </div>
@@ -130,42 +143,28 @@ export const FpoLogisticsConsole: React.FC = () => {
           {/* Vehicle Info Box */}
           <div
             style={{
-              background: '#F8FAFC',
-              padding: '0.85rem',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-subtle)',
+              background: '#FFF5ED',
+              padding: '0.85rem 1rem',
+              borderRadius: '6px',
+              border: '1px solid #F1E4D8',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <div
-                style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  background: '#FFF7ED',
-                  color: '#EA580C',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <Truck size={20} />
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Truck size={22} style={{ color: '#21170F', flexShrink: 0 }} />
               <div>
-                <div style={{ fontWeight: 800, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                <div style={{ fontWeight: 700, fontSize: '14px', color: '#21170F' }}>
                   {run.vehicle_type}
                 </div>
-                <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '12px', color: '#6E5A4A' }}>
                   Reg: {run.vehicle_registration} • Driver: {run.driver_name}
                 </div>
               </div>
             </div>
 
-            <span className="badge badge-orange" style={{ fontSize: '0.66rem' }}>
+            <span className="badge badge-orange" style={{ fontSize: '12px', fontWeight: 600 }}>
               06:30 AM
             </span>
           </div>
@@ -173,60 +172,60 @@ export const FpoLogisticsConsole: React.FC = () => {
           {/* Saturation Progress */}
           <div
             style={{
-              background: '#F8FAFC',
-              padding: '0.85rem',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-subtle)',
+              background: '#FFF5ED',
+              padding: '0.85rem 1rem',
+              borderRadius: '6px',
+              border: '1px solid #F1E4D8',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.35rem' }}>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+              <span style={{ fontSize: '13px', color: '#4A3A2E', fontWeight: 600 }}>
                 Consolidated Payload
               </span>
-              <span className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 900, color: '#059669' }}>
-                {run.current_payload_kg} kg <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>/ {run.vehicle_capacity_kg} kg</span>
+              <span className="tabular-nums" style={{ fontSize: '15px', fontWeight: 700, color: '#FB923C' }}>
+                {run.current_payload_kg} kg <span style={{ fontSize: '12px', color: '#6E5A4A', fontWeight: 400 }}>/ {run.vehicle_capacity_kg} kg</span>
               </span>
             </div>
 
-            <div style={{ height: '8px', background: '#E2E8F0', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ height: '8px', background: '#F1E4D8', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
               <div
                 style={{
                   height: '100%',
                   width: `${run.capacity_fill_pct}%`,
-                  background: '#10B981',
+                  background: '#FB923C',
                   borderRadius: '4px',
                   transition: 'width 0.6s ease',
                 }}
               />
-              <div style={{ position: 'absolute', top: 0, bottom: 0, left: '75%', width: '2px', background: '#F97316' }} />
+              <div style={{ position: 'absolute', top: 0, bottom: 0, left: '75%', width: '2px', background: '#21170F' }} />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.35rem', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.35rem', fontSize: '12px', color: '#6E5A4A' }}>
               <span>0 kg</span>
-              <span style={{ color: '#EA580C', fontWeight: 700 }}>75% Target Gate</span>
+              <span style={{ color: '#FB923C', fontWeight: 600 }}>75% Target Gate</span>
               <span>{run.vehicle_capacity_kg} kg</span>
             </div>
           </div>
 
           {/* 3 Metrics */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-            <div style={{ background: '#F8FAFC', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', padding: '0.55rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>STOPS</div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
+            <div style={{ background: '#FFF5ED', borderRadius: '6px', border: '1px solid #F1E4D8', padding: '0.65rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: '#6E5A4A', fontWeight: 600 }}>STOPS</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: '#21170F', marginTop: '0.1rem' }}>
                 {stops.length} Lots
               </div>
             </div>
 
-            <div style={{ background: '#F8FAFC', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', padding: '0.55rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>SAVINGS</div>
-              <div className="tabular-nums" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#059669', marginTop: '0.1rem' }}>
+            <div style={{ background: '#FFF5ED', borderRadius: '6px', border: '1px solid #F1E4D8', padding: '0.65rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: '#6E5A4A', fontWeight: 600 }}>SAVINGS</div>
+              <div className="tabular-nums" style={{ fontSize: '16px', fontWeight: 700, color: '#F97316', marginTop: '0.1rem' }}>
                 +₹{run.cost_savings_per_kg.toFixed(2)}/kg
               </div>
             </div>
 
-            <div style={{ background: '#F8FAFC', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)', padding: '0.55rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>HUB</div>
-              <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#EA580C', marginTop: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ background: '#FFF5ED', borderRadius: '6px', border: '1px solid #F1E4D8', padding: '0.65rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '12px', color: '#6E5A4A', fontWeight: 600 }}>HUB</div>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#FB923C', marginTop: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 Nilakuthi
               </div>
             </div>
@@ -235,10 +234,10 @@ export const FpoLogisticsConsole: React.FC = () => {
           {/* Digital Gate Pass Card */}
           <div
             style={{
-              background: '#F8FAFC',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-md)',
-              padding: '0.75rem',
+              background: '#FFF5ED',
+              border: '1px solid #F1E4D8',
+              borderRadius: '6px',
+              padding: '0.85rem 1rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -246,19 +245,19 @@ export const FpoLogisticsConsole: React.FC = () => {
               marginTop: 'auto',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               {qrDataUrl && (
                 <img
                   src={qrDataUrl}
                   alt="Transit Gate Pass QR"
-                  style={{ width: '50px', height: '50px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}
+                  style={{ width: '48px', height: '48px', borderRadius: '4px', border: '1px solid #E5D2C2' }}
                 />
               )}
               <div>
-                <div style={{ fontWeight: 800, fontSize: '0.84rem', color: 'var(--text-primary)' }}>
+                <div style={{ fontWeight: 700, fontSize: '13px', color: '#21170F' }}>
                   Digital Transit Gate-Pass
                 </div>
-                <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                <div style={{ fontSize: '12px', color: '#6E5A4A', fontFamily: 'var(--font-mono)' }}>
                   TOKEN: {run.digital_gate_pass_token.slice(0, 14)}...
                 </div>
               </div>
@@ -267,21 +266,31 @@ export const FpoLogisticsConsole: React.FC = () => {
             <button
               onClick={() => setShowManifestModal(true)}
               className="tap-target btn-secondary"
-              style={{ padding: '0.35rem 0.75rem', fontSize: '0.76rem', minHeight: '32px' }}
+              style={{ padding: '0.4rem 0.85rem', fontSize: '13px', minHeight: '38px', fontWeight: 600 }}
             >
-              <QrCode size={13} style={{ marginRight: '0.25rem' }} />
+              <QrCode size={14} style={{ marginRight: '0.3rem' }} />
               QR Pass
             </button>
           </div>
         </div>
 
         {/* Right Column: Route Stops Timeline & Actions */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            background: '#FFFFFF',
+            border: '1px solid #F1E4D8',
+            borderRadius: '8px',
+            padding: '1.25rem',
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+            <span style={{ fontSize: '14px', fontWeight: 700, color: '#21170F' }}>
               Pickup Route Timeline
             </span>
-            <span className="badge badge-orange" style={{ fontSize: '0.68rem' }}>
+            <span className="badge badge-orange" style={{ fontSize: '12px', fontWeight: 600 }}>
               CVRPTW Optimal
             </span>
           </div>
@@ -295,41 +304,35 @@ export const FpoLogisticsConsole: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.65rem',
-                  padding: '0.65rem 0.85rem',
-                  borderRadius: 'var(--radius-md)',
-                  background: '#F8FAFC',
-                  border: '1px solid var(--border-subtle)',
+                  padding: '0.75rem 0.95rem',
+                  borderRadius: '6px',
+                  background: '#FFF5ED',
+                  border: '1px solid #F1E4D8',
                 }}
               >
-                <div
+                <span
                   style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    color: '#6E5A4A',
                     width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    background: '#FFF7ED',
-                    border: '1px solid #FED7AA',
-                    color: '#EA580C',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 900,
-                    fontSize: '0.72rem',
                     flexShrink: 0,
                   }}
                 >
-                  {stop.order || idx + 1}
-                </div>
+                  0{stop.order || idx + 1}
+                </span>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-primary)' }}>
+                    <span style={{ fontWeight: 600, fontSize: '13px', color: '#21170F' }}>
                       {stop.farmer_name}
                     </span>
-                    <span style={{ fontSize: '0.74rem', color: '#EA580C', fontWeight: 700 }}>
+                    <span style={{ fontSize: '13px', color: '#FB923C', fontWeight: 700 }}>
                       {stop.quantity_kg} kg
                     </span>
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: '12px', color: '#6E5A4A' }}>
                     {stop.village}, {stop.district} • Lot: {stop.lot_code}
                   </div>
                 </div>
@@ -342,39 +345,23 @@ export const FpoLogisticsConsole: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.65rem',
-                padding: '0.65rem 0.85rem',
-                borderRadius: 'var(--radius-md)',
-                background: '#ECFDF5',
-                border: '1px solid #A7F3D0',
+                padding: '0.75rem 0.95rem',
+                borderRadius: '6px',
+                background: 'var(--accent-green-light)',
+                border: '1px solid var(--accent-green-border)',
               }}
             >
-              <div
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  background: '#10B981',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 900,
-                  fontSize: '0.72rem',
-                  flexShrink: 0,
-                }}
-              >
-                <MapPin size={12} />
-              </div>
+              <MapPin size={16} style={{ color: '#F97316', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontWeight: 800, fontSize: '0.82rem', color: '#065F46' }}>
+                  <span style={{ fontWeight: 700, fontSize: '13px', color: '#F97316' }}>
                     {run.destination_hub}
                   </span>
-                  <span className="badge badge-green" style={{ fontSize: '0.62rem' }}>
+                  <span className="badge badge-orange" style={{ fontSize: '12px', fontWeight: 600 }}>
                     DESTINATION
                   </span>
                 </div>
-                <div style={{ fontSize: '0.7rem', color: '#047857', fontWeight: 600 }}>
+                <div style={{ fontSize: '12px', color: '#F97316', fontWeight: 600 }}>
                   Total Payload: {run.current_payload_kg} kg
                 </div>
               </div>
@@ -387,16 +374,25 @@ export const FpoLogisticsConsole: React.FC = () => {
               onClick={handleSendSms}
               disabled={smsSent}
               className="tap-target btn-primary"
-              style={{ gap: '0.35rem', fontSize: '0.82rem', minHeight: '36px' }}
+              style={{ gap: '0.4rem', fontSize: '13px', minHeight: '40px', fontWeight: 600 }}
             >
-              <MessageSquare size={14} />
-              <span>{smsSent ? '✓ Dispatched' : 'SMS Route to Driver'}</span>
+              {smsSent ? (
+                <>
+                  <CheckCircle size={14} />
+                  <span>Route Dispatched</span>
+                </>
+              ) : (
+                <>
+                  <MessageSquare size={14} />
+                  <span>SMS Route to Driver</span>
+                </>
+              )}
             </button>
 
             <button
               onClick={() => window.print()}
               className="tap-target btn-secondary"
-              style={{ gap: '0.35rem', fontSize: '0.82rem', minHeight: '36px' }}
+              style={{ gap: '0.4rem', fontSize: '13px', minHeight: '40px', fontWeight: 600 }}
             >
               <Printer size={14} />
               <span>Print Manifest</span>
@@ -420,21 +416,21 @@ export const FpoLogisticsConsole: React.FC = () => {
             padding: '1rem',
           }}
         >
-          <div className="glass-card" style={{ maxWidth: '380px', width: '100%', textAlign: 'center', background: '#FFFFFF', padding: '1.5rem' }}>
+          <div style={{ maxWidth: '400px', width: '100%', textAlign: 'center', background: '#FFFFFF', padding: '1.5rem', border: '1px solid #F1E4D8', borderRadius: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#21170F' }}>
                 Digital Gate-Pass QR Code
               </h3>
               <button
                 type="button"
                 onClick={() => setShowManifestModal(false)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#6E5A4A' }}
               >
                 <X size={18} />
               </button>
             </div>
 
-            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '13px', color: '#6E5A4A', marginBottom: '1rem' }}>
               Scan at Highway Patrol & Processing Plant Checkpoint
             </p>
 

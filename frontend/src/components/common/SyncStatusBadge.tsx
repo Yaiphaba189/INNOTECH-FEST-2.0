@@ -93,7 +93,7 @@ export const SyncStatusBadge: React.FC = () => {
         fontWeight: 600,
         color: 'var(--plantation-green)',
         background: 'var(--plantation-green-bg)',
-        border: '1px solid rgba(16, 185, 129, 0.3)',
+        border: '1px solid rgba(251, 146, 60, 0.3)',
       }}
     >
       <CheckCircle2 size={14} />

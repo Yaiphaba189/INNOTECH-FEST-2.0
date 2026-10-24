@@ -136,10 +136,9 @@ export const BuyerMarketplace: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       {/* Buyer Console Header */}
       <div
-        className="glass-card"
         style={{
           padding: '1.25rem 1.5rem',
           display: 'flex',
@@ -147,18 +146,21 @@ export const BuyerMarketplace: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '1rem',
+          background: '#FFFFFF',
+          border: '1px solid #F1E4D8',
+          borderRadius: '8px',
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className="badge badge-orange" style={{ fontSize: '0.66rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <span className="badge badge-orange" style={{ fontSize: '11px', fontWeight: 600 }}>
               BUYER TERMINAL
             </span>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+            <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#21170F' }}>
               Wholesale Pineapple Marketplace Feed
             </h1>
           </div>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginTop: '0.2rem' }}>
+          <p style={{ color: '#6E5A4A', fontSize: '13px', marginTop: '0.25rem' }}>
             Direct procurement from verified smallholder clusters in Churachandpur and Thoubal.
           </p>
         </div>
@@ -166,9 +168,9 @@ export const BuyerMarketplace: React.FC = () => {
         <button
           onClick={() => setShowOrderModal(true)}
           className="tap-target btn-primary"
-          style={{ gap: '0.4rem', fontSize: '0.84rem', minHeight: '38px' }}
+          style={{ gap: '0.4rem', fontSize: '13px', minHeight: '40px', fontWeight: 600 }}
         >
-          <PlusCircle size={16} />
+          <PlusCircle size={15} />
           <span>Post Demand Order</span>
         </button>
       </div>
@@ -185,8 +187,8 @@ export const BuyerMarketplace: React.FC = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-            <Filter size={14} style={{ color: 'var(--brand-orange)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '12px', color: '#6E5A4A', fontWeight: 600 }}>
+            <Filter size={14} style={{ color: '#FB923C' }} />
             <span>FILTER:</span>
           </div>
 
@@ -195,11 +197,11 @@ export const BuyerMarketplace: React.FC = () => {
             onChange={(e) => setSelectedDistrict(e.target.value)}
             style={{
               background: '#FFFFFF',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-full)',
-              padding: '0.35rem 0.85rem',
-              color: 'var(--text-primary)',
-              fontSize: '0.78rem',
+              border: '1px solid #E5D2C2',
+              borderRadius: '6px',
+              padding: '0.4rem 0.85rem',
+              color: '#21170F',
+              fontSize: '13px',
               fontWeight: 500,
             }}
           >
@@ -213,11 +215,11 @@ export const BuyerMarketplace: React.FC = () => {
             onChange={(e) => setSelectedGrade(e.target.value)}
             style={{
               background: '#FFFFFF',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-full)',
-              padding: '0.35rem 0.85rem',
-              color: 'var(--text-primary)',
-              fontSize: '0.78rem',
+              border: '1px solid #E5D2C2',
+              borderRadius: '6px',
+              padding: '0.4rem 0.85rem',
+              color: '#21170F',
+              fontSize: '13px',
               fontWeight: 500,
             }}
           >
@@ -227,70 +229,73 @@ export const BuyerMarketplace: React.FC = () => {
           </select>
         </div>
 
-        <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+        <div style={{ fontSize: '13px', color: '#6E5A4A' }}>
           Showing <strong>{filteredLots.length}</strong> verified farm lots
         </div>
       </div>
 
       {/* Marketplace Lots Grid */}
       <div
+        className="buyer-lot-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
           gap: '1rem',
         }}
       >
         {filteredLots.map((lot) => (
           <div
             key={lot.id}
-            className="glass-card"
             style={{
               display: 'flex',
               flexDirection: 'column',
               gap: '0.75rem',
-              padding: '1.2rem',
+              padding: '1.25rem',
+              background: '#FFFFFF',
+              border: '1px solid #F1E4D8',
+              borderRadius: '8px',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="badge badge-orange" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem' }}>
+              <span className="badge badge-orange" style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 600 }}>
                 {lot.lot_code}
               </span>
-              <span className={`badge ${lot.grade === 'Grade A' ? 'badge-green' : 'badge-slate'}`} style={{ fontSize: '0.66rem' }}>
+              <span className={`badge ${lot.grade === 'Grade A' ? 'badge-orange' : 'badge-slate'}`} style={{ fontSize: '12px', fontWeight: 600 }}>
                 {lot.grade}
               </span>
             </div>
 
             <div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#21170F' }}>
                 {lot.weight_kg} kg {lot.variety} Pineapple
               </h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)', fontSize: '0.76rem', marginTop: '0.15rem' }}>
-                <MapPin size={12} style={{ color: '#F97316' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#6E5A4A', fontSize: '12px', marginTop: '0.25rem' }}>
+                <MapPin size={13} style={{ color: '#FB923C' }} />
                 <span>{lot.district} • {lot.farmer}</span>
               </div>
             </div>
 
             <div
               style={{
-                background: '#F8FAFC',
-                padding: '0.65rem 0.75rem',
-                borderRadius: 'var(--radius-sm)',
+                background: '#FFF5ED',
+                padding: '0.75rem 0.85rem',
+                borderRadius: '6px',
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 gap: '0.5rem',
-                border: '1px solid var(--border-subtle)',
+                border: '1px solid #F1E4D8',
               }}
             >
               <div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>SWEETNESS</div>
-                <div className="tabular-nums" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#059669' }}>
+                <div style={{ fontSize: '12px', color: '#6E5A4A', fontWeight: 600 }}>SWEETNESS</div>
+                <div className="tabular-nums" style={{ fontSize: '16px', fontWeight: 700, color: '#F97316' }}>
                   {lot.brix}° Brix
                 </div>
               </div>
 
               <div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>READY DATE</div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.15rem' }}>
+                <div style={{ fontSize: '12px', color: '#6E5A4A', fontWeight: 600 }}>READY DATE</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#21170F', marginTop: '0.15rem' }}>
                   {lot.available_date}
                 </div>
               </div>
@@ -302,25 +307,25 @@ export const BuyerMarketplace: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 marginTop: 'auto',
-                paddingTop: '0.65rem',
-                borderTop: '1px solid var(--border-subtle)',
+                paddingTop: '0.75rem',
+                borderTop: '1px solid #F1E4D8',
               }}
             >
               <div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 700 }}>ASKING RATE</div>
-                <div className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 900, color: '#EA580C' }}>
+                <div style={{ fontSize: '12px', color: '#6E5A4A', fontWeight: 600 }}>ASKING RATE</div>
+                <div className="tabular-nums" style={{ fontSize: '18px', fontWeight: 700, color: '#FB923C' }}>
                   ₹{lot.minimum_rate.toFixed(2)}
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>/kg</span>
+                  <span style={{ fontSize: '12px', color: '#6E5A4A', fontWeight: 400 }}>/kg</span>
                 </div>
               </div>
 
               <button
                 className="tap-target btn-primary"
-                style={{ padding: '0.35rem 0.85rem', fontSize: '0.78rem', minHeight: '34px', gap: '0.3rem' }}
+                style={{ padding: '0.45rem 0.95rem', fontSize: '13px', minHeight: '38px', gap: '0.35rem', fontWeight: 600 }}
                 onClick={() => alert(`Bid initiated for ${lot.lot_code} (${lot.weight_kg} kg). The farmer will review net payout.`)}
               >
                 <span>Submit Offer</span>
-                <ArrowRight size={12} />
+                <ArrowRight size={13} />
               </button>
             </div>
           </div>

@@ -162,8 +162,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               style={{
                 width: '30px',
                 height: '30px',
-                borderRadius: '8px',
-                background: 'linear-gradient(135deg, #F97316 0%, #EA580C 100%)',
+                borderRadius: '6px',
+                background: '#FB923C',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -173,7 +173,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <Sprout size={16} strokeWidth={2.4} />
             </div>
             <span style={{ fontWeight: 900, fontSize: '1.05rem', color: '#0F172A' }}>
-              HARVESTLINK <span style={{ color: '#F97316' }}>AI</span>
+              HARVESTLINK <span style={{ color: '#FB923C' }}>AI</span>
             </span>
           </div>
 
@@ -217,7 +217,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               fontWeight: 700,
               cursor: 'pointer',
               background: activeTab === 'login' ? '#FFFFFF' : 'transparent',
-              color: activeTab === 'login' ? '#EA580C' : 'var(--text-muted)',
+              color: activeTab === 'login' ? '#FB923C' : 'var(--text-muted)',
               boxShadow: activeTab === 'login' ? '0 1px 3px rgba(15, 23, 42, 0.08)' : 'none',
               transition: 'all 0.15s ease',
             }}
@@ -239,7 +239,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               fontWeight: 700,
               cursor: 'pointer',
               background: activeTab === 'signup' ? '#FFFFFF' : 'transparent',
-              color: activeTab === 'signup' ? '#EA580C' : 'var(--text-muted)',
+              color: activeTab === 'signup' ? '#FB923C' : 'var(--text-muted)',
               boxShadow: activeTab === 'signup' ? '0 1px 3px rgba(15, 23, 42, 0.08)' : 'none',
               transition: 'all 0.15s ease',
             }}
@@ -278,9 +278,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               gap: '0.45rem',
               padding: '0.55rem 0.75rem',
               borderRadius: 'var(--radius-md)',
-              background: '#ECFDF5',
-              border: '1px solid #A7F3D0',
-              color: '#059669',
+              background: 'var(--accent-green-light)',
+              border: '1px solid var(--accent-green-border)',
+              color: '#F97316',
               fontSize: '0.76rem',
               fontWeight: 600,
               marginBottom: '0.85rem',
@@ -373,7 +373,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             {/* Quick Demo Switcher */}
             <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '0.85rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.5rem', color: '#EA580C', fontSize: '0.7rem', fontWeight: 800 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginBottom: '0.5rem', color: '#FB923C', fontSize: '0.7rem', fontWeight: 800 }}>
                 <Sparkles size={12} />
                 <span>1-TAP DEMO SWITCH</span>
               </div>
@@ -389,12 +389,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     gap: '0.35rem',
                     padding: '0.4rem 0.55rem',
                     borderRadius: 'var(--radius-sm)',
-                    border: '1px solid #C7D2FE',
-                    background: '#EEF2FF',
+                    border: '1px solid #E5D2C2',
+                    background: '#FFF5ED',
                     cursor: 'pointer',
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
-                    color: '#4F46E5',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#21170F',
                   }}
                 >
                   <ShieldCheck size={13} />
@@ -411,12 +411,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     gap: '0.35rem',
                     padding: '0.4rem 0.55rem',
                     borderRadius: 'var(--radius-sm)',
-                    border: '1px solid #A7F3D0',
-                    background: '#ECFDF5',
+                    border: '1px solid var(--accent-green-border)',
+                    background: 'var(--accent-green-light)',
                     cursor: 'pointer',
                     fontSize: '0.74rem',
                     fontWeight: 700,
-                    color: '#059669',
+                    color: '#F97316',
                   }}
                 >
                   <Sprout size={13} />
@@ -460,7 +460,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     cursor: 'pointer',
                     fontSize: '0.74rem',
                     fontWeight: 700,
-                    color: '#EA580C',
+                    color: '#FB923C',
                   }}
                 >
                   <Truck size={13} />

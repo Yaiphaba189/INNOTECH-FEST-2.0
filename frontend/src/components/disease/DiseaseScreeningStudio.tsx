@@ -375,9 +375,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
         scanY = (scanY + 2.5) % 480;
         const grad = ctx.createLinearGradient(0, scanY - 15, 0, scanY + 15);
-        grad.addColorStop(0, 'rgba(16, 185, 129, 0)');
-        grad.addColorStop(0.5, 'rgba(16, 185, 129, 0.35)');
-        grad.addColorStop(1, 'rgba(16, 185, 129, 0)');
+        grad.addColorStop(0, 'rgba(251, 146, 60, 0)');
+        grad.addColorStop(0.5, 'rgba(251, 146, 60, 0.35)');
+        grad.addColorStop(1, 'rgba(251, 146, 60, 0)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, scanY - 15, 640, 30);
       }
@@ -701,9 +701,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
-          background: '#F1F5F9',
-          padding: '0.3rem',
-          borderRadius: 'var(--radius-md)',
+          background: '#FFF5ED',
+          padding: '0.25rem',
+          borderRadius: '6px',
           border: '1px solid var(--border-subtle)',
         }}
       >
@@ -714,20 +714,19 @@ export const DiseaseScreeningStudio: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.45rem',
+            gap: '0.5rem',
             padding: '0.45rem 0.8rem',
-            borderRadius: '6px',
-            border: 'none',
+            borderRadius: '4px',
+            border: screeningMode === 'vision' ? '1px solid var(--border-medium)' : '1px solid transparent',
             background: screeningMode === 'vision' ? '#FFFFFF' : 'transparent',
-            color: screeningMode === 'vision' ? '#0F172A' : '#64748B',
-            fontWeight: screeningMode === 'vision' ? 800 : 600,
-            fontSize: '0.78rem',
+            color: screeningMode === 'vision' ? '#21170F' : '#6E5A4A',
+            fontWeight: screeningMode === 'vision' ? 600 : 500,
+            fontSize: '13px',
             cursor: 'pointer',
-            boxShadow: screeningMode === 'vision' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-            transition: 'all 0.12s ease',
+            transition: 'background 0.12s ease',
           }}
         >
-          <Camera size={14} color={screeningMode === 'vision' ? '#EA580C' : '#64748B'} />
+          <Camera size={15} color={screeningMode === 'vision' ? '#FB923C' : '#6E5A4A'} />
           <span>Optical Vision Screening (External Rind & Leaves)</span>
         </button>
 
@@ -738,34 +737,20 @@ export const DiseaseScreeningStudio: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '0.45rem',
+            gap: '0.5rem',
             padding: '0.45rem 0.8rem',
-            borderRadius: '6px',
-            border: 'none',
+            borderRadius: '4px',
+            border: screeningMode === 'acoustic' ? '1px solid var(--border-medium)' : '1px solid transparent',
             background: screeningMode === 'acoustic' ? '#FFFFFF' : 'transparent',
-            color: screeningMode === 'acoustic' ? '#4F46E5' : '#64748B',
-            fontWeight: screeningMode === 'acoustic' ? 800 : 600,
-            fontSize: '0.78rem',
+            color: screeningMode === 'acoustic' ? '#FB923C' : '#6E5A4A',
+            fontWeight: screeningMode === 'acoustic' ? 600 : 500,
+            fontSize: '13px',
             cursor: 'pointer',
-            boxShadow: screeningMode === 'acoustic' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-            transition: 'all 0.12s ease',
+            transition: 'background 0.12s ease',
           }}
         >
-          <Waves size={14} color={screeningMode === 'acoustic' ? '#4F46E5' : '#64748B'} />
-          <span>Acoustic &ldquo;Thumb-Thump&rdquo; Spectrometer (Internal Water Blister)</span>
-          <span
-            style={{
-              fontSize: '0.62rem',
-              fontWeight: 800,
-              padding: '0.1rem 0.4rem',
-              borderRadius: '999px',
-              background: '#EEF2FF',
-              color: '#4F46E5',
-              border: '1px solid #C7D2FE',
-            }}
-          >
-            INNOVATION #1
-          </span>
+          <Waves size={15} color={screeningMode === 'acoustic' ? '#FB923C' : '#6E5A4A'} />
+          <span>Acoustic Bio-Resonance Spectrometer (Internal Water Blister)</span>
         </button>
       </div>
 
@@ -773,111 +758,104 @@ export const DiseaseScreeningStudio: React.FC = () => {
         <AcousticBioResonanceStudio />
       ) : (
         <>
-          {/* Clean Scope Bar: Crop Scope Pills on Left, Auto-Scan Toggle on Right */}
+          {/* Clean Scope Bar: Crop Scope on Left, Auto-Scan Toggle on Right */}
           <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '0.6rem',
-          padding: '0.45rem 0.65rem',
-          borderRadius: 'var(--radius-md)',
-          background: '#F8FAFC',
-          border: '1px solid var(--border-subtle)',
-        }}
-      >
-        {/* Left: Clean Text Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', marginRight: '0.2rem' }}>
-            CROP:
-          </span>
-          {[
-            { id: 'auto', label: 'Auto (All Crops)' },
-            { id: 'pineapple', label: 'Pineapple' },
-            { id: 'rice', label: 'Rice' },
-            { id: 'orange', label: 'Orange' },
-          ].map((scope) => {
-            const isActive = cropScope === scope.id;
-            return (
-              <button
-                key={scope.id}
-                onClick={() => {
-                  setCropScope(scope.id as CropScope);
-                  if (scope.id !== 'auto') {
-                    const defaultOrgans = CROP_ORGANS[scope.id];
-                    if (defaultOrgans && defaultOrgans[0]) {
-                      setSelectedOrgan(defaultOrgans[0].id);
-                    }
-                  }
-                }}
-                style={{
-                  padding: '0.25rem 0.65rem',
-                  fontSize: '0.74rem',
-                  borderRadius: 'var(--radius-full)',
-                  border: isActive ? '1px solid var(--brand-orange)' : '1px solid var(--border-subtle)',
-                  background: isActive ? '#FFF7ED' : '#FFFFFF',
-                  color: isActive ? '#EA580C' : 'var(--text-secondary)',
-                  fontWeight: isActive ? 800 : 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.12s ease',
-                }}
-              >
-                {scope.label}
-                {scope.id === 'orange' && (
-                  <span
-                    title="No trained model yet: explainable colour analysis only"
-                    style={{ marginLeft: '0.35rem', fontSize: '0.58rem', fontWeight: 800, color: '#B45309', background: '#FEF3C7', borderRadius: '999px', padding: '0.05rem 0.4rem' }}
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '0.6rem',
+              padding: '0.45rem 0.75rem',
+              borderRadius: '6px',
+              background: '#FFF5ED',
+              border: '1px solid var(--border-subtle)',
+            }}
+          >
+            {/* Left: Clean Text Options */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', marginRight: '0.2rem' }}>
+                CROP:
+              </span>
+              {[
+                { id: 'auto', label: 'Auto (All Crops)' },
+                { id: 'pineapple', label: 'Pineapple' },
+                { id: 'rice', label: 'Rice' },
+                { id: 'orange', label: 'Orange' },
+              ].map((scope) => {
+                const isActive = cropScope === scope.id;
+                return (
+                  <button
+                    key={scope.id}
+                    onClick={() => {
+                      setCropScope(scope.id as CropScope);
+                      if (scope.id !== 'auto') {
+                        const defaultOrgans = CROP_ORGANS[scope.id];
+                        if (defaultOrgans && defaultOrgans[0]) {
+                          setSelectedOrgan(defaultOrgans[0].id);
+                        }
+                      }
+                    }}
+                    style={{
+                      padding: '0.3rem 0.7rem',
+                      fontSize: '12px',
+                      borderRadius: '4px',
+                      border: isActive ? '1px solid #FB923C' : '1px solid var(--border-subtle)',
+                      background: isActive ? '#FFF7ED' : '#FFFFFF',
+                      color: isActive ? '#F97316' : 'var(--text-secondary)',
+                      fontWeight: isActive ? 600 : 500,
+                      cursor: 'pointer',
+                      transition: 'background 0.12s ease',
+                    }}
                   >
-                    Preview
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+                    {scope.label}
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* Right: Clean Auto-Scan Status Button */}
-        <button
-          onClick={() => setAutoScanActive(!autoScanActive)}
-          title="Toggle Continuous Real-Time Auto-Detection"
-          style={{
-            padding: '0.25rem 0.65rem',
-            borderRadius: 'var(--radius-full)',
-            border: autoScanActive ? '1px solid #10B981' : '1px solid var(--border-medium)',
-            background: autoScanActive ? '#ECFDF5' : '#FFFFFF',
-            color: autoScanActive ? '#047857' : 'var(--text-muted)',
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            transition: 'all 0.12s ease',
-          }}
-        >
-          {autoScanActive ? (
-            <>
-              <span className="pulse-dot pulse-dot-green" style={{ width: '6px', height: '6px' }} />
-              <span>Auto-Scan: Active</span>
-            </>
-          ) : (
-            <>
-              <Pause size={11} />
-              <span>Auto-Scan: Paused</span>
-            </>
-          )}
-        </button>
-      </div>
+            {/* Right: Clean Auto-Scan Status Button */}
+            <button
+              onClick={() => setAutoScanActive(!autoScanActive)}
+              title="Toggle Continuous Real-Time Auto-Detection"
+              style={{
+                padding: '0.3rem 0.7rem',
+                borderRadius: '4px',
+                border: autoScanActive ? '1px solid var(--accent-green-border)' : '1px solid var(--border-medium)',
+                background: autoScanActive ? 'var(--accent-green-light)' : '#FFFFFF',
+                color: autoScanActive ? '#F97316' : 'var(--text-muted)',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                transition: 'background 0.12s ease',
+              }}
+            >
+              {autoScanActive ? (
+                <>
+                  <span className="pulse-dot pulse-dot-green" style={{ width: '6px', height: '6px' }} />
+                  <span>Auto-Scan: Active</span>
+                </>
+              ) : (
+                <>
+                  <Pause size={12} />
+                  <span>Auto-Scan: Paused</span>
+                </>
+              )}
+            </button>
+          </div>
 
-      {/* Main Grid: Viewfinder & Diagnosis Dashboard */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))',
-          gap: '1.1rem',
-        }}
-      >
+          {/* Main Grid: Viewfinder & Diagnosis Dashboard */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))',
+              gap: '1.25rem',
+              alignItems: 'start',
+            }}
+          >
         {/* Left Column: Live Viewfinder */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {/* Viewfinder Window */}
@@ -937,7 +915,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     gap: '0.35rem',
                   }}
                 >
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F97316' }} />
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FB923C' }} />
                   <span>Snapshot Mode</span>
                 </div>
 
@@ -990,7 +968,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-                    <Camera size={20} color="#F97316" />
+                    <Camera size={20} color="#FB923C" />
                     <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#FFFFFF' }}>
                       Real-Time AI Disease Scanner
                     </span>
@@ -1071,8 +1049,8 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     padding: '0.25rem 0.6rem',
                     borderRadius: 'var(--radius-full)',
                     background: 'rgba(15, 23, 42, 0.85)',
-                    border: isSimulatedCamera ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(34, 197, 94, 0.4)',
-                    color: isSimulatedCamera ? '#38BDF8' : '#4ADE80',
+                    border: isSimulatedCamera ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(251, 146, 60, 0.4)',
+                    color: isSimulatedCamera ? '#38BDF8' : '#FB923C',
                     fontSize: '0.68rem',
                     fontWeight: 700,
                     display: 'flex',
@@ -1101,7 +1079,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                         padding: '0.25rem 0.6rem',
                         borderRadius: 'var(--radius-full)',
                         background: 'rgba(15, 23, 42, 0.9)',
-                        color: '#4ADE80',
+                        color: '#FB923C',
                         border: '1px solid rgba(74, 222, 128, 0.5)',
                         fontSize: '0.68rem',
                         fontWeight: 700,
@@ -1180,7 +1158,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     style={{
                       background: 'rgba(15, 23, 42, 0.88)',
                       backdropFilter: 'blur(4px)',
-                      border: '1px solid rgba(249, 115, 22, 0.4)',
+                      border: '1px solid rgba(251, 146, 60, 0.4)',
                       borderRadius: 'var(--radius-full)',
                       padding: '0.25rem 0.65rem',
                       display: 'flex',
@@ -1193,7 +1171,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     <span style={{ fontWeight: 700 }}>
                       Crop: {detectedCropLive.name}
                     </span>
-                    <span style={{ color: '#4ADE80', fontWeight: 800 }}>
+                    <span style={{ color: '#FB923C', fontWeight: 800 }}>
                       {detectedCropLive.confidence}%
                     </span>
                   </div>
@@ -1239,7 +1217,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       height: '160px',
                       border: isScanningFrame
                         ? '2px solid rgba(52, 211, 153, 0.85)'
-                        : '1.5px dashed rgba(249, 115, 22, 0.55)',
+                        : '1.5px dashed rgba(251, 146, 60, 0.55)',
                       borderRadius: '14px',
                       position: 'relative',
                       display: 'flex',
@@ -1253,7 +1231,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                         width: '6px',
                         height: '6px',
                         borderRadius: '50%',
-                        background: isScanningFrame ? '#34D399' : '#F97316',
+                        background: isScanningFrame ? '#FB923C' : '#FB923C',
                       }}
                     />
                   </div>
@@ -1265,10 +1243,10 @@ export const DiseaseScreeningStudio: React.FC = () => {
             {isScanningFrame && <div className="animate-scan-line" style={{ zIndex: 5 }} />}
 
             {/* Corner Reticle Brackets */}
-            <div style={{ position: 'absolute', top: 10, left: 10, width: 14, height: 14, borderTop: '2px solid #F97316', borderLeft: '2px solid #F97316', pointerEvents: 'none', zIndex: 4 }} />
-            <div style={{ position: 'absolute', top: 10, right: 10, width: 14, height: 14, borderTop: '2px solid #F97316', borderRight: '2px solid #F97316', pointerEvents: 'none', zIndex: 4 }} />
-            <div style={{ position: 'absolute', bottom: 10, left: 10, width: 14, height: 14, borderBottom: '2px solid #F97316', borderLeft: '2px solid #F97316', pointerEvents: 'none', zIndex: 4 }} />
-            <div style={{ position: 'absolute', bottom: 10, right: 10, width: 14, height: 14, borderBottom: '2px solid #F97316', borderRight: '2px solid #F97316', pointerEvents: 'none', zIndex: 4 }} />
+            <div style={{ position: 'absolute', top: 10, left: 10, width: 14, height: 14, borderTop: '2px solid #FB923C', borderLeft: '2px solid #FB923C', pointerEvents: 'none', zIndex: 4 }} />
+            <div style={{ position: 'absolute', top: 10, right: 10, width: 14, height: 14, borderTop: '2px solid #FB923C', borderRight: '2px solid #FB923C', pointerEvents: 'none', zIndex: 4 }} />
+            <div style={{ position: 'absolute', bottom: 10, left: 10, width: 14, height: 14, borderBottom: '2px solid #FB923C', borderLeft: '2px solid #FB923C', pointerEvents: 'none', zIndex: 4 }} />
+            <div style={{ position: 'absolute', bottom: 10, right: 10, width: 14, height: 14, borderBottom: '2px solid #FB923C', borderRight: '2px solid #FB923C', pointerEvents: 'none', zIndex: 4 }} />
           </div>
 
           {/* Action Toolbar */}
@@ -1373,9 +1351,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       padding: '0.2rem 0.55rem',
                       fontSize: '0.7rem',
                       borderRadius: 'var(--radius-full)',
-                      border: isSelected ? '1px solid #EA580C' : '1px solid var(--border-subtle)',
+                      border: isSelected ? '1px solid #FB923C' : '1px solid var(--border-subtle)',
                       background: isSelected ? '#FFF7ED' : '#FFFFFF',
-                      color: isSelected ? '#EA580C' : 'var(--text-secondary)',
+                      color: isSelected ? '#FB923C' : 'var(--text-secondary)',
                       fontWeight: isSelected ? 800 : 500,
                       cursor: 'pointer',
                       transition: 'all 0.1s ease',
@@ -1472,7 +1450,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     • {diagnosis.part_display_name || detectedOrganLive.name}
                   </span>
                 </div>
-                <span style={{ color: '#059669', fontWeight: 700, fontSize: '0.68rem' }}>
+                <span style={{ color: '#F97316', fontWeight: 700, fontSize: '0.68rem' }}>
                   Auto-Detected
                 </span>
               </div>
@@ -1503,7 +1481,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                 <span style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
                   Diagnostic Confidence
                 </span>
-                <span className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 900, color: '#059669' }}>
+                <span className="tabular-nums" style={{ fontSize: '1rem', fontWeight: 900, color: '#F97316' }}>
                   {diagnosis.confidence_score.toFixed(1)}%
                 </span>
               </div>
@@ -1513,7 +1491,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   style={{
                     height: '100%',
                     width: `${diagnosis.confidence_score}%`,
-                    background: diagnosis.confidence_score >= 85 ? '#10B981' : '#F97316',
+                    background: diagnosis.confidence_score >= 85 ? '#FB923C' : '#FB923C',
                     borderRadius: '3px',
                     transition: 'width 0.4s ease',
                   }}
@@ -1550,7 +1528,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       border: '1px solid var(--border-subtle)',
                     }}
                   >
-                    <CheckCircle size={12} style={{ color: '#F97316', flexShrink: 0 }} />
+                    <CheckCircle size={12} style={{ color: '#FB923C', flexShrink: 0 }} />
                     <span>{sym}</span>
                   </div>
                 ))}
@@ -1578,7 +1556,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       fontSize: '0.7rem',
                       fontWeight: 700,
                       borderRadius: '4px',
-                      background: activeRemedyTab === 'organic' ? '#059669' : 'transparent',
+                      background: activeRemedyTab === 'organic' ? '#F97316' : 'transparent',
                       color: activeRemedyTab === 'organic' ? '#FFFFFF' : 'var(--text-muted)',
                       border: 'none',
                       cursor: 'pointer',
@@ -1593,7 +1571,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       fontSize: '0.7rem',
                       fontWeight: 700,
                       borderRadius: '4px',
-                      background: activeRemedyTab === 'chemical' ? '#EA580C' : 'transparent',
+                      background: activeRemedyTab === 'chemical' ? '#FB923C' : 'transparent',
                       color: activeRemedyTab === 'chemical' ? '#FFFFFF' : 'var(--text-muted)',
                       border: 'none',
                       cursor: 'pointer',
@@ -1624,8 +1602,17 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   padding: '0.45rem',
                 }}
               >
-                <ShieldAlert size={14} />
-                <span>{escalated ? '✓ Escalated to District Officer' : 'Escalate to District Horticulture Officer'}</span>
+                {escalated ? (
+                  <>
+                    <CheckCircle size={14} style={{ color: '#F97316' }} />
+                    <span style={{ color: '#F97316' }}>Escalated to District Officer (Logged)</span>
+                  </>
+                ) : (
+                  <>
+                    <ShieldAlert size={14} />
+                    <span>Escalate to District Horticulture Officer</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

@@ -220,6 +220,8 @@ export const GisMapCanvas: React.FC<Props> = (props) => {
             if (!c) return;
             const el = document.createElement('div');
             const sel = z.id === selectedZoneId;
+            // The pinpoint tooltip already names the selected parcel; a second label would stack under it.
+            if (sel && propsRef.current.farmerPin) return;
             el.style.cssText =
               'pointer-events:none;transform:translateY(-50%);padding:2px 7px;border-radius:6px;font:700 10px/1.3 system-ui,sans-serif;' +
               `color:#fff;background:rgba(11,17,32,${sel ? 0.92 : 0.72});border:1px solid ${sel ? '#F97316' : 'rgba(255,255,255,0.25)'};white-space:nowrap;`;
@@ -235,7 +237,7 @@ export const GisMapCanvas: React.FC<Props> = (props) => {
       cleanup();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cluster, selectedZoneId, layers.gdd]);
+  }, [cluster, selectedZoneId, layers.gdd, props.farmerPin]);
 
   // Render and update Farmer Pinpoint Marker
   useEffect(() => {

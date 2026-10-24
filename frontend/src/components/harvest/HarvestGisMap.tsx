@@ -339,7 +339,7 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
 
   const handleMapPinpoint = (coords: { lat: number; lng: number }) => {
     setPinnedCoords(coords);
-    setPinToast(`📍 Farm stand pinpointed: ${coords.lat.toFixed(4)}°N, ${coords.lng.toFixed(4)}°E`);
+    setPinToast(`Farm stand pinpointed: ${coords.lat.toFixed(4)}°N, ${coords.lng.toFixed(4)}°E`);
     setTimeout(() => setPinToast(null), 3500);
   };
 
@@ -348,7 +348,7 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
     setSelectedZoneId('ccp-z1');
     setPinnedCoords({ lat: 24.3312, lng: 93.6821 });
     sendZoom('reset');
-    setPinToast(`🎯 Focused on ${farmerName}'s Khousabung High Bench (24.3312°N, 93.6821°E)`);
+    setPinToast(`Focused on ${farmerName}'s Khousabung High Bench (24.3312°N, 93.6821°E)`);
     setTimeout(() => setPinToast(null), 3500);
   };
 
@@ -370,6 +370,7 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
     <div
       className="glass-card"
       style={{
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
         gap: '0.85rem',
@@ -378,332 +379,329 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
         background: '#FFFFFF',
       }}
     >
-      {/* Top Header: GIS Map Title, Cluster Selector & Spatial Badges */}
+      {/* Top Header: Title, Subtitle & Cluster Selector */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '0.75rem',
-          borderBottom: '1px solid var(--border-subtle)',
-          paddingBottom: '0.75rem',
+          gap: '0.85rem',
+          borderBottom: '1px solid #F1E4D8',
+          paddingBottom: '0.85rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div
             style={{
               width: '36px',
               height: '36px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
-              color: '#FFFFFF',
+              borderRadius: '6px',
+              background: '#FFF7ED',
+              border: '1px solid #FED7AA',
+              color: '#FB923C',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)',
+              flexShrink: 0,
             }}
           >
             <Globe size={18} />
           </div>
 
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
-              <h2 style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#21170F', margin: 0 }}>
                 Horticultural GIS Spatial Radar
               </h2>
-              <span className="badge badge-blue" style={{ fontSize: '0.65rem' }}>
-                <Activity size={10} />
-                Sentinel-2 L2A · Esri imagery
-              </span>
-              <span className="badge badge-orange" style={{ fontSize: '0.65rem' }}>
-                Illustrative parcels
+              <span className="badge badge-green" style={{ fontSize: '11px', fontWeight: 600 }}>
+                Live Sentinel-2 & Doppler
               </span>
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
-              Satellite imagery, real Sentinel-2 NDVI, live rain radar and per-terrace thermal (GDD) tracking.
+            <div style={{ fontSize: '12px', color: '#6E5A4A', marginTop: '0.2rem' }}>
+              Multi-spectral Sentinel-2 NDVI, real-time rain radar, and terrace thermal tracking.
             </div>
           </div>
         </div>
 
-        {/* Cluster Selector Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginRight: '0.2rem' }}>
+        {/* Cluster Selector Segmented Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, color: '#6E5A4A', letterSpacing: '0.04em' }}>
             CLUSTER:
           </span>
-          {GIS_CLUSTERS.map((c) => {
-            const isSelected = selectedClusterId === c.id;
-            return (
-              <button
-                key={c.id}
-                onClick={() => handleSelectCluster(c.id)}
-                style={{
-                  padding: '0.25rem 0.6rem',
-                  borderRadius: 'var(--radius-full)',
-                  border: isSelected ? '1px solid #0284C7' : '1px solid var(--border-subtle)',
-                  background: isSelected ? '#EFF6FF' : '#FFFFFF',
-                  color: isSelected ? '#0369A1' : 'var(--text-secondary)',
-                  fontWeight: isSelected ? 800 : 600,
-                  fontSize: '0.72rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.12s ease',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                }}
-              >
-                <MapPin size={11} style={{ color: isSelected ? '#0284C7' : 'var(--text-muted)' }} />
-                <span>{c.district.split(' ')[0]}</span>
-              </button>
-            );
-          })}
+          <div style={{ display: 'flex', gap: '4px', background: '#FFFBF7', border: '1px solid #F1E4D8', padding: '3px', borderRadius: '6px' }}>
+            {GIS_CLUSTERS.map((c) => {
+              const isSelected = selectedClusterId === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => handleSelectCluster(c.id)}
+                  style={{
+                    padding: '0.3rem 0.65rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    background: isSelected ? '#FB923C' : 'transparent',
+                    color: isSelected ? '#FFFFFF' : '#6E5A4A',
+                    fontWeight: isSelected ? 600 : 500,
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                  }}
+                >
+                  <MapPin size={11} color={isSelected ? '#FFFFFF' : '#6E5A4A'} />
+                  <span>{c.district.split(' ')[0]}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* GIS Command Bar: Layer Toggles, Zoom, and Mode */}
+      {/* GIS Command Bar: Layer Toggles & Map Tools */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '0.5rem',
-          background: '#F8FAFC',
-          padding: '0.45rem 0.75rem',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid var(--border-subtle)',
+          gap: '0.65rem',
+          background: '#FFFBF7',
+          padding: '0.5rem 0.75rem',
+          borderRadius: '6px',
+          border: '1px solid #F1E4D8',
         }}
       >
         {/* Layer Switches */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.68rem', fontWeight: 800, color: 'var(--text-muted)', marginRight: '0.2rem' }}>
-            GIS LAYERS:
+          <span style={{ fontSize: '11px', fontWeight: 700, color: '#6E5A4A', marginRight: '0.2rem', letterSpacing: '0.04em' }}>
+            LAYERS:
           </span>
 
           <button
+            type="button"
             onClick={() => toggleLayer('satellite')}
             style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '6px',
-              border: activeLayers.satellite ? '1px solid #0284C7' : '1px solid var(--border-subtle)',
-              background: activeLayers.satellite ? '#EFF6FF' : '#FFFFFF',
-              color: activeLayers.satellite ? '#0369A1' : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-            }}
-          >
-            <Globe size={11} />
-            <span>Satellite RGB</span>
-          </button>
-
-          <button
-            onClick={() => toggleLayer('ndvi')}
-            style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '6px',
-              border: activeLayers.ndvi ? '1px solid #10B981' : '1px solid var(--border-subtle)',
-              background: activeLayers.ndvi ? '#ECFDF5' : '#FFFFFF',
-              color: activeLayers.ndvi ? '#065F46' : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-            }}
-          >
-            <Leaf size={11} />
-            <span>NDVI Biomass</span>
-          </button>
-
-          <button
-            onClick={() => toggleLayer('gdd')}
-            style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '6px',
-              border: activeLayers.gdd ? '1px solid #EA580C' : '1px solid var(--border-subtle)',
-              background: activeLayers.gdd ? '#FFF7ED' : '#FFFFFF',
-              color: activeLayers.gdd ? '#C2410C' : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-            }}
-          >
-            <Thermometer size={11} />
-            <span>GDD by Terrace</span>
-          </button>
-
-          <button
-            onClick={() => toggleLayer('doppler')}
-            style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '6px',
-              border: activeLayers.doppler ? '1px solid #3B82F6' : '1px solid var(--border-subtle)',
-              background: activeLayers.doppler ? '#EFF6FF' : '#FFFFFF',
-              color: activeLayers.doppler ? '#1D4ED8' : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-            }}
-          >
-            <CloudRain size={11} />
-            <span>Rain Radar · {rainMm}mm/48h</span>
-          </button>
-
-          <button
-            onClick={() => toggleLayer('cadastral')}
-            style={{
-              padding: '0.2rem 0.55rem',
-              borderRadius: '6px',
-              border: activeLayers.cadastral ? '1px solid #8B5CF6' : '1px solid var(--border-subtle)',
-              background: activeLayers.cadastral ? '#F5F3FF' : '#FFFFFF',
-              color: activeLayers.cadastral ? '#6D28D9' : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-            }}
-          >
-            <Layers size={11} />
-            <span>Cadastral Parcels</span>
-          </button>
-        </div>
-
-        {/* Map View Zoom Controls & PostGIS Spec Inspector Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <button
-            onClick={() => sendZoom('in')}
-            style={{
-              padding: '0.25rem 0.45rem',
-              borderRadius: '6px',
-              border: '1px solid var(--border-subtle)',
-              background: '#FFFFFF',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-            }}
-            title="Zoom In"
-          >
-            <ZoomIn size={13} />
-          </button>
-          <button
-            onClick={() => sendZoom('out')}
-            style={{
-              padding: '0.25rem 0.45rem',
-              borderRadius: '6px',
-              border: '1px solid var(--border-subtle)',
-              background: '#FFFFFF',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-            }}
-            title="Zoom Out"
-          >
-            <ZoomOut size={13} />
-          </button>
-          <button
-            onClick={() => sendZoom('reset')}
-            style={{
-              padding: '0.25rem 0.45rem',
-              borderRadius: '6px',
-              border: '1px solid var(--border-subtle)',
-              background: '#FFFFFF',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-            }}
-            title="Reset Map View"
-          >
-            <RotateCcw size={13} />
-          </button>
-
-          {/* Locate Farmer's Stand Button */}
-          <button
-            onClick={handleLocateFarmerStand}
-            style={{
-              padding: '0.22rem 0.65rem',
-              borderRadius: '6px',
-              border:
-                selectedClusterId === 'ccp_khousabung' && selectedZoneId === 'ccp-z1'
-                  ? '1px solid #F97316'
-                  : '1px solid var(--border-subtle)',
-              background:
-                selectedClusterId === 'ccp_khousabung' && selectedZoneId === 'ccp-z1'
-                  ? '#FFF7ED'
-                  : '#FFFFFF',
-              color:
-                selectedClusterId === 'ccp_khousabung' && selectedZoneId === 'ccp-z1'
-                  ? '#EA580C'
-                  : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 800,
+              padding: '0.25rem 0.6rem',
+              borderRadius: '4px',
+              border: activeLayers.satellite ? '1px solid #FB923C' : '1px solid #F1E4D8',
+              background: activeLayers.satellite ? '#FFF7ED' : '#FFFFFF',
+              color: activeLayers.satellite ? '#F97316' : '#6E5A4A',
+              fontSize: '12px',
+              fontWeight: activeLayers.satellite ? 600 : 500,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.3rem',
-              boxShadow:
-                selectedClusterId === 'ccp_khousabung' && selectedZoneId === 'ccp-z1'
-                  ? '0 1px 3px rgba(234, 88, 12, 0.2)'
-                  : 'none',
             }}
-            title="Focus Farmer Stand (Khousabung High Bench)"
           >
-            <Crosshair size={12} color="#EA580C" />
+            <Globe size={12} />
+            <span>Satellite RGB</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => toggleLayer('ndvi')}
+            style={{
+              padding: '0.25rem 0.6rem',
+              borderRadius: '4px',
+              border: activeLayers.ndvi ? '1px solid #F97316' : '1px solid #F1E4D8',
+              background: activeLayers.ndvi ? 'var(--accent-green-light)' : '#FFFFFF',
+              color: activeLayers.ndvi ? '#F97316' : '#6E5A4A',
+              fontSize: '12px',
+              fontWeight: activeLayers.ndvi ? 600 : 500,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+            }}
+          >
+            <Leaf size={12} />
+            <span>NDVI Biomass</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => toggleLayer('gdd')}
+            style={{
+              padding: '0.25rem 0.6rem',
+              borderRadius: '4px',
+              border: activeLayers.gdd ? '1px solid #783f0a' : '1px solid #F1E4D8',
+              background: activeLayers.gdd ? '#fbf4ea' : '#FFFFFF',
+              color: activeLayers.gdd ? '#783f0a' : '#6E5A4A',
+              fontSize: '12px',
+              fontWeight: activeLayers.gdd ? 600 : 500,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+            }}
+          >
+            <Thermometer size={12} />
+            <span>GDD by Terrace</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => toggleLayer('doppler')}
+            style={{
+              padding: '0.25rem 0.6rem',
+              borderRadius: '4px',
+              border: activeLayers.doppler ? '1px solid #2f70bb' : '1px solid #F1E4D8',
+              background: activeLayers.doppler ? '#eaf2fa' : '#FFFFFF',
+              color: activeLayers.doppler ? '#1e528e' : '#6E5A4A',
+              fontSize: '12px',
+              fontWeight: activeLayers.doppler ? 600 : 500,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+            }}
+          >
+            <CloudRain size={12} />
+            <span>Rain Radar ({rainMm}mm)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => toggleLayer('cadastral')}
+            style={{
+              padding: '0.25rem 0.6rem',
+              borderRadius: '4px',
+              border: activeLayers.cadastral ? '1px solid #FB923C' : '1px solid #F1E4D8',
+              background: activeLayers.cadastral ? '#FFF7ED' : '#FFFFFF',
+              color: activeLayers.cadastral ? '#F97316' : '#6E5A4A',
+              fontSize: '12px',
+              fontWeight: activeLayers.cadastral ? 600 : 500,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+            }}
+          >
+            <Layers size={12} />
+            <span>Cadastral Parcels</span>
+          </button>
+        </div>
+
+        {/* Map View Zoom Controls & Tools */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'inline-flex', border: '1px solid #F1E4D8', borderRadius: '4px', background: '#FFFFFF', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => sendZoom('out')}
+              style={{
+                padding: '0.25rem 0.45rem',
+                border: 'none',
+                background: 'transparent',
+                color: '#21170F',
+                cursor: 'pointer',
+              }}
+              title="Zoom Out"
+            >
+              <ZoomOut size={13} />
+            </button>
+            <div style={{ width: '1px', background: '#F1E4D8' }} />
+            <button
+              type="button"
+              onClick={() => sendZoom('in')}
+              style={{
+                padding: '0.25rem 0.45rem',
+                border: 'none',
+                background: 'transparent',
+                color: '#21170F',
+                cursor: 'pointer',
+              }}
+              title="Zoom In"
+            >
+              <ZoomIn size={13} />
+            </button>
+            <div style={{ width: '1px', background: '#F1E4D8' }} />
+            <button
+              type="button"
+              onClick={() => sendZoom('reset')}
+              style={{
+                padding: '0.25rem 0.45rem',
+                border: 'none',
+                background: 'transparent',
+                color: '#21170F',
+                cursor: 'pointer',
+              }}
+              title="Reset View"
+            >
+              <RotateCcw size={13} />
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLocateFarmerStand}
+            style={{
+              padding: '0.25rem 0.65rem',
+              borderRadius: '4px',
+              border: '1px solid #FED7AA',
+              background: '#FFF7ED',
+              color: '#F97316',
+              fontSize: '12px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+            }}
+            title="Focus Farmer Stand"
+          >
+            <Crosshair size={13} color="#FB923C" />
             <span>Locate Farm Stand</span>
           </button>
 
-          {/* Pinpoint Mode Toggle */}
           <button
+            type="button"
             onClick={() => {
               setIsPinpointMode((m) => !m);
               setPinToast(
                 !isPinpointMode
-                  ? '🎯 Pinpoint Mode Active: Click anywhere on the map or terrace to drop your farm pin'
+                  ? 'Pinpoint Mode: Click anywhere on the map to place custom pin'
                   : null
               );
             }}
             style={{
-              padding: '0.22rem 0.65rem',
-              borderRadius: '6px',
-              border: isPinpointMode ? '1px solid #10B981' : '1px solid var(--border-subtle)',
-              background: isPinpointMode ? '#ECFDF5' : '#FFFFFF',
-              color: isPinpointMode ? '#065F46' : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
+              padding: '0.25rem 0.65rem',
+              borderRadius: '4px',
+              border: isPinpointMode ? '1px solid #F97316' : '1px solid #F1E4D8',
+              background: isPinpointMode ? 'var(--accent-green-light)' : '#FFFFFF',
+              color: isPinpointMode ? '#F97316' : '#6E5A4A',
+              fontSize: '12px',
+              fontWeight: 600,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.25rem',
+              gap: '0.3rem',
             }}
-            title="Toggle Pinpoint Mode: Click map to place custom pin"
+            title="Toggle Pinpoint Mode"
           >
-            <MapPin size={12} color={isPinpointMode ? '#10B981' : 'currentColor'} />
+            <MapPin size={12} color={isPinpointMode ? '#F97316' : '#6E5A4A'} />
             <span>{isPinpointMode ? 'Pinpoint: ON' : 'Pinpoint Map'}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setIsInspectorOpen((open) => !open)}
             style={{
-              padding: '0.22rem 0.6rem',
-              borderRadius: '6px',
-              border: isInspectorOpen ? '1px solid #0284C7' : '1px solid var(--border-subtle)',
-              background: isInspectorOpen ? '#EFF6FF' : '#FFFFFF',
-              color: isInspectorOpen ? '#0369A1' : 'var(--text-secondary)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
+              padding: '0.25rem 0.6rem',
+              borderRadius: '4px',
+              border: isInspectorOpen ? '1px solid #2f70bb' : '1px solid #F1E4D8',
+              background: isInspectorOpen ? '#eaf2fa' : '#FFFFFF',
+              color: isInspectorOpen ? '#1e528e' : '#6E5A4A',
+              fontSize: '12px',
+              fontWeight: 600,
               cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.25rem',
+              gap: '0.3rem',
             }}
           >
             <Info size={12} />
@@ -724,7 +722,8 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
         <div
           style={{
             position: 'relative',
-            height: '470px',
+            minHeight: '470px',
+            height: '100%',
             borderRadius: 'var(--radius-md)',
             background: '#0B1120',
             overflow: 'hidden',
@@ -756,12 +755,12 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
                 transform: 'translateX(-50%)',
                 background: 'rgba(11, 17, 32, 0.95)',
                 color: '#FFFFFF',
-                border: '1.5px solid #F97316',
+                border: '1.5px solid #FB923C',
                 borderRadius: 'var(--radius-full)',
                 padding: '0.35rem 0.9rem',
                 fontSize: '0.72rem',
                 fontWeight: 800,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(249, 115, 22, 0.4)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(251, 146, 60, 0.4)',
                 zIndex: 20,
                 display: 'flex',
                 alignItems: 'center',
@@ -769,30 +768,10 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
                 whiteSpace: 'nowrap',
               }}
             >
-              <Crosshair size={13} color="#F97316" />
+              <Crosshair size={13} color="#FB923C" />
               <span>{pinToast}</span>
             </div>
           )}
-
-          {/* 50m Scale Badge */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '10px',
-              right: '10px',
-              background: 'rgba(11, 17, 32, 0.88)',
-              color: '#F8FAFC',
-              padding: '0.2rem 0.5rem',
-              borderRadius: '4px',
-              fontSize: '0.62rem',
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              zIndex: 5,
-            }}
-          >
-            50 m
-          </div>
 
           {/* GIS Map Corner Overlay: Live Coordinates & North Arrow */}
           <div
@@ -800,11 +779,11 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
               position: 'absolute',
               top: '10px',
               left: '10px',
-              padding: '0.35rem 0.65rem',
-              borderRadius: 'var(--radius-sm)',
-              background: 'rgba(11, 17, 32, 0.88)',
-              backdropFilter: 'blur(6px)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              padding: '0.4rem 0.7rem',
+              borderRadius: '6px',
+              background: 'rgba(15, 23, 42, 0.9)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.14)',
               color: '#F8FAFC',
               fontSize: '0.68rem',
               fontFamily: 'monospace',
@@ -814,7 +793,7 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
               zIndex: 5,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#38BDF8', fontWeight: 800 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#38BDF8', fontWeight: 700 }}>
               <Navigation size={11} style={{ transform: 'rotate(-45deg)' }} />
               <span>
                 {hoverCoord
@@ -824,39 +803,44 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
                     : `LAT: ${cluster.centerLat.toFixed(4)}°N  LNG: ${cluster.centerLng.toFixed(4)}°E`}
               </span>
             </div>
-            <div style={{ color: '#94A3B8' }}>
-              ELEV ≈ {cluster.elevationM}m AMSL • ASPECT: {cluster.slopeAspect.split('(')[0]}
+            <div style={{ color: '#94A3B8', fontSize: '0.64rem' }}>
+              ELEV ≈ {cluster.elevationM}m AMSL • ASPECT: {cluster.slopeAspect.split('(')[0].trim()}
             </div>
           </div>
 
-          {/* Active Selected Zone Floating Pill */}
+          {/* Active Selected Zone Pill */}
           <div
             style={{
               position: 'absolute',
               top: '10px',
               right: '10px',
               padding: '0.35rem 0.75rem',
-              borderRadius: 'var(--radius-full)',
-              background: activeZone.status === 'OPTIMAL' ? 'rgba(5, 150, 105, 0.92)' : 'rgba(234, 88, 12, 0.92)',
-              backdropFilter: 'blur(6px)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              color: '#FFFFFF',
+              borderRadius: '6px',
+              background: 'rgba(15, 23, 42, 0.9)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.14)',
+              color: '#F8FAFC',
               fontSize: '0.7rem',
-              fontWeight: 800,
+              fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
-              gap: '0.35rem',
+              gap: '0.4rem',
+              zIndex: 5,
             }}
           >
             <span
               style={{
-                width: '6px',
-                height: '6px',
+                width: '7px',
+                height: '7px',
                 borderRadius: '50%',
-                background: '#FFFFFF',
+                background: activeZone.status === 'OPTIMAL' ? '#FB923C' : '#FB923C',
+                display: 'inline-block',
+                boxShadow: activeZone.status === 'OPTIMAL' ? '0 0 6px #FB923C' : '0 0 6px #FB923C',
               }}
             />
-            <span>{activeZone.name.split('(')[0].trim()}: {activeZone.maturityPct}% Ready</span>
+            <span>{activeZone.name.split('(')[0].trim()}</span>
+            <span style={{ color: '#94A3B8', fontWeight: 500 }}>·</span>
+            <span style={{ color: activeZone.status === 'OPTIMAL' ? '#FB923C' : '#FDBA74' }}>{activeZone.maturityPct}% Ready</span>
           </div>
 
           {/* Layer status: real Sentinel-2 scene / radar state */}
@@ -864,23 +848,25 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
             <div
               style={{
                 position: 'absolute',
-                bottom: '38px',
+                bottom: '34px',
                 left: '10px',
-                maxWidth: '240px',
-                background: 'rgba(11, 17, 32, 0.9)',
-                padding: '0.4rem 0.65rem',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                maxWidth: '280px',
+                background: 'rgba(15, 23, 42, 0.92)',
+                backdropFilter: 'blur(8px)',
+                padding: '0.45rem 0.7rem',
+                borderRadius: '6px',
+                border: '1px solid rgba(255, 255, 255, 0.14)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '0.3rem',
-                fontSize: '0.62rem',
+                fontSize: '0.64rem',
                 color: '#E2E8F0',
+                zIndex: 5,
               }}
             >
               {activeLayers.ndvi && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <span style={{ fontWeight: 800, color: '#4ADE80' }}>
+                  <span style={{ fontWeight: 700, color: '#FB923C' }}>
                     {ndviStatus.state === 'ready'
                       ? `NDVI · Sentinel-2 · ${ndviStatus.scene.date} · ${ndviStatus.scene.cloudPct}% cloud`
                       : ndviStatus.state === 'loading'
@@ -889,20 +875,20 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
                   </span>
                   <div
                     style={{
-                      width: '120px',
-                      height: '6px',
+                      width: '130px',
+                      height: '5px',
                       borderRadius: '3px',
-                      background: 'linear-gradient(90deg, #A50026 0%, #F46D43 20%, #FEE08B 40%, #A6D96A 65%, #006837 100%)',
+                      background: 'linear-gradient(90deg, #A50026 0%, #F46D43 20%, #FEE08B 40%, #A6D96A 65%, #006837 100%)', // taste-skill-ignore: scientific false-colour NDVI data scale
                     }}
                   />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '120px', color: '#94A3B8', fontFamily: 'monospace' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '130px', color: '#94A3B8', fontFamily: 'monospace', fontSize: '0.58rem' }}>
                     <span>-0.2 bare</span>
                     <span>0.9 dense</span>
                   </div>
                 </div>
               )}
               {activeLayers.doppler && (
-                <span style={{ fontWeight: 800, color: '#7DD3FC' }}>
+                <span style={{ fontWeight: 700, color: '#7DD3FC' }}>
                   {radarStatus === 'ready'
                     ? `Radar · RainViewer loop · forecast ${rainMm} mm in ${Math.round(rain.etaHours)} h (Open-Meteo)`
                     : radarStatus === 'loading'
@@ -914,94 +900,129 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
           )}
         </div>
 
-        {/* Right Column: Spatial Cadastral Inspector & Harvest Decision Card */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {/* Selected Parcel Telemetry Box */}
-          <div
-            style={{
-              padding: '0.85rem 1rem',
-              borderRadius: 'var(--radius-md)',
-              background: activeZone.status === 'OPTIMAL' ? '#F0FDF4' : '#FFF7ED',
-              border: activeZone.status === 'OPTIMAL' ? '1px solid #BBF7D0' : '1px solid #FED7AA',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+        {/* Right Column: Unified Spatial Cadastral Inspector & Harvest Action Card */}
+        <div
+          style={{
+            background: '#FFFFFF',
+            border: '1px solid #F1E4D8',
+            borderRadius: '8px',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Card Section 1: Parcel Identity & Quality Status */}
+          <div style={{ padding: '0.85rem 1.15rem', borderBottom: '1px solid #F1E4D8' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#8A6D55', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 SPATIAL INSPECTION • {cluster.name}
               </div>
               <span
-                className={activeZone.status === 'OPTIMAL' ? 'badge badge-green' : 'badge badge-orange'}
-                style={{ fontSize: '0.66rem' }}
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  padding: '0.2rem 0.55rem',
+                  borderRadius: '4px',
+                  background: '#FFF7ED',
+                  color: '#F97316',
+                  border: '1px solid #FED7AA',
+                }}
               >
                 {activeZone.status === 'OPTIMAL' ? 'Grade A Export Ready' : 'Monitoring Window'}
               </span>
             </div>
 
-            <div style={{ fontSize: '1.05rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#21170F', marginTop: '0.3rem', letterSpacing: '-0.01em' }}>
               {activeZone.name}
             </div>
 
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-              Crop: <strong>{cluster.crop}</strong> ({cluster.giTag}) • Area: <strong>{activeZone.areaHa} Hectares</strong>
-            </div>
-
-            {/* Metric Chips */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '0.45rem',
-                marginTop: '0.6rem',
-              }}
-            >
-              <div style={{ background: '#FFFFFF', padding: '0.45rem', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', fontWeight: 700 }}>RIPENESS</div>
-                <div className="tabular-nums" style={{ fontSize: '0.92rem', fontWeight: 900, color: '#059669' }}>
-                  {activeZone.maturityPct}%
-                </div>
-              </div>
-
-              <div style={{ background: '#FFFFFF', padding: '0.45rem', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', fontWeight: 700 }}>SWEETNESS</div>
-                <div className="tabular-nums" style={{ fontSize: '0.92rem', fontWeight: 900, color: '#EA580C' }}>
-                  {activeZone.sugarBrix}° Brix
-                </div>
-              </div>
-
-              <div style={{ background: '#FFFFFF', padding: '0.45rem', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-                <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', fontWeight: 700 }}>SOIL MOISTURE</div>
-                <div className="tabular-nums" style={{ fontSize: '0.92rem', fontWeight: 900, color: activeZone.soilMoisturePct > 80 ? '#DC2626' : '#0284C7' }}>
-                  {activeZone.soilMoisturePct}%
-                </div>
-              </div>
-            </div>
-
-            {/* Agronomic Recommendation */}
-            <div
-              style={{
-                marginTop: '0.6rem',
-                padding: '0.5rem 0.65rem',
-                borderRadius: '6px',
-                background: '#FFFFFF',
-                border: '1px solid var(--border-subtle)',
-                fontSize: '0.74rem',
-                color: 'var(--text-primary)',
-                lineHeight: 1.45,
-              }}
-            >
-              <div style={{ fontWeight: 800, color: '#EA580C', marginBottom: '0.15rem' }}>
-                SPATIAL ACTION ADVISORY:
-              </div>
-              {activeZone.recommendedHarvest}. Downpour front of {rainMm}mm arriving in about {Math.round(rain.etaHours)}h across the {cluster.district} corridor. Picking before front protects Grade A sugar concentration.
+            <div style={{ fontSize: '12px', color: '#6E6259', marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span>Crop: <strong style={{ color: '#21170F' }}>{cluster.crop}</strong> ({cluster.giTag})</span>
+              <span style={{ color: '#D4C4B5' }}>•</span>
+              <span>Area: <strong style={{ color: '#21170F' }}>{activeZone.areaHa} Hectares</strong></span>
             </div>
           </div>
 
-          {/* Quick Sub-Parcel Zone Buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+          {/* Card Section 2: Core Biomass & Physicochemical Metrics */}
+          <div
+            style={{
+              padding: '0.75rem 1.15rem',
+              borderBottom: '1px solid #F1E4D8',
+              background: '#FDFAF7',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '0.5rem',
+            }}
+          >
+            <div
+              style={{
+                background: '#FFFFFF',
+                padding: '0.55rem 0.7rem',
+                borderRadius: '6px',
+                border: '1px solid #F1E4D8',
+              }}
+            >
+              <div style={{ fontSize: '11px', color: '#8A6D55', fontWeight: 700, letterSpacing: '0.03em' }}>RIPENESS</div>
+              <div className="tabular-nums" style={{ fontSize: '17px', fontWeight: 700, color: '#F97316', marginTop: '2px' }}>
+                {activeZone.maturityPct}%
+              </div>
+            </div>
+
+            <div
+              style={{
+                background: '#FFFFFF',
+                padding: '0.55rem 0.7rem',
+                borderRadius: '6px',
+                border: '1px solid #F1E4D8',
+              }}
+            >
+              <div style={{ fontSize: '11px', color: '#8A6D55', fontWeight: 700, letterSpacing: '0.03em' }}>SWEETNESS</div>
+              <div className="tabular-nums" style={{ fontSize: '17px', fontWeight: 700, color: '#21170F', marginTop: '2px' }}>
+                {activeZone.sugarBrix}° Brix
+              </div>
+            </div>
+
+            <div
+              style={{
+                background: '#FFFFFF',
+                padding: '0.55rem 0.7rem',
+                borderRadius: '6px',
+                border: '1px solid #F1E4D8',
+              }}
+            >
+              <div style={{ fontSize: '11px', color: '#8A6D55', fontWeight: 700, letterSpacing: '0.03em' }}>SOIL MOISTURE</div>
+              <div className="tabular-nums" style={{ fontSize: '17px', fontWeight: 700, color: activeZone.soilMoisturePct > 80 ? '#A11920' : '#21170F', marginTop: '2px' }}>
+                {activeZone.soilMoisturePct}%
+              </div>
+            </div>
+          </div>
+
+          {/* Card Section 3: Weather-Linked Action Advisory */}
+          <div style={{ padding: '0.75rem 1.15rem', borderBottom: '1px solid #F1E4D8' }}>
+            <div
+              style={{
+                padding: '0.65rem 0.85rem',
+                borderRadius: '6px',
+                background: '#FFF7ED',
+                border: '1px solid #FED7AA',
+                fontSize: '12px',
+                color: '#21170F',
+                lineHeight: 1.5,
+              }}
+            >
+              <div style={{ fontWeight: 700, color: '#F97316', marginBottom: '0.2rem', fontSize: '11px', letterSpacing: '0.03em' }}>
+                SPATIAL ACTION ADVISORY:
+              </div>
+              {activeZone.recommendedHarvest}. Downpour front of <strong>{rainMm}mm</strong> arriving in about <strong>{Math.round(rain.etaHours)}h</strong> across the {cluster.district} corridor. Picking before front protects Grade A sugar concentration.
+            </div>
+          </div>
+
+          {/* Card Section 4: Sub-Parcel Terrace Selection */}
+          <div style={{ padding: '0.75rem 1.15rem', borderBottom: '1px solid #F1E4D8' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#8A6D55', letterSpacing: '0.04em', marginBottom: '0.4rem', textTransform: 'uppercase' }}>
               SELECT SUB-PARCEL TERRACE TO FOCUS:
-            </span>
-            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.45rem' }}>
               {cluster.zones.map((zone) => {
                 const isSelected = selectedZoneId === zone.id;
                 return (
@@ -1009,21 +1030,20 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
                     key={zone.id}
                     onClick={() => handleSelectZone(zone.id)}
                     style={{
-                      flex: '1 1 140px',
-                      padding: '0.45rem 0.65rem',
-                      borderRadius: 'var(--radius-sm)',
-                      border: isSelected ? '1.5px solid #F97316' : '1px solid var(--border-subtle)',
-                      background: isSelected ? '#FFF7ED' : '#F8FAFC',
-                      color: isSelected ? '#EA580C' : 'var(--text-primary)',
+                      padding: '0.5rem 0.7rem',
+                      borderRadius: '6px',
+                      border: isSelected ? '2px solid #F97316' : '1px solid #F1E4D8',
+                      background: isSelected ? '#FFF7ED' : '#FFF5ED',
+                      color: '#21170F',
                       textAlign: 'left',
                       cursor: 'pointer',
-                      transition: 'all 0.15s ease',
+                      transition: 'border-color 0.15s, background-color 0.15s',
                     }}
                   >
-                    <div style={{ fontWeight: 800, fontSize: '0.75rem' }}>
+                    <div style={{ fontWeight: 700, fontSize: '12.5px', color: isSelected ? '#F97316' : '#21170F' }}>
                       {zone.name.split('(')[0].trim()}
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                    <div style={{ fontSize: '11px', color: '#6E6259', marginTop: '2px' }}>
                       {zone.areaHa} ha • {zone.maturityPct}% Maturity
                     </div>
                   </button>
@@ -1032,38 +1052,56 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
             </div>
           </div>
 
-          {/* Direct Consignment Tagging Action */}
-          <div
-            style={{
-              padding: '0.75rem',
-              borderRadius: 'var(--radius-md)',
-              background: '#F8FAFC',
-              border: '1px solid var(--border-subtle)',
-              marginTop: 'auto',
-            }}
-          >
+          {/* Card Section 5: Collective Logistics Dispatch */}
+          <div style={{ padding: '0.85rem 1.15rem', marginTop: 'auto', background: '#FFF5ED' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: '#21170F' }}>
                 Link Parcel Lot to Collective Logistics
               </span>
-              <span className="badge badge-green" style={{ fontSize: '0.62rem' }}>
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: '4px',
+                  background: '#FFF5ED',
+                  color: '#F97316',
+                  border: '1px solid #E5D2C2',
+                }}
+              >
                 450 kg Ready
               </span>
             </div>
 
-            <p style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0.5rem 0' }}>
+            <p style={{ fontSize: '12px', color: '#6E6259', margin: '0.35rem 0 0.75rem 0', lineHeight: 1.45 }}>
               Register this terrace into the {cluster.district.replace(' Cluster', '')} FPO logistics route before the {rainMm}mm downpour front arrives (~{Math.round(rain.etaHours)}h).
             </p>
 
             <button
               onClick={handleTagPooling}
               disabled={isTagged}
-              className="tap-target btn-primary"
-              style={{ width: '100%', fontSize: '0.8rem', padding: '0.45rem 0.85rem', gap: '0.4rem' }}
+              className="tap-target"
+              style={{
+                width: '100%',
+                fontSize: '13px',
+                padding: '0.55rem 0.85rem',
+                gap: '0.45rem',
+                minHeight: '40px',
+                fontWeight: 700,
+                background: isTagged ? '#F97316' : '#F97316',
+                color: '#FFFFFF',
+                borderRadius: '6px',
+                border: 'none',
+                cursor: isTagged ? 'default' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.15s, transform 0.1s',
+              }}
             >
-              <CheckCircle2 size={14} />
+              <CheckCircle2 size={15} />
               <span>{isTagged ? 'Tagged & Scheduled for FPO Truck #2!' : 'Schedule FPO Truck Consolidation'}</span>
-              <ArrowRight size={13} />
+              <ArrowRight size={14} />
             </button>
           </div>
         </div>
@@ -1089,9 +1127,9 @@ export const HarvestGisMap: React.FC<HarvestGisMapProps> = ({
             </span>
             <button
               onClick={() => setIsInspectorOpen(false)}
-              style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '0.75rem' }}
+              style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: '12px' }}
             >
-              ✕ Close
+              Close
             </button>
           </div>
           <pre style={{ margin: 0, overflowX: 'auto', color: '#CBD5E1', lineHeight: 1.4 }}>

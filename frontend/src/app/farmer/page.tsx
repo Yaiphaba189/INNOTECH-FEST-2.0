@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
 import { DiseaseScreeningStudio } from '@/components/disease/DiseaseScreeningStudio';
@@ -40,9 +40,21 @@ function FarmerHub() {
   const netPay = bestView?.net ?? 0;
   const [activeTab, setActiveTab] = useState<'module-a' | 'module-b' | 'module-c'>('module-a');
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'radar' || tabParam === 'module-b' || tabParam === 'harvest') {
+        setActiveTab('module-b');
+      } else if (tabParam === 'market' || tabParam === 'module-c') {
+        setActiveTab('module-c');
+      }
+    }
+  }, []);
+
   return (
     <RoleGuard allowedRoles={['farmer']}>
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
+      <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
         <Header
           currentRole="farmer"
           onSelectRole={(role) => {
@@ -52,293 +64,160 @@ function FarmerHub() {
           }}
         />
 
-        <main style={{ flex: 1, maxWidth: '1180px', width: '100%', margin: '0 auto', padding: '1.5rem 1.25rem' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {/* Unified Farmer Command Hub Card */}
-            <div
-              className="glass-card"
-              style={{
-                padding: '1.25rem 1.5rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-              }}
-            >
-              {/* Profile Top Row */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.85rem',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                  <div
-                    style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '12px',
-                      background: 'linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%)',
-                      border: '1px solid #FED7AA',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#EA580C',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <User size={22} strokeWidth={2.4} />
-                  </div>
+        <main className="app-sheet">
+          <div className="farmer-workspace">
+            {/* Screen Heading */}
+            <div className="hl-screen-heading">
+              <div>
+                <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Harvest decisions
+                </h1>
+                <p>
+                  <MapPin size={14} style={{ color: '#FB923C' }} />
+                  <span>{farmerName} · Demonstration farm · Khousabung, Churachandpur</span>
+                </p>
+              </div>
 
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
-                      <h1 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                        {farmerName}
-                      </h1>
-                      <span className="badge badge-green" style={{ fontSize: '0.68rem' }}>
-                        <ShieldCheck size={12} />
-                        Verified Smallholder
-                      </span>
-                      <span className="badge badge-orange" style={{ fontSize: '0.68rem' }}>
-                        {lot.lot_code}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
-                        color: 'var(--text-muted)',
-                        fontSize: '0.78rem',
-                        marginTop: '0.15rem',
-                      }}
-                    >
-                      <MapPin size={13} style={{ color: '#F97316' }} />
-                      <span>Khousabung Terraces, {lot.district} Cluster</span>
-                      <span>•</span>
-                      <span style={{ color: '#059669', fontWeight: 600 }}>GI Certified Queen Pineapple</span>
-                    </div>
-                  </div>
-                </div>
+              <span className="hl-lot-id">{lot.lot_code || 'HL-Q-CCP-089'}</span>
+            </div>
 
-                {/* Weather Alert Strip */}
-                <div
-                  style={{
-                    background: '#FFF7ED',
-                    border: '1px solid #FED7AA',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.45rem 0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.65rem',
-                  }}
-                >
-                  <CloudRain size={16} style={{ color: '#EA580C', flexShrink: 0 }} />
-                  <div style={{ fontSize: '0.78rem', color: '#9A3412', fontWeight: 600 }}>
-                    {decision?.urgent
-                      ? `Rain ${Math.round(rain.mm)} mm in ${Math.round(rain.etaHours)} h: pick within ${Math.round(decision.hoursLeft)} h to protect your grade`
-                      : 'No harvest-threatening rain in the next 48 h'}
+            {/* Overview Grid: Harvest Window & Field and Lot */}
+            <div className="hl-overview-grid">
+              {/* Left Panel: Harvest Window & Weather Risk */}
+              <div className="hl-risk-panel">
+                <div className="hl-risk-copy">
+                  <span className="hl-section-kicker">
+                    <CloudRain size={16} />
+                    <span>Harvest window</span>
+                  </span>
+                  <h2>Pick before the rain reaches your stand</h2>
+                  <p>
+                    65 mm of rain is forecast in 41 h. Harvest within 35 h to protect the Grade A grade.
+                  </p>
+                  <div className="hl-window-chart">
+                    <div className="hl-window-labels">
+                      <span>Now</span>
+                      <span>Pick by 35 h</span>
+                      <span>Rain · 41 h</span>
+                    </div>
+                    <div className="hl-window-track">
+                      <div className="hl-window-safe" style={{ width: '73%' }} />
+                      <div className="hl-window-pick" style={{ left: '73%' }} />
+                      <div className="hl-window-rain" style={{ left: '85%' }} />
+                    </div>
+                    <div className="hl-window-end">48-hour forecast</div>
                   </div>
                   <button
+                    type="button"
+                    className="hl-primary-action"
                     onClick={() => setActiveTab('module-b')}
-                    style={{
-                      background: '#EA580C',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      borderRadius: '6px',
-                      padding: '0.2rem 0.55rem',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.25rem',
-                    }}
                   >
-                    <span>Radar</span>
-                    <ArrowRight size={11} />
+                    <span>Open harvest radar</span>
+                    <ArrowRight size={15} />
                   </button>
                 </div>
+
+                <div className="hl-risk-value">
+                  <span>Value at risk if delayed</span>
+                  <strong>₹4,094</strong>
+                  <small>Estimated for this 500 kg lot</small>
+                </div>
               </div>
 
-              {/* 4 Essential Farm Telemetry Chips */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                  gap: '0.75rem',
-                }}
-              >
-                <div
-                  style={{
-                    background: '#F8FAFC',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.75rem 0.95rem',
-                  }}
-                >
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    Stand Capacity
+              {/* Right Panel: Field and Lot */}
+              <div className="hl-field-note">
+                <h2>Field and lot</h2>
+                <dl>
+                  <div>
+                    <dt>Crop</dt>
+                    <dd>GI Queen pineapple</dd>
                   </div>
-                  <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
-                    18,500 <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-muted)' }}>Pines</span>
+                  <div>
+                    <dt>Current grade</dt>
+                    <dd style={{ color: '#F97316', fontWeight: 600 }}>Grade A</dd>
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: '#EA580C', fontWeight: 600 }}>
-                    1.2 Ha Stand
+                  <div>
+                    <dt>Rain window</dt>
+                    <dd style={{ color: '#963238', fontWeight: 600 }}>65 mm · 41 h</dd>
                   </div>
-                </div>
-
-                <div
-                  style={{
-                    background: '#F8FAFC',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.75rem 0.95rem',
-                  }}
-                >
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    Sugar Sweetness
+                  <div>
+                    <dt>Net offer</dt>
+                    <dd className="tabular-nums" style={{ color: '#F97316', fontWeight: 700 }}>₹28.50 / kg</dd>
                   </div>
-                  <div className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 800, color: '#059669', marginTop: '0.1rem' }}>
-                    {lot.estimated_brix.toFixed(1)}° <span style={{ fontSize: '0.78rem', fontWeight: 500 }}>Brix</span>
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
-                    {decision?.gradeNow ?? 'Grade A'} Export Quality
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    background: '#F8FAFC',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.75rem 0.95rem',
-                  }}
-                >
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    Thermal Accumulation
-                  </div>
-                  <div className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 800, color: '#EA580C', marginTop: '0.1rem' }}>
-                    2,478 <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-muted)' }}>/ 2500 GDD</span>
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
-                    99.1% Peak Maturity
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    background: '#F8FAFC',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '0.75rem 0.95rem',
-                  }}
-                >
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
-                    Guaranteed Net Pay
-                  </div>
-                  <div className="tabular-nums" style={{ fontSize: '1.15rem', fontWeight: 800, color: '#F97316', marginTop: '0.1rem' }}>
-                    ₹{netPay.toFixed(2)} <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-muted)' }}>/ kg Net</span>
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600 }}>
-                    +₹{round2(netPay - BROKER_NET_PER_KG).toFixed(2)}/kg vs Broker Cash
-                  </div>
-                </div>
+                </dl>
+                <small>Demonstration forecast · sample scenario</small>
               </div>
             </div>
 
-            {/* Clean Segmented Tab Switcher */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <div
-                style={{
-                  display: 'inline-flex',
-                  background: '#F1F5F9',
-                  padding: '0.3rem',
-                  borderRadius: 'var(--radius-full)',
-                  border: '1px solid var(--border-subtle)',
-                  gap: '0.35rem',
-                }}
-              >
-                <button
-                  onClick={() => setActiveTab('module-a')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.45rem',
-                    padding: '0.5rem 1.15rem',
-                    borderRadius: 'var(--radius-full)',
-                    border: 'none',
-                    fontSize: '0.84rem',
-                    fontWeight: activeTab === 'module-a' ? 800 : 600,
-                    cursor: 'pointer',
-                    background: activeTab === 'module-a' ? '#FFFFFF' : 'transparent',
-                    color: activeTab === 'module-a' ? '#EA580C' : 'var(--text-secondary)',
-                    boxShadow: activeTab === 'module-a' ? '0 1px 4px rgba(15, 23, 42, 0.08)' : 'none',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <Camera size={15} />
-                  <span>AI Disease Scanner</span>
-                </button>
+            {/* 4 Essential Farm Telemetry Chips */}
+            <div className="hl-metric-strip">
+              <div>
+                <span>Stand capacity</span>
+                <strong>
+                  18,500 <small>plants</small>
+                </strong>
+                <em>1.2 ha stand</em>
+              </div>
 
-                <button
-                  onClick={() => setActiveTab('module-b')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.45rem',
-                    padding: '0.5rem 1.15rem',
-                    borderRadius: 'var(--radius-full)',
-                    border: 'none',
-                    fontSize: '0.84rem',
-                    fontWeight: activeTab === 'module-b' ? 800 : 600,
-                    cursor: 'pointer',
-                    background: activeTab === 'module-b' ? '#FFFFFF' : 'transparent',
-                    color: activeTab === 'module-b' ? '#EA580C' : 'var(--text-secondary)',
-                    boxShadow: activeTab === 'module-b' ? '0 1px 4px rgba(15, 23, 42, 0.08)' : 'none',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <CalendarDays size={15} />
-                  <span>Harvest Radar</span>
-                </button>
+              <div>
+                <span>Fruit sweetness</span>
+                <strong style={{ color: '#F97316' }}>
+                  14.8° <small>Brix</small>
+                </strong>
+                <em style={{ color: '#F97316' }}>Grade A estimate</em>
+              </div>
 
-                <button
-                  onClick={() => setActiveTab('module-c')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.45rem',
-                    padding: '0.5rem 1.15rem',
-                    borderRadius: 'var(--radius-full)',
-                    border: 'none',
-                    fontSize: '0.84rem',
-                    fontWeight: activeTab === 'module-c' ? 800 : 600,
-                    cursor: 'pointer',
-                    background: activeTab === 'module-c' ? '#FFFFFF' : 'transparent',
-                    color: activeTab === 'module-c' ? '#EA580C' : 'var(--text-secondary)',
-                    boxShadow: activeTab === 'module-c' ? '0 1px 4px rgba(15, 23, 42, 0.08)' : 'none',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <CircleDollarSign size={15} />
-                  <span>Transparent Market</span>
-                </button>
+              <div>
+                <span>Thermal accumulation</span>
+                <strong style={{ color: '#783f0a' }}>
+                  2,478 <small>/ 2,500 GDD</small>
+                </strong>
+                <em style={{ color: '#F97316' }}>99.1% maturity estimate</em>
+              </div>
+
+              <div>
+                <span>Net return</span>
+                <strong style={{ color: '#F97316' }}>
+                  ₹28.50 <small>/ kg</small>
+                </strong>
+                <em style={{ color: '#F97316' }}>
+                  ₹5.25 above broker cash
+                </em>
               </div>
             </div>
 
-            {/* Active Sub-module Container with Instant Tab Switching */}
-            <div style={{ marginTop: '0.25rem' }}>
+            {/* Clean Module Underline Navigation */}
+            <nav className="hl-module-nav" aria-label="Module Tabs">
+              <button
+                type="button"
+                onClick={() => setActiveTab('module-a')}
+                className={activeTab === 'module-a' ? 'is-active' : ''}
+              >
+                <Camera size={16} />
+                <span>Disease screening</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('module-b')}
+                className={activeTab === 'module-b' ? 'is-active' : ''}
+              >
+                <CalendarDays size={16} />
+                <span>Harvest radar</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('module-c')}
+                className={activeTab === 'module-c' ? 'is-active' : ''}
+              >
+                <CircleDollarSign size={16} />
+                <span>Market offers</span>
+              </button>
+            </nav>
+
+            {/* Active Sub-module Container */}
+            <div className="hl-module-content">
               <div style={{ display: activeTab === 'module-a' ? 'block' : 'none' }}>
                 <DiseaseScreeningStudio />
               </div>
