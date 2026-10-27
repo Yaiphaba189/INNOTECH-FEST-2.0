@@ -17,6 +17,7 @@ import {
   Waves,
   Sparkles,
   Loader2,
+  ArrowLeft,
 } from 'lucide-react';
 import { DiseaseDiagnosis } from '@/types';
 import { INITIAL_DISEASE_DIAGNOSIS, MOCK_DISEASE_CATALOG } from '@/lib/mock-data';
@@ -225,6 +226,16 @@ export const DiseaseScreeningStudio: React.FC = () => {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+  };
+
+  // Leave the live or demo field stream and return to the camera start screen
+  const handleExitStream = () => {
+    stopCurrentStream();
+    setIsCameraActive(false);
+    setIsSimulatedCamera(false);
+    setIsCameraLoading(false);
+    setCameraError(null);
+    setPreviewImage(null);
   };
 
   // Helper to detect if device is mobile
@@ -1250,7 +1261,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
           </div>
 
           {/* Action Toolbar */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '0.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isCameraActive || previewImage ? '2fr 1fr 1fr 1fr' : '2fr 1fr 1fr', gap: '0.5rem' }}>
             {previewImage ? (
               <button
                 onClick={handleResumeLiveFeed}
@@ -1287,6 +1298,18 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     <span>Use Live Camera</span>
                   </>
                 )}
+              </button>
+            )}
+
+            {(isCameraActive || previewImage) && (
+              <button
+                onClick={handleExitStream}
+                className="tap-target btn-secondary"
+                title="Stop the stream and go back"
+                style={{ fontSize: '0.76rem', gap: '0.3rem', justifyContent: 'center' }}
+              >
+                <ArrowLeft size={13} />
+                <span>Back</span>
               </button>
             )}
 
