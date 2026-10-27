@@ -69,6 +69,22 @@ export interface ModelCard {
 const PRIMARY_API_BASE =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
+// The backend runs on :8001 per the docs but :8000 under docker-compose, so try every known port.
+const API_BASES = Array.from(new Set([PRIMARY_API_BASE, 'http://localhost:8001', 'http://localhost:8000']));
+
+/** fetch() against the first reachable backend; any HTTP response counts as reachable. */
+async function fetchApi(endpoint: string, init?: RequestInit): Promise<Response> {
+  let lastErr: unknown = new Error('No API base reachable');
+  for (const base of API_BASES) {
+    try {
+      return await fetch(`${base}${endpoint}`, init);
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr;
+}
+
 // Resolved by AuthContext once the demo/session login attempt settles, so data fetches fired on
 // first render do not go out with the placeholder 'mock-' token and 401 into mock fallbacks.
 let resolveAuthReady: () => void = () => {};
@@ -77,13 +93,19 @@ const authReady = new Promise<void>((resolve) => {
 });
 export const markAuthReady = () => resolveAuthReady();
 
+/** Records that a screen is showing built-in sample data; DemoDataBanner listens for this. */
+export const DEMO_DATA_EVENT = 'harvestlink:demo-data';
+export function markDemoData(source: string) {
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(DEMO_DATA_EVENT, { detail: source }));
+}
+
 async function safeFetch<T>(
   endpoint: string,
   options?: RequestInit,
   fallback?: T
 ): Promise<T> {
   const urls = Array.from(
-    new Set([`${PRIMARY_API_BASE}${endpoint}`, `http://localhost:8001${endpoint}`])
+    new Set(API_BASES.map((b) => `${b}${endpoint}`))
   );
 
   if (typeof window !== 'undefined') {
@@ -133,7 +155,7 @@ export const api = {
         formData.append('crop_record_id', cropRecordId);
         formData.append('image_angle', angle);
 
-        const res = await fetch(`${PRIMARY_API_BASE}/api/assessments/screen`, {
+        const res = await fetchApi(`/api/assessments/screen`, {
           method: 'POST',
           headers: authHeader,
           body: formData,
@@ -197,9 +219,11 @@ export const api = {
     detected_crop: string;
     crop_display_name: string;
     crop_confidence: number;
+    crop_source?: 'user_selected' | 'unidentified';
     detected_part: string;
     part_display_name: string;
     part_confidence: number;
+    part_source?: 'user_selected' | 'defaulted' | 'unidentified';
     diagnosis: {
       predicted_class: string;
       display_name: string;
@@ -215,7 +239,7 @@ export const api = {
       triage_status?: 'confirmed' | 'preliminary' | 'inconclusive';
     };
     image_hash_sha256?: string;
-    inference_mode?: 'trained_model' | 'colour_heuristic';
+    inference_mode?: 'trained_model' | 'colour_heuristic' | 'crop_not_selected';
     evidence?: Record<string, number>;
   }> {
     const token = typeof window !== 'undefined' ? localStorage.getItem('harvestlink_token_active') : null;
@@ -227,7 +251,7 @@ export const api = {
       if (cropHint) formData.append('crop_hint', cropHint);
       if (partHint) formData.append('part_hint', partHint);
 
-      const res = await fetch(`${PRIMARY_API_BASE}/api/assessments/auto-detect`, {
+      const res = await fetchApi(`/api/assessments/auto-detect`, {
         method: 'POST',
         headers: authHeader,
         body: formData,
@@ -237,91 +261,11 @@ export const api = {
         return await res.json();
       }
     } catch (err) {
-      console.warn('Real-time auto-detect failed, using smart fallback:', err);
+      console.warn('Real-time auto-detect failed:', err);
     }
 
-    // Smart fallback simulation
-    const crop = cropHint || 'pineapple';
-    const isPineapple = crop === 'pineapple';
-    const isRice = crop === 'rice';
-
-    if (isPineapple) {
-      return {
-        detected_crop: 'pineapple',
-        crop_display_name: 'Manipur Queen Pineapple (GI #497)',
-        crop_confidence: 0.984,
-        detected_part: partHint || 'crown',
-        part_display_name: partHint === 'base_stalk' ? 'Fruit Base & Basal Stalk' : partHint === 'lateral' ? 'Lateral Fruit Eyes & Axils' : 'Crown Whorl (Rosette Heart)',
-        part_confidence: 0.942,
-        diagnosis: {
-          predicted_class: partHint === 'base_stalk' ? 'black_rot' : partHint === 'lateral' ? 'mealybug_wilt' : 'heart_rot',
-          display_name: partHint === 'base_stalk' ? 'Thielaviopsis Black Rot (Water Blister)' : partHint === 'lateral' ? 'Pineapple Mealybug Wilt-Associated Virus' : 'Phytophthora Heart Rot',
-          local_name: partHint === 'base_stalk' ? 'হৈনোম অমোৎপা' : partHint === 'lateral' ? 'হৈনোম হিক তাবা' : 'মপন শাবা (Heart Rot)',
-          scientific_name: partHint === 'base_stalk' ? 'Ceratocystis paradoxa' : partHint === 'lateral' ? 'Dysmicoccus brevipes / PMWV' : 'Phytophthora nicotianae var. parasitica',
-          confidence_score: 93.4,
-          severity_rating: 'CRITICAL',
-          symptoms_detected: [
-            'Water-soaked soft rot at central leaf base',
-            'Brown necrotic leaf margins',
-            'Inner whorl leaf detachment with foul odor',
-          ],
-          organic_treatment: 'Dip slips in Trichoderma viride (10g/L) for 15 minutes before planting.',
-          chemical_treatment: 'Spray Copper Oxychloride (0.25%) or Fosetyl-Aluminium (0.2%) at heart base.',
-          cultural_practices: 'Dig 30cm drainage trenches immediately to eliminate stagnant water between ridges.',
-          refer_to_expert: true,
-        },
-      };
-    } else if (isRice) {
-      return {
-        detected_crop: 'rice',
-        crop_display_name: 'Chak-hao & Valley Rice (Oryza sativa)',
-        crop_confidence: 0.965,
-        detected_part: partHint || 'leaf_blade',
-        part_display_name: partHint === 'sheath' ? 'Leaf Sheath (Waterline Zone)' : partHint === 'panicle' ? 'Panicle & Grain Head' : 'Leaf Blade & Margins',
-        part_confidence: 0.938,
-        diagnosis: {
-          predicted_class: partHint === 'sheath' ? 'sheath_blight' : partHint === 'panicle' ? 'blast' : 'bacterial_leaf_blight',
-          display_name: partHint === 'sheath' ? 'Rhizoctonia Sheath Blight' : partHint === 'panicle' ? 'Rice Blast (Magnaporthe)' : 'Bacterial Leaf Blight (BLB)',
-          local_name: partHint === 'sheath' ? 'মখোং শাবা' : partHint === 'panicle' ? 'চেকপোকপা' : 'নাহা শাবা (Bacterial Leaf Blight)',
-          scientific_name: partHint === 'sheath' ? 'Rhizoctonia solani' : partHint === 'panicle' ? 'Magnaporthe oryzae' : 'Xanthomonas oryzae pv. oryzae',
-          confidence_score: 91.8,
-          severity_rating: 'MODERATE',
-          symptoms_detected: [
-            'Water-soaked lesions turning yellow to white from leaf tips',
-            'Bacterial ooze droplets on leaf surfaces in early morning',
-          ],
-          organic_treatment: 'Spray fresh cow dung supernatant (20%) or neem cake aqueous extract.',
-          chemical_treatment: 'Spray Streptocycline (1g in 10L) + Copper Oxychloride (25g in 10L).',
-          cultural_practices: 'Drain standing water; prune lower affected leaves.',
-          refer_to_expert: false,
-        },
-      };
-    } else {
-      return {
-        detected_crop: 'orange',
-        crop_display_name: 'Tamenglong Mandarin Orange (GI #498)',
-        crop_confidence: 0.976,
-        detected_part: partHint || 'foliage',
-        part_display_name: partHint === 'fruit_peel' ? 'Fruit Peel & Outer Rind' : partHint === 'root_rot' ? 'Stem Collar & Bark Base' : 'Foliage & Canopy Leaves',
-        part_confidence: 0.946,
-        diagnosis: {
-          predicted_class: partHint === 'fruit_peel' ? 'citrus_canker' : partHint === 'root_rot' ? 'root_rot' : 'citrus_greening_hlb',
-          display_name: partHint === 'fruit_peel' ? 'Citrus Canker (Xanthomonas)' : partHint === 'root_rot' ? 'Citrus Root & Collar Rot' : 'Citrus Greening (Huanglongbing / HLB)',
-          local_name: partHint === 'fruit_peel' ? 'হৈব্রু ঘা' : partHint === 'root_rot' ? 'মরী শাবা' : 'কমলা হালবা (Huanglongbing / HLB)',
-          scientific_name: partHint === 'fruit_peel' ? 'Xanthomonas axonopodis pv. citri' : partHint === 'root_rot' ? 'Phytophthora nicotianae' : 'Candidatus Liberibacter asiaticus',
-          confidence_score: 94.2,
-          severity_rating: 'SEVERE',
-          symptoms_detected: [
-            'Asymmetric blotchy leaf mottle with yellow veins',
-            'Small, lopsided fruit with aborted seeds and bitter juice',
-          ],
-          organic_treatment: 'Encourage natural predators (ladybird beetles) against citrus psyllids.',
-          chemical_treatment: 'Spray Dimethoate 30 EC (1.5ml/L) or Imidacloprid (0.3ml/L) to target psyllid.',
-          cultural_practices: 'Strict eradication of infected branches; use certified disease-free rootstocks.',
-          refer_to_expert: true,
-        },
-      };
-    }
+    // Never fabricate a diagnosis: the caller must tell the user the scan could not run.
+    throw new Error('Diagnosis server unreachable');
   },
 
   async escalateToOfficer(diagnosisId: string, notes: string): Promise<{ success: boolean }> {
@@ -330,8 +274,7 @@ export const api = {
       {
         method: 'POST',
         body: JSON.stringify({ notes }),
-      },
-      { success: true }
+      }
     );
   },
 
@@ -367,6 +310,7 @@ export const api = {
     } catch {
       // fallback
     }
+    markDemoData('Harvest forecast');
     return MOCK_HARVEST_FORECAST;
   },
 
@@ -400,7 +344,7 @@ export const api = {
       formData.append('image_file', file);
       if (cropHint) formData.append('crop_hint', cropHint);
 
-      const res = await fetch(`${PRIMARY_API_BASE}/api/crops/evaluate-frame`, {
+      const res = await fetchApi(`/api/crops/evaluate-frame`, {
         method: 'POST',
         body: formData,
       });
@@ -409,112 +353,11 @@ export const api = {
         return await res.json();
       }
     } catch (err) {
-      console.warn('Field evaluation call failed, using fallback:', err);
+      console.warn('Field evaluation call failed:', err);
     }
 
-    // Smart fallback simulation based on filename/hint
-    const fn = file.name.toLowerCase();
-    const isFallow = fn.includes('fallow') || fn.includes('bare') || fn.includes('soil');
-    const isWaterDeficit = fn.includes('water') || fn.includes('dry') || fn.includes('deficit');
-    const isRootRot = fn.includes('rot') || fn.includes('canker') || fn.includes('collar');
-
-    if (isFallow) {
-      return {
-        is_planted: false,
-        planting_status: 'Unplanted Fallow Ground',
-        canopy_coverage_pct: 7.3,
-        detected_crop: null,
-        crop_display_name: 'Bare Soil / Pre-Planting Terrace',
-        crop_condition: 'FALLOW',
-        condition_score: 15.0,
-        water_status: 'DRY_SOIL',
-        soil_moisture_pct: 18.2,
-        root_rot_status: 'N/A',
-        root_rot_details: 'No active biological root system detected in fallow terrace soil.',
-        harvest_readiness_pct: 0.0,
-        harvest_recommendation: 'Field not planted. Prepare contour ridges and add bio-manure.',
-        estimated_brix: 0.0,
-        gdd_accumulated: 0.0,
-        gdd_target: 2500.0,
-        optimal_harvest_window: 'N/A - Planting Required',
-        recommended_pick_date: 'N/A',
-        weather_risk: 'LOW (Soil Work Favorable)',
-        agronomic_advisory: 'FALLOW PLOT: Terrace bed is currently unplanted (7.3% vegetation). Prepare double-row contour ridges on 15% slope and incorporate Farm Yard Manure (FYM) before monsoon planting.',
-      };
-    }
-
-    if (isWaterDeficit) {
-      return {
-        is_planted: true,
-        planting_status: 'Established Stand',
-        canopy_coverage_pct: 68.0,
-        detected_crop: cropHint || 'pineapple',
-        crop_display_name: 'Manipur Queen Pineapple (GI #497)',
-        crop_condition: 'WATER_DEFICIT',
-        condition_score: 56.4,
-        water_status: 'LACKING_WATER',
-        soil_moisture_pct: 28.4,
-        root_rot_status: 'HEALTHY',
-        root_rot_details: 'Root zone dry but healthy. No fungal pathogen detected at basal collar.',
-        harvest_readiness_pct: 82.0,
-        harvest_recommendation: 'Provide 25mm drip/furrow irrigation before harvest to prevent fruit desiccation.',
-        estimated_brix: 14.8,
-        gdd_accumulated: 2279.0,
-        gdd_target: 2500.0,
-        optimal_harvest_window: 'In 6 to 9 Days (Post-Rehydration)',
-        recommended_pick_date: '2026-10-26',
-        weather_risk: 'MODERATE (High Evaporation & Moisture Deficit)',
-        agronomic_advisory: 'WATER DEFICIT: Crop is lacking water. Soil moisture is at 28.4% (critical threshold 35%). Leaves showing loss of turgor. Apply 25mm supplemental irrigation in early morning and mulch with paddy straw.',
-      };
-    }
-
-    if (isRootRot) {
-      return {
-        is_planted: true,
-        planting_status: 'Established Stand',
-        canopy_coverage_pct: 75.0,
-        detected_crop: cropHint || 'pineapple',
-        crop_display_name: 'Manipur Queen Pineapple (GI #497)',
-        crop_condition: 'ROOT_ROT_ONSET',
-        condition_score: 41.2,
-        water_status: 'WATERLOGGED',
-        soil_moisture_pct: 88.5,
-        root_rot_status: 'EARLY_ONSET',
-        root_rot_details: 'Basal stem collar softening and dark water-soaking detected. Zoospore proliferation active.',
-        harvest_readiness_pct: 94.0,
-        harvest_recommendation: 'Salvage harvest mature uninfected fruit immediately; excavate drainage trenches.',
-        estimated_brix: 13.3,
-        gdd_accumulated: 2478.0,
-        gdd_target: 2500.0,
-        optimal_harvest_window: 'Immediate (Next 24 Hours)',
-        recommended_pick_date: '2026-10-20',
-        weather_risk: 'CRITICAL (Standing Water Accelerating Basal Rot)',
-        agronomic_advisory: 'ROOT ROT STARTED: Early root and collar rot detected at stem base. Saturated furrows (88.5% moisture). Dig 30cm contour drainage channels immediately. Drench root collars with Trichoderma viride bio-fungicide @ 10g/L.',
-      };
-    }
-
-    return {
-      is_planted: true,
-      planting_status: 'Established Stand',
-      canopy_coverage_pct: 92.4,
-      detected_crop: cropHint || 'pineapple',
-      crop_display_name: 'Manipur Queen Pineapple (GI #497)',
-      crop_condition: 'MATURE_HARVEST',
-      condition_score: 97.2,
-      water_status: 'OPTIMAL',
-      soil_moisture_pct: 64.5,
-      root_rot_status: 'HEALTHY',
-      root_rot_details: 'Turgid root system, intact root crowns, no basal soft rot detected.',
-      harvest_readiness_pct: 99.1,
-      harvest_recommendation: 'Optimal harvest window: Oct 22 – Oct 26. Harvest before Wednesday 65mm downpour.',
-      estimated_brix: 14.8,
-      gdd_accumulated: 2478.0,
-      gdd_target: 2500.0,
-      optimal_harvest_window: 'Oct 22 – Oct 26, 2026',
-      recommended_pick_date: '2026-10-22',
-      weather_risk: 'HIGH (65mm Downpour Predicted in 48h)',
-      agronomic_advisory: 'PEAK HARVEST MATURITY: Stand has accumulated 99.1% GDD with 14.8° Brix (Grade A Export). Urgent pre-monsoon advisory: 65mm rainfall forecast in 48h. Harvest within 36 hours to avoid water blister and osmotic sucrose drop.',
-    };
+    // Never fabricate a field evaluation from the filename.
+    throw new Error('Field evaluation server unreachable');
   },
 
   async registerLot(weightKg: number, cropRecordId: string): Promise<{ success: boolean; lot_id: string }> {
@@ -530,8 +373,7 @@ export const api = {
           harvest_window_start: new Date().toISOString().split('T')[0],
           harvest_window_end: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
         }),
-      },
-      { success: true, lot_id: `lot-reg-${Date.now()}` }
+      }
     );
   },
 
@@ -570,6 +412,7 @@ export const api = {
     } catch {
       // fallback
     }
+    markDemoData('Buyer matches');
     return MOCK_BUYER_MATCHES;
   },
 
@@ -589,8 +432,7 @@ export const api = {
   async acceptDeal(matchId: string): Promise<{ success: boolean; match_id: string }> {
     return safeFetch<{ success: boolean; match_id: string }>(
       `/api/lots/matches/${matchId}/accept`,
-      { method: 'POST' },
-      { success: true, match_id: matchId }
+      { method: 'POST' }
     );
   },
 
@@ -601,9 +443,11 @@ export const api = {
   async getDispatchRun(clusterDistrict: string): Promise<DispatchRun> {
     return safeFetch<DispatchRun>(
       `/api/logistics/dispatch-runs/${encodeURIComponent(clusterDistrict)}`,
-      { method: 'GET' },
-      MOCK_DISPATCH_RUN
-    );
+      { method: 'GET' }
+    ).catch(() => {
+      markDemoData('Dispatch run');
+      return MOCK_DISPATCH_RUN;
+    });
   },
 
   async getMarketplaceLots(): Promise<MarketplaceLot[]> {
@@ -680,6 +524,7 @@ export const api = {
       // fallback
     }
 
+    markDemoData('Marketplace lots');
     return fallbackLots;
   },
 
@@ -689,12 +534,21 @@ export const api = {
       {
         method: 'POST',
         body: JSON.stringify(order),
-      },
-      { success: true, order_id: `order-${Date.now()}` }
+      }
     );
   },
 
   auth: {
+    /** Asks the backend whether a stored token is still accepted. */
+    async checkToken(token: string): Promise<'valid' | 'invalid' | 'unreachable'> {
+      try {
+        const res = await fetchApi('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+        return res.ok ? 'valid' : 'invalid';
+      } catch {
+        return 'unreachable';
+      }
+    },
+
     async login(phone_number: string, password: string): Promise<AuthResponse> {
       let formattedPhone = phone_number.trim();
       if (!formattedPhone.startsWith('+')) {
@@ -710,7 +564,7 @@ export const api = {
           : password;
 
       try {
-        const res = await fetch(`${PRIMARY_API_BASE}/api/auth/login`, {
+        const res = await fetchApi(`/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -770,7 +624,7 @@ export const api = {
       preferred_language?: string;
     }): Promise<AuthResponse> {
       try {
-        const res = await fetch(`${PRIMARY_API_BASE}/api/auth/register`, {
+        const res = await fetchApi(`/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),

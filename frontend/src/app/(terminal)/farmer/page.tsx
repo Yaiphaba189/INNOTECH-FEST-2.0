@@ -8,6 +8,7 @@ import { RoleGuard } from '@/components/auth/RoleGuard';
 import { useAuth } from '@/context/AuthContext';
 import { FarmerProvider, useFarmer } from '@/context/FarmerContext';
 import { BROKER_NET_PER_KG, round2 } from '@/lib/decision';
+import { api } from '@/lib/api-client';
 import { useRouter } from 'next/navigation';
 import {
   Camera,
@@ -39,6 +40,19 @@ function FarmerHub() {
   // Admin/demo-role sessions can open this page; show the seeded farmer persona, not the admin's name.
   const farmerName = user?.role === 'farmer' && user.full_name ? user.full_name : 'Tombi Singh';
   const netPay = bestView?.net ?? 0;
+  const isDemoRain = rain.source === 'demo';
+  const hoursLeft = decision ? Math.max(0, Math.round(decision.hoursLeft)) : null;
+  const rupeesAtRisk = decision ? Math.round(decision.rupeesAtRisk) : null;
+  const grade = decision?.gradeNow ?? '—';
+  const brix = decision?.brixNow ?? lot.estimated_brix;
+  const advantage = bestView?.advantage ?? null;
+  const [gdd, setGdd] = useState<{ acc: number; target: number } | null>(null);
+  useEffect(() => {
+    api
+      .getHarvestForecast('crop-queen-tombi-001')
+      .then((f) => setGdd({ acc: f.gdd_accumulated, target: f.gdd_target }))
+      .catch(() => setGdd(null));
+  }, []);
   const [activeTab, setActiveTab] = useState<'module-a' | 'module-b' | 'module-c'>('module-a');
 
   useEffect(() => {
@@ -87,18 +101,20 @@ function FarmerHub() {
                   </span>
                   <h2>Pick before the rain reaches your stand</h2>
                   <p>
-                    65 mm of rain is forecast in 41 h. Harvest within 35 h to protect the Grade A grade.
+                    {rain.mm >= 20
+                      ? `${rain.mm} mm of rain is forecast in ${rain.etaHours} h. Harvest within ${hoursLeft ?? '—'} h to protect the ${grade} grade.`
+                      : `No damaging rain in the next 48 h (${rain.mm} mm forecast). No need to rush the harvest.`}
                   </p>
                   <div className="hl-window-chart">
                     <div className="hl-window-labels">
                       <span>Now</span>
-                      <span>Pick by 35 h</span>
-                      <span>Rain · 41 h</span>
+                      <span>Pick by {hoursLeft ?? '—'} h</span>
+                      <span>Rain · {rain.etaHours} h</span>
                     </div>
                     <div className="hl-window-track">
-                      <div className="hl-window-safe" style={{ width: '73%' }} />
-                      <div className="hl-window-pick" style={{ left: '73%' }} />
-                      <div className="hl-window-rain" style={{ left: '85%' }} />
+                      <div className="hl-window-safe" style={{ width: `${Math.min(100, ((hoursLeft ?? 0) / 48) * 100)}%` }} />
+                      <div className="hl-window-pick" style={{ left: `${Math.min(100, ((hoursLeft ?? 0) / 48) * 100)}%` }} />
+                      <div className="hl-window-rain" style={{ left: `${Math.min(100, (rain.etaHours / 48) * 100)}%` }} />
                     </div>
                     <div className="hl-window-end">48-hour forecast</div>
                   </div>
@@ -114,8 +130,8 @@ function FarmerHub() {
 
                 <div className="hl-risk-value">
                   <span>Value at risk if delayed</span>
-                  <strong>₹4,094</strong>
-                  <small>Estimated for this 500 kg lot</small>
+                  <strong>{rupeesAtRisk == null ? '—' : `₹${rupeesAtRisk.toLocaleString('en-IN')}`}</strong>
+                  <small>Estimated for this {lot.quantity_kg} kg lot</small>
                 </div>
               </div>
 
@@ -129,18 +145,18 @@ function FarmerHub() {
                   </div>
                   <div>
                     <dt>Current grade</dt>
-                    <dd style={{ color: '#F97316', fontWeight: 600 }}>Grade A</dd>
+                    <dd style={{ color: '#F97316', fontWeight: 600 }}>{grade}</dd>
                   </div>
                   <div>
                     <dt>Rain window</dt>
-                    <dd style={{ color: '#963238', fontWeight: 600 }}>65 mm · 41 h</dd>
+                    <dd style={{ color: '#963238', fontWeight: 600 }}>{rain.mm} mm · {rain.etaHours} h</dd>
                   </div>
                   <div>
                     <dt>Net offer</dt>
-                    <dd className="tabular-nums" style={{ color: '#F97316', fontWeight: 700 }}>₹28.50 / kg</dd>
+                    <dd className="tabular-nums" style={{ color: '#F97316', fontWeight: 700 }}>{bestView ? `₹${bestView.net.toFixed(2)} / kg` : '—'}</dd>
                   </div>
                 </dl>
-                <small>Demonstration forecast · sample scenario</small>
+                <small>{isDemoRain ? 'Demonstration storm · sample scenario, not a live forecast' : `Live forecast · ${rain.source}`}</small>
               </div>
             </div>
 
@@ -159,28 +175,28 @@ function FarmerHub() {
                 <i className="hl-metric-icon"><Candy size={16} /></i>
                 <span>Fruit sweetness</span>
                 <strong style={{ color: '#F97316' }}>
-                  14.8° <small>Brix</small>
+                  {brix}° <small>Brix</small>
                 </strong>
-                <em style={{ color: '#F97316' }}>Grade A estimate</em>
+                <em style={{ color: '#F97316' }}>{grade} estimate</em>
               </div>
 
               <div>
                 <i className="hl-metric-icon"><Thermometer size={16} /></i>
                 <span>Thermal accumulation</span>
                 <strong style={{ color: '#783f0a' }}>
-                  2,478 <small>/ 2,500 GDD</small>
+                  {gdd ? gdd.acc.toLocaleString('en-IN') : '—'} <small>/ {gdd ? gdd.target.toLocaleString('en-IN') : '—'} GDD</small>
                 </strong>
-                <em style={{ color: '#F97316' }}>99.1% maturity estimate</em>
+                <em style={{ color: '#F97316' }}>{gdd ? `${((gdd.acc / gdd.target) * 100).toFixed(1)}% maturity estimate` : 'Forecast unavailable'}</em>
               </div>
 
               <div>
                 <i className="hl-metric-icon"><CircleDollarSign size={16} /></i>
                 <span>Net return</span>
                 <strong style={{ color: '#F97316' }}>
-                  ₹28.50 <small>/ kg</small>
+                  {bestView ? `₹${bestView.net.toFixed(2)}` : '—'} <small>/ kg</small>
                 </strong>
                 <em style={{ color: '#F97316' }}>
-                  ₹5.25 above broker cash
+                  {advantage == null ? 'No offer yet' : `₹${advantage.toFixed(2)} ${advantage >= 0 ? 'above' : 'below'} broker cash`}
                 </em>
               </div>
             </div>

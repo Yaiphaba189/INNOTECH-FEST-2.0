@@ -20,7 +20,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { DiseaseDiagnosis } from '@/types';
-import { INITIAL_DISEASE_DIAGNOSIS, MOCK_DISEASE_CATALOG } from '@/lib/mock-data';
+import { MOCK_DISEASE_CATALOG } from '@/lib/mock-data';
 import { compressFieldImage, CompressionResult } from '@/lib/image-compressor';
 import { queueOfflineScan } from '@/lib/offline-db';
 import { api, ModelCard } from '@/lib/api-client';
@@ -58,6 +58,10 @@ interface OrganDefinition {
   hint: string;
   img: string;
 }
+
+// Crop/organ come from the farmer's selection (no image-based crop model), so 100 means "selected", not a score.
+const formatDetectionBadge = (confidence: number) =>
+  confidence >= 100 ? 'Selected' : confidence > 0 ? `${confidence}%` : '—';
 
 const CROP_ORGANS: Record<string, OrganDefinition[]> = {
   pineapple: [
@@ -158,22 +162,23 @@ export const DiseaseScreeningStudio: React.FC = () => {
     name: string;
     confidence: number;
   }>({
-    id: 'pineapple',
-    name: 'Manipur Queen Pineapple (GI 497)',
-    confidence: 97.4,
+    id: 'unknown',
+    name: 'Not identified yet',
+    confidence: 0,
   });
   const [detectedOrganLive, setDetectedOrganLive] = useState<{
     id: string;
     name: string;
     confidence: number;
   }>({
-    id: 'crown',
-    name: 'Crown Whorl (Rosette)',
-    confidence: 94.2,
+    id: 'unknown',
+    name: 'Not identified yet',
+    confidence: 0,
   });
+  const [scanError, setScanError] = useState<string | null>(null);
 
   // Current Diagnosis & Remediation
-  const [diagnosis, setDiagnosis] = useState<DiseaseDiagnosis | null>(INITIAL_DISEASE_DIAGNOSIS);
+  const [diagnosis, setDiagnosis] = useState<DiseaseDiagnosis | null>(null);
   const [activeRemedyTab, setActiveRemedyTab] = useState<'organic' | 'chemical'>('organic');
   const [compressionInfo, setCompressionInfo] = useState<CompressionResult | null>({
     compressedBlob: new Blob(),
@@ -486,6 +491,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
       const cropHint = currentScope === 'auto' ? undefined : currentScope;
 
       const response = await api.autoDetectLiveFrame(file, cropHint, selectedOrganRef.current);
+      setScanError(null);
 
       // Single batched update
       setDetectedCropLive({
@@ -513,7 +519,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
         confidence_score: diag.confidence_score,
         triage_status: diag.triage_status ?? 'confirmed',
         severity: (diag.severity_rating as any) || 'CRITICAL',
-        inference_mode: response.inference_mode ?? 'offline_preset',
+        inference_mode: response.inference_mode ?? 'colour_heuristic',
         evidence: response.evidence,
         symptoms_detected: diag.symptoms_detected || [],
         organic_treatments: [diag.organic_treatment],
@@ -524,7 +530,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
         timestamp: new Date().toISOString(),
       });
     } catch (err) {
-      // ignore frame drops silently
+      setScanError('Cannot reach the diagnosis server — no result to show. Check your connection; scans are not simulated.');
     } finally {
       setIsScanningFrame(false);
       isScanningRef.current = false;
@@ -579,7 +585,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
         canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.85)
       );
 
-      if (blob) {
+      if (blob && diagnosis) {
         const file = new File([blob], `frozen_frame_${Date.now()}.jpg`, { type: 'image/jpeg' });
         const result = await compressFieldImage(file, 1024, 0.82);
         setCompressionInfo(result);
@@ -591,7 +597,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
           imageAngle: selectedOrgan,
           compressedSizeKb: Math.round(result.compressedSizeBytes / 1024),
           originalSizeKb: Math.round(result.originalSizeBytes / 1024),
-          diagnosis: diagnosis || INITIAL_DISEASE_DIAGNOSIS,
+          diagnosis,
         });
       }
     } catch (err) {
@@ -618,6 +624,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
   // Sends an image through the backend analyzer and renders the result. Shared by uploads and sample photos.
   const analyseFile = async (file: File, cropHint: string | undefined, organ: string, idPrefix: string) => {
     const response = await api.autoDetectLiveFrame(file, cropHint, organ);
+    setScanError(null);
 
     setDetectedCropLive({
       id: response.detected_crop,
@@ -630,7 +637,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
       confidence: Math.round(response.part_confidence * 100),
     });
 
-    setSelectedOrgan(response.detected_part);
+    if (response.detected_part !== 'unknown') setSelectedOrgan(response.detected_part);
     const diag = response.diagnosis;
     setDiagnosis({
       id: `${idPrefix}-${Date.now()}`,
@@ -644,7 +651,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
       confidence_score: diag.confidence_score,
       triage_status: diag.triage_status ?? 'confirmed',
       severity: (diag.severity_rating as any) || 'CRITICAL',
-      inference_mode: response.inference_mode ?? 'offline_preset',
+      inference_mode: response.inference_mode ?? 'colour_heuristic',
       evidence: response.evidence,
       symptoms_detected: diag.symptoms_detected || [],
       organic_treatments: [diag.organic_treatment],
@@ -673,6 +680,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
       await analyseFile(uploadFile, cropScope === 'auto' ? undefined : cropScope, selectedOrgan, 'upload-diag');
     } catch (err) {
       console.error('File diagnosis failed:', err);
+      setScanError('Cannot reach the diagnosis server — your photo was not analysed.');
     } finally {
       setIsScanningFrame(false);
     }
@@ -691,6 +699,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
       await analyseFile(new File([blob], `${preset.id}.jpg`, { type: blob.type || 'image/jpeg' }), preset.crop, preset.organ, 'sample-diag');
     } catch (err) {
       console.error('Sample photo analysis failed:', err);
+      setScanError('Cannot reach the diagnosis server — the sample photo was not analysed.');
     } finally {
       setIsScanningFrame(false);
     }
@@ -698,7 +707,12 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
   const handleEscalateConfirm = async () => {
     if (diagnosis?.id) {
-      await api.escalateToOfficer(diagnosis.id, escalationNotes);
+      try {
+        await api.escalateToOfficer(diagnosis.id, escalationNotes);
+      } catch {
+        window.alert('Could not reach the server, so this was NOT sent to the officer. Please try again.');
+        return;
+      }
     }
     setEscalated(true);
     setShowEscalationModal(false);
@@ -1183,7 +1197,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       Crop: {detectedCropLive.name.replace(/#/g, "")}
                     </span>
                     <span style={{ color: '#FB923C', fontWeight: 800 }}>
-                      {detectedCropLive.confidence}%
+                      {formatDetectionBadge(detectedCropLive.confidence)}
                     </span>
                   </div>
 
@@ -1205,7 +1219,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       Organ: {detectedOrganLive.name}
                     </span>
                     <span style={{ color: '#2563EB', fontWeight: 800 }}>
-                      {detectedOrganLive.confidence}%
+                      {formatDetectionBadge(detectedOrganLive.confidence)}
                     </span>
                   </div>
                 </div>
@@ -1417,8 +1431,21 @@ export const DiseaseScreeningStudio: React.FC = () => {
         </div>
 
         {/* Right Column: Clean Diagnosis Results Card */}
+        {!diagnosis && (
+          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+              DIAGNOSIS RESULT
+            </span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              {scanError ?? 'No scan yet. Choose a crop, then point the camera at the affected plant part or upload a photo.'}
+            </span>
+          </div>
+        )}
         {diagnosis && (
           <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {scanError && (
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#B91C1C' }}>{scanError}</span>
+            )}
             {/* Header: Clean Risk Badge & Crop Metadata */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1441,8 +1468,8 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
               {diagnosis.inference_mode && diagnosis.inference_mode !== 'trained_model' && (
                 <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)' }}>
-                  {diagnosis.inference_mode === 'offline_preset'
-                    ? 'Offline preset — server unreachable, this is a sample result, not a scan of your photo.'
+                  {diagnosis.inference_mode === 'crop_not_selected'
+                    ? 'The crop is not auto-identified. Pick Pineapple, Rice or Orange above to get a diagnosis.'
                     : `Screening aid: colour analysis of your photo (${Math.round((diagnosis.evidence?.plant_coverage ?? 0) * 100)}% plant tissue detected). Confirm with a KVK officer.`}
                 </span>
               )}
@@ -1474,7 +1501,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   </span>
                 </div>
                 <span style={{ color: '#F97316', fontWeight: 700, fontSize: '0.68rem' }}>
-                  Auto-Detected
+                  {diagnosis.inference_mode === 'crop_not_selected' ? 'Select a crop' : 'Selected by you'}
                 </span>
               </div>
 

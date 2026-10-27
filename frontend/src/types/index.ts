@@ -46,7 +46,7 @@ export interface DiseaseDiagnosis {
   confidence_score: number;
   triage_status: 'confirmed' | 'preliminary' | 'inconclusive';
   severity: 'CRITICAL' | 'MODERATE' | 'LOW' | 'NONE' | 'UNKNOWN';
-  inference_mode?: 'trained_model' | 'colour_heuristic' | 'offline_preset';
+  inference_mode?: 'trained_model' | 'colour_heuristic' | 'crop_not_selected';
   evidence?: Record<string, number>;
   symptoms_detected: string[];
   organic_treatments: string[];

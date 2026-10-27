@@ -58,7 +58,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const storedToken = localStorage.getItem('harvestlink_token_active');
         const storedUser: AuthUser | null = storedUserRaw ? JSON.parse(storedUserRaw) : null;
 
-        if (storedUser && storedToken && !storedToken.startsWith('mock-')) {
+        // Simulated tokens ('mock-', 'demo-token-') are never accepted by the API; real ones are
+        // checked with the backend so an expired or foreign token is replaced instead of causing 401s.
+        const simulated = !!storedToken && (storedToken.startsWith('mock-') || storedToken.startsWith('demo-token-'));
+        const tokenState = storedToken && !simulated ? await api.auth.checkToken(storedToken) : 'invalid';
+
+        if (storedUser && storedToken && tokenState !== 'invalid') {
           if (!cancelled) {
             setUser(storedUser);
             setToken(storedToken);

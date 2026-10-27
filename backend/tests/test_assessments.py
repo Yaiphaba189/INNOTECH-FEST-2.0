@@ -71,3 +71,16 @@ async def test_model_info_reports_engine_and_coverage(client):
     # tests run with trained weights disabled, so every crop reports the colour-rule engine
     assert cards["pineapple"]["inference_mode"] == "colour_heuristic"
     assert cards["pineapple"]["test_accuracy"] is None
+
+
+@pytest.mark.asyncio
+async def test_auto_detect_without_crop_hint_does_not_guess_a_crop(client):
+    import io
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new("RGB", (64, 64), (200, 160, 40)).save(buf, "JPEG")
+    res = (await client.post("/api/assessments/auto-detect", files={"image_file": ("f.jpg", buf.getvalue(), "image/jpeg")})).json()
+    assert res["detected_crop"] == "unknown"
+    assert res["crop_confidence"] == 0.0
+    assert res["diagnosis"]["triage_status"] == "inconclusive"

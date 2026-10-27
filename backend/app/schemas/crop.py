@@ -47,16 +47,16 @@ class FieldEvaluationResponse(BaseModel):
     crop_condition: str  # OPTIMAL, WATER_DEFICIT, ROOT_ROT_ONSET, MATURE_HARVEST, FALLOW
     condition_score: float
     water_status: str  # OPTIMAL, LACKING_WATER, WATERLOGGED
-    soil_moisture_pct: float
+    soil_moisture_pct: Optional[float] = None
     root_rot_status: str  # HEALTHY, EARLY_ONSET, CRITICAL_ROT
     root_rot_details: str
-    harvest_readiness_pct: float
+    harvest_readiness_pct: Optional[float] = None
     harvest_recommendation: str
-    estimated_brix: float
-    gdd_accumulated: float
-    gdd_target: float
-    optimal_harvest_window: str
-    recommended_pick_date: str
+    estimated_brix: Optional[float] = None
+    gdd_accumulated: Optional[float] = None
+    gdd_target: Optional[float] = None
+    optimal_harvest_window: Optional[str] = None
+    recommended_pick_date: Optional[str] = None
     weather_risk: str
     agronomic_advisory: str
 

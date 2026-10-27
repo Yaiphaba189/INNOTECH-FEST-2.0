@@ -57,9 +57,11 @@ class AutoDetectResponse(BaseModel):
     detected_crop: str  # pineapple, rice, orange
     crop_display_name: str
     crop_confidence: float
+    crop_source: str = "user_selected"  # user_selected | unidentified
     detected_part: str  # crown, base_stalk, lateral, leaf_blade, sheath, panicle, fruit_peel, foliage, root_rot
     part_display_name: str
     part_confidence: float
+    part_source: str = "user_selected"  # user_selected | defaulted | unidentified
     diagnosis: AutoDiagnosisDetail
     image_hash_sha256: Optional[str] = None
     model_version: str = "MultiCrop-MobileNetV3-Live"

@@ -127,6 +127,8 @@ export const BuyerMarketplace: React.FC = () => {
       });
     } catch (err) {
       console.warn('Order broadcast error:', err);
+      window.alert('Could not broadcast your order — the server is unreachable. Please try again.');
+      return;
     }
     setOrderSuccess(true);
     setTimeout(() => {

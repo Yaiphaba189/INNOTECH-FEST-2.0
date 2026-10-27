@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Header } from '@/components/common/Header';
 import { Footer } from '@/components/common/Footer';
+import { DemoDataBanner } from '@/components/common/DemoDataBanner';
 import { UserRole } from '@/types';
 
 // Header and footer live here so they persist across Farmer/Buyer/FPO navigation instead of remounting.
@@ -15,6 +16,7 @@ export default function TerminalLayout({ children }: { children: React.ReactNode
   return (
     <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
       <Header currentRole={currentRole} onSelectRole={(role) => router.push(`/${role}`)} />
+      <DemoDataBanner />
       {children}
       <Footer />
     </div>

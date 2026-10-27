@@ -135,7 +135,36 @@ class AssessmentService:
 
         crop_clean = (crop_hint or "").lower().strip()
         if crop_clean not in ["pineapple", "rice", "orange"]:
-            crop_clean = "pineapple"
+            # No crop-identification model exists, so never guess a crop (a held orange must not
+            # become a "pineapple heart rot" result): ask the farmer to pick the crop instead.
+            return {
+                "detected_crop": "unknown",
+                "crop_display_name": "Crop not identified",
+                "crop_confidence": 0.0,
+                "crop_source": "unidentified",
+                "detected_part": "unknown",
+                "part_display_name": "Select a crop to begin",
+                "part_confidence": 0.0,
+                "part_source": "unidentified",
+                "diagnosis": {
+                    "predicted_class": "unidentified",
+                    "display_name": "Select the crop to get a diagnosis",
+                    "local_name": "",
+                    "scientific_name": "",
+                    "confidence_score": 0.0,
+                    "severity_rating": "UNKNOWN",
+                    "symptoms_detected": [],
+                    "organic_treatment": "Choose Pineapple, Rice or Orange above, then scan again.",
+                    "chemical_treatment": "No recommendation until the crop is confirmed.",
+                    "cultural_practices": "Frame the affected plant part in daylight, filling most of the image.",
+                    "refer_to_expert": False,
+                    "triage_status": "inconclusive",
+                },
+                "image_hash_sha256": sha256,
+                "model_version": "crop-selection-required",
+                "inference_mode": "crop_not_selected",
+                "evidence": {},
+            }
 
         crop_display_map = {
             "pineapple": "Manipur Queen Pineapple (GI #497)",
@@ -144,6 +173,7 @@ class AssessmentService:
         }
 
         part_clean = (part_hint or "").lower().strip()
+        part_from_user = bool(part_clean)
         part_display_map = {
             "crown": "Crown Whorl (Rosette Heart)",
             "base_stalk": "Fruit Base & Basal Stalk",
@@ -166,7 +196,10 @@ class AssessmentService:
             if part_clean not in ["foliage", "fruit_peel", "root_rot", "citrus_greening_hlb", "citrus_canker"]:
                 part_clean = "foliage"
 
-        diag = predict_crop_disease(content, image_angle=part_clean, crop=crop_clean)
+        try:
+            diag = predict_crop_disease(content, image_angle=part_clean, crop=crop_clean)
+        except ValueError as ex:
+            raise ImageCorruptedError(str(ex))
         disease_info = DISEASE_REMEDIES.get(diag["predicted_class"], {})
         symptoms = diag.get("symptoms_detected") or disease_info.get("symptoms") or [
             "Normal vegetative tissue development"
@@ -203,10 +236,12 @@ class AssessmentService:
         return {
             "detected_crop": crop_clean,
             "crop_display_name": crop_display_map.get(crop_clean, "Manipur Horticulture Crop"),
-            "crop_confidence": 0.968,
+            "crop_confidence": 1.0,
+            "crop_source": "user_selected",
             "detected_part": part_key,
             "part_display_name": part_display_map.get(part_key, part_key.replace("_", " ").title()),
-            "part_confidence": 0.942,
+            "part_confidence": 1.0 if part_from_user else 0.0,
+            "part_source": "user_selected" if part_from_user else "defaulted",
             "diagnosis": {
                 "predicted_class": diag["predicted_class"],
                 "display_name": display_name_map.get(diag["predicted_class"], diag["predicted_class"].replace("_", " ").title()),

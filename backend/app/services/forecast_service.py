@@ -1,5 +1,6 @@
 from io import BytesIO
 from typing import Dict, Any, Optional
+from app.core.errors import ImageCorruptedError
 from datetime import date, timedelta
 from PIL import Image
 from sqlalchemy import select
@@ -65,10 +66,7 @@ class ForecastService:
         5. When to Harvest (Readiness %, GDD, Brix, Pick Date, Rain Advisory)
         """
         # Analyze vegetation, moisture proxy, and discoloration via PIL
-        green_pct = 50.0
-        dry_pct = 10.0
-        dark_pct = 5.0
-        soil_pct = 35.0
+        green_pct = dry_pct = dark_pct = soil_pct = 0.0
 
         try:
             im = Image.open(BytesIO(content)).convert('RGB')
@@ -96,132 +94,78 @@ class ForecastService:
                 dark_pct = (dark_count / total) * 100
                 soil_pct = (soil_count / total) * 100
         except Exception:
-            pass
+            raise ImageCorruptedError("Could not read the field photo.")
 
-        fn_lower = filename.lower()
-        is_water_deficit = "water" in fn_lower or "dry" in fn_lower or "wilt" in fn_lower or (dry_pct > 28 and green_pct < 45)
-        is_root_rot = "rot" in fn_lower or "canker" in fn_lower or "sheath" in fn_lower or (dark_pct > 22)
-        is_fallow = "fallow" in fn_lower or "soil" in fn_lower or "bare" in fn_lower or (green_pct + dry_pct < 12 and soil_pct > 65)
+        # Only what pixels can show: canopy cover and visual stress. Soil moisture, readiness, Brix,
+        # GDD and pick dates are NOT measurable from a photo, so they are returned as None.
+        vegetation = green_pct + dry_pct
+        visible = vegetation + dark_pct
+        health = round(100.0 * green_pct / visible, 1) if visible > 0 else 0.0
+        not_measured = "Not measurable from a photo; use the crop forecast for harvest timing."
 
-        # 1. Unplanted / Fallow Frame
-        if is_fallow:
+        common = {
+            "soil_moisture_pct": None,
+            "harvest_readiness_pct": None,
+            "estimated_brix": None,
+            "gdd_accumulated": None,
+            "gdd_target": None,
+            "optimal_harvest_window": None,
+            "recommended_pick_date": None,
+        }
+
+        if vegetation < 12:
             return {
+                **common,
                 "is_planted": False,
-                "planting_status": "Unplanted Fallow Ground",
-                "canopy_coverage_pct": round(max(5.0, green_pct + dry_pct), 1),
+                "planting_status": "No Vegetation Visible",
+                "canopy_coverage_pct": round(vegetation, 1),
                 "detected_crop": None,
-                "crop_display_name": "Bare Soil / Pre-Planting Terrace",
+                "crop_display_name": "No crop identified",
                 "crop_condition": "FALLOW",
-                "condition_score": 15.0,
-                "water_status": "DRY_SOIL",
-                "soil_moisture_pct": 18.2,
+                "condition_score": 0.0,
+                "water_status": "UNKNOWN",
                 "root_rot_status": "N/A",
-                "root_rot_details": "No active biological root system detected in fallow terrace soil.",
-                "harvest_readiness_pct": 0.0,
-                "harvest_recommendation": "Field not planted. Prepare contour ridges and add bio-manure.",
-                "estimated_brix": 0.0,
-                "gdd_accumulated": 0.0,
-                "gdd_target": 2500.0,
-                "optimal_harvest_window": "N/A - Planting Required",
-                "recommended_pick_date": "N/A",
-                "weather_risk": "LOW (Soil Work Favorable)",
-                "agronomic_advisory": "FALLOW PLOT: Terrace bed is currently unplanted (12% vegetation). Prepare double-row contour ridges on 15% slope and incorporate Farm Yard Manure (FYM) before monsoon planting."
+                "root_rot_details": "No plant tissue visible, so no root or collar assessment is possible.",
+                "harvest_recommendation": not_measured,
+                "weather_risk": "Not assessed from a photo",
+                "agronomic_advisory": f"Only {vegetation:.0f}% of the frame looks like vegetation. Frame the crop canopy in daylight and retake.",
             }
 
-        # 2. Planted Stand - Determine Crop
-        detected_crop = crop_hint or "pineapple"
-        if "rice" in fn_lower or crop_hint == "rice":
-            detected_crop = "rice"
-            crop_name = "Chak-hao & Valley Rice (Oryza sativa)"
-            gdd_target = 1850.0
-            gdd_acc = 1810.0
-            brix_val = 0.0
-        elif "orange" in fn_lower or crop_hint == "orange":
-            detected_crop = "orange"
-            crop_name = "Tamenglong Mandarin Orange (GI #498)"
-            gdd_target = 3100.0
-            gdd_acc = 3040.0
-            brix_val = 11.8
+        crop_names = {
+            "rice": "Chak-hao & Valley Rice (Oryza sativa)",
+            "orange": "Tamenglong Mandarin Orange (GI #498)",
+            "pineapple": "Manipur Queen Pineapple (GI #497)",
+        }
+        detected_crop = crop_hint if crop_hint in crop_names else None  # the crop is never guessed from pixels
+        crop_name = crop_names.get(detected_crop, "Crop not identified (select a crop)")
+        canopy_cov = round(min(100.0, vegetation), 1)
+
+        if dark_pct > 22:
+            condition, water, rot = "ROOT_ROT_ONSET", "WATERLOGGED", "EARLY_ONSET"
+            rot_details = f"{dark_pct:.0f}% of the frame is very dark/water-soaked tissue, a visual sign only. Inspect the stem collar."
+            advisory = "Dark water-soaked areas visible. Check drainage and inspect the basal collar; confirm with a KVK officer."
+        elif dry_pct > 28 and green_pct < 45:
+            condition, water, rot = "WATER_DEFICIT", "LACKING_WATER", "HEALTHY"
+            rot_details = "No dark water-soaked tissue visible."
+            advisory = f"{dry_pct:.0f}% of the canopy looks dry or yellowed against {green_pct:.0f}% green: possible moisture stress."
         else:
-            detected_crop = "pineapple"
-            crop_name = "Manipur Queen Pineapple (GI #497)"
-            gdd_target = 2500.0
-            gdd_acc = 2478.0
-            brix_val = 14.8
+            condition, water, rot = "OPTIMAL", "OPTIMAL", "HEALTHY"
+            rot_details = "No dark water-soaked tissue visible."
+            advisory = f"Canopy looks healthy ({green_pct:.0f}% green). This is a visual check only."
 
-        canopy_cov = round(min(98.5, max(65.0, green_pct + dry_pct + 25.0)), 1)
-
-        # 3. Water Deficit / Moisture Stress
-        if is_water_deficit:
-            return {
-                "is_planted": True,
-                "planting_status": "Established Stand",
-                "canopy_coverage_pct": canopy_cov,
-                "detected_crop": detected_crop,
-                "crop_display_name": crop_name,
-                "crop_condition": "WATER_DEFICIT",
-                "condition_score": 56.4,
-                "water_status": "LACKING_WATER",
-                "soil_moisture_pct": 28.4,
-                "root_rot_status": "HEALTHY",
-                "root_rot_details": "Root zone dry but healthy. No fungal pathogen detected at basal collar.",
-                "harvest_readiness_pct": 82.0,
-                "harvest_recommendation": "Provide 25mm drip/furrow irrigation before harvest to prevent fruit desiccation.",
-                "estimated_brix": brix_val,
-                "gdd_accumulated": gdd_acc * 0.92,
-                "gdd_target": gdd_target,
-                "optimal_harvest_window": "In 6 to 9 Days (Post-Rehydration)",
-                "recommended_pick_date": (date.today() + timedelta(days=7)).isoformat(),
-                "weather_risk": "MODERATE (High Evaporation & Moisture Deficit)",
-                "agronomic_advisory": "WATER DEFICIT: Crop is lacking water. Soil moisture is at 28.4% (critical threshold 35%). Leaves showing loss of turgor. Apply 25mm supplemental irrigation in early morning and mulch with paddy straw."
-            }
-
-        # 4. Root Rot Onset
-        if is_root_rot:
-            return {
-                "is_planted": True,
-                "planting_status": "Established Stand",
-                "canopy_coverage_pct": canopy_cov,
-                "detected_crop": detected_crop,
-                "crop_display_name": crop_name,
-                "crop_condition": "ROOT_ROT_ONSET",
-                "condition_score": 41.2,
-                "water_status": "WATERLOGGED",
-                "soil_moisture_pct": 88.5,
-                "root_rot_status": "EARLY_ONSET",
-                "root_rot_details": "Basal stem collar softening and dark water-soaking detected. Zoospore proliferation active.",
-                "harvest_readiness_pct": 94.0,
-                "harvest_recommendation": "Salvage harvest mature uninfected fruit immediately; excavate drainage trenches.",
-                "estimated_brix": max(12.0, brix_val - 1.5),
-                "gdd_accumulated": gdd_acc,
-                "gdd_target": gdd_target,
-                "optimal_harvest_window": "Immediate (Next 24 Hours)",
-                "recommended_pick_date": (date.today() + timedelta(days=1)).isoformat(),
-                "weather_risk": "CRITICAL (Standing Water Accelerating Basal Rot)",
-                "agronomic_advisory": "ROOT ROT STARTED: Early root and collar rot detected at stem base. Saturated furrows (88.5% moisture). Dig 30cm contour drainage channels immediately. Drench root collars with Trichoderma viride bio-fungicide @ 10g/L."
-            }
-
-        # 5. Optimal Stand - Ready for Peak Harvest
         return {
+            **common,
             "is_planted": True,
-            "planting_status": "Established Stand",
+            "planting_status": "Established Stand" if canopy_cov >= 40 else "Sparse Vegetation",
             "canopy_coverage_pct": canopy_cov,
             "detected_crop": detected_crop,
             "crop_display_name": crop_name,
-            "crop_condition": "MATURE_HARVEST",
-            "condition_score": 97.2,
-            "water_status": "OPTIMAL",
-            "soil_moisture_pct": 64.5,
-            "root_rot_status": "HEALTHY",
-            "root_rot_details": "Turgid root system, intact root crowns, no basal soft rot detected.",
-            "harvest_readiness_pct": 99.1,
-            "harvest_recommendation": "Optimal harvest window: Oct 22 – Oct 26. Harvest before Wednesday 65mm downpour.",
-            "estimated_brix": brix_val,
-            "gdd_accumulated": gdd_acc,
-            "gdd_target": gdd_target,
-            "optimal_harvest_window": "Oct 22 – Oct 26, 2026",
-            "recommended_pick_date": (date.today() + timedelta(days=2)).isoformat(),
-            "weather_risk": "HIGH (65mm Downpour Predicted in 48h)",
-            "agronomic_advisory": "PEAK HARVEST MATURITY: Stand has accumulated 99.1% GDD with 14.8° Brix (Grade A Export). Urgent pre-monsoon advisory: 65mm rainfall forecast in 48h. Harvest within 36 hours to avoid water blister and osmotic sucrose drop."
+            "crop_condition": condition,
+            "condition_score": health,
+            "water_status": water,
+            "root_rot_status": rot,
+            "root_rot_details": rot_details,
+            "harvest_recommendation": not_measured,
+            "weather_risk": "Not assessed from a photo",
+            "agronomic_advisory": advisory,
         }
-

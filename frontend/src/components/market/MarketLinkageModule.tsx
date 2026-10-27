@@ -41,7 +41,12 @@ export const MarketLinkageModule: React.FC<MarketLinkageModuleProps> = ({
   };
 
   const handleLockDeal = async (quote: BuyerMatchQuote) => {
-    await lockDeal(quote);
+    try {
+      await lockDeal(quote);
+    } catch {
+      window.alert('Could not confirm the deal — the server is unreachable. Nothing was booked.');
+      return;
+    }
     if (onDealLocked) setTimeout(() => onDealLocked(quote), 700);
   };
 

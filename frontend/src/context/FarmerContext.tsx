@@ -99,14 +99,23 @@ export const FarmerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       await api.acceptDeal(quote.id);
     } catch (err) {
       console.warn('Deal accept error:', err);
+      // The server never confirmed the deal, so undo the optimistic lock.
+      setLockedQuoteId(null);
+      setQuotes((prev) => prev.map((q) => (q.id === quote.id ? { ...q, status: 'available' } : q)));
+      throw err;
     }
   }, []);
 
   const pickAndBook = useCallback(async () => {
     if (!bestQuote || booking !== 'idle') return;
     setBooking('booking');
-    await lockDeal(bestQuote);
-    setBooking('booked');
+    try {
+      await lockDeal(bestQuote);
+      setBooking('booked');
+    } catch {
+      setBooking('idle');
+      window.alert('Could not confirm the deal — the server is unreachable. Nothing was booked.');
+    }
   }, [bestQuote, booking, lockDeal]);
 
   const value: FarmerContextType = {

@@ -43,22 +43,24 @@ interface FieldScanPreset {
   condition: 'OPTIMAL' | 'WATER_DEFICIT' | 'ROOT_ROT_ONSET' | 'MATURE_HARVEST' | 'FALLOW';
   conditionScore: number;
   waterStatus: 'OPTIMAL' | 'LACKING_WATER' | 'WATERLOGGED' | 'DRY_SOIL';
-  soilMoisturePct: number;
+  soilMoisturePct: number | null;
   rootRotStatus: 'HEALTHY' | 'EARLY_ONSET' | 'N/A';
   rootRotDetails: string;
-  harvestReadinessPct: number;
-  recommendedPickDate: string;
-  optimalHarvestWindow: string;
-  estimatedBrix: number;
-  gddAccumulated: number;
+  harvestReadinessPct: number | null;
+  recommendedPickDate: string | null;
+  optimalHarvestWindow: string | null;
+  estimatedBrix: number | null;
+  gddAccumulated: number | null;
   weatherRisk: string;
   advisory: string;
 }
 
+const pctOrDash = (v: number | null) => (v == null ? '—' : `${v}%`);
+
 const FIELD_SCAN_PRESETS: FieldScanPreset[] = [
   {
     id: 'mature_harvest',
-    label: 'Mature Stand (Harvest Ready)',
+    label: 'Sample: Mature Stand (Harvest Ready)',
     img: '/samples/crown_view.jpg',
     isPlanted: true,
     plantingStatus: 'Established Stand',
@@ -218,12 +220,14 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
   }, []);
 
   const handleRegisterClick = async () => {
-    setLotRegistered(true);
     try {
       await api.registerLot(450, 'crop-queen-tombi-001');
     } catch (err) {
       console.warn('Lot registration error:', err);
+      window.alert('Could not register the lot — the server is unreachable. Please try again.');
+      return;
     }
+    setLotRegistered(true);
     if (onRegisterLot) {
       setTimeout(() => {
         onRegisterLot();
@@ -325,6 +329,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
       }
     } catch (err) {
       console.warn('Frame evaluation error:', err);
+      window.alert('Could not analyse the field photo — the server is unreachable. No result was generated.');
     } finally {
       setIsEvaluating(false);
     }
@@ -373,6 +378,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
       });
     } catch (err) {
       console.warn('File upload evaluation error:', err);
+      window.alert('Could not analyse the field photo — the server is unreachable. No result was generated.');
     } finally {
       setIsEvaluating(false);
     }
@@ -457,10 +463,10 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
             HARVEST READINESS
           </div>
           <div className="tabular-nums" style={{ fontSize: '18px', fontWeight: 700, color: '#F97316', marginTop: '0.2rem' }}>
-            {fieldEvaluation.harvestReadinessPct}%
+            {pctOrDash(fieldEvaluation.harvestReadinessPct)}
           </div>
           <div style={{ fontSize: '12px', color: '#6E5A4A', marginTop: '0.2rem' }}>
-            {fieldEvaluation.isPlanted ? fieldEvaluation.optimalHarvestWindow : 'N/A - Planting Required'}
+            {fieldEvaluation.optimalHarvestWindow ?? 'Not measurable from a photo'}
           </div>
         </div>
 
@@ -477,7 +483,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
               marginTop: '0.2rem',
             }}
           >
-            {fieldEvaluation.soilMoisturePct}%
+            {pctOrDash(fieldEvaluation.soilMoisturePct)}
           </div>
           <div style={{ fontSize: '12px', fontWeight: 600, color: fieldEvaluation.waterStatus === 'LACKING_WATER' ? '#9a5b13' : fieldEvaluation.waterStatus === 'WATERLOGGED' ? '#a11920' : '#F97316', marginTop: '0.2rem' }}>
             {fieldEvaluation.waterStatus === 'LACKING_WATER' ? 'Deficit (Lacking Water)' : fieldEvaluation.waterStatus === 'WATERLOGGED' ? 'Waterlogged' : 'Optimal Hydration'}
@@ -591,7 +597,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
         {/* Quick Sample Presets Row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginRight: '0.2rem' }}>
-            PRESETS:
+            SAMPLE SCENARIOS (illustrative data, not your field):
           </span>
           {FIELD_SCAN_PRESETS.map((p) => {
             const isSelected = activePresetId === p.id && !isCameraActive;
@@ -780,7 +786,7 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                   SOIL MOISTURE
                 </div>
                 <div style={{ fontSize: '0.86rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.1rem' }}>
-                  {fieldEvaluation.soilMoisturePct}%
+                  {pctOrDash(fieldEvaluation.soilMoisturePct)}
                 </div>
                 <div
                   style={{
@@ -836,14 +842,14 @@ export const HarvestReadinessRadar: React.FC<HarvestReadinessRadarProps> = ({
                   WHEN TO HARVEST:
                 </span>
                 <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#FB923C' }}>
-                  {fieldEvaluation.recommendedPickDate}
+                  {fieldEvaluation.recommendedPickDate ?? '—'}
                 </span>
               </div>
               <div style={{ fontSize: '0.76rem', color: 'var(--text-primary)', fontWeight: 600 }}>
-                Window: {fieldEvaluation.optimalHarvestWindow}
+                Window: {fieldEvaluation.optimalHarvestWindow ?? '—'}
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                Thermal GDD: <strong>{fieldEvaluation.gddAccumulated}</strong> / 2500 • Sugar Sweetness: <strong>{fieldEvaluation.estimatedBrix}° Brix</strong>
+                Thermal GDD: <strong>{fieldEvaluation.gddAccumulated ?? '—'}</strong> / 2500 • Sugar Sweetness: <strong>{fieldEvaluation.estimatedBrix == null ? '—' : `${fieldEvaluation.estimatedBrix}° Brix`}</strong>
               </div>
             </div>
           </div>
