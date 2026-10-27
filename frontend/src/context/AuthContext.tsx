@@ -39,9 +39,10 @@ export const DEFAULT_DEMO_TOKEN = 'mock-jwt-farmer-tombi-001';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(DEFAULT_DEMO_FARMER);
-  const [token, setToken] = useState<string | null>(DEFAULT_DEMO_TOKEN);
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  // Starts true so guarded pages wait for the stored session to be restored before deciding to redirect.
+  const [isLoading, setIsLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'signup'>('login');
 
@@ -64,6 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           return;
         }
+
+        // Signed out (or never signed in): stay logged out; the user signs in or uses quick demo login.
+        if (!storedUser) return;
 
         const demo = storedUser ? Object.values(DEMO_USERS).find((u) => u.phone === storedUser.phone_number) : null;
         const phone = demo?.phone ?? DEFAULT_DEMO_FARMER.phone_number;

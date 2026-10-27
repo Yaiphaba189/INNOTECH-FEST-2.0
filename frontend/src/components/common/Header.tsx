@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { UserRole } from '@/types';
 import { useAuth } from '@/context/AuthContext';
@@ -26,12 +27,11 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectRole,
 }) => {
   const { t } = useTranslation();
+  const router = useRouter();
   const {
     user,
     isAuthenticated,
     logout,
-    switchDemoRole,
-    openAuthModal,
     closeAuthModal,
     isAuthModalOpen,
     authModalTab,
@@ -43,13 +43,11 @@ export const Header: React.FC<HeaderProps> = ({
   const isSuperAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
   const handleRoleTabClick = async (targetRole: UserRole) => {
-    if (user?.role !== targetRole && !isSuperAdmin) {
-      try {
-        await switchDemoRole(targetRole);
-      } catch (err) {
-        console.warn('Auto role switch fallback:', err);
-      }
+    if (!user) {
+      router.push('/login');
+      return;
     }
+    if (user.role !== targetRole && !isSuperAdmin) return;
     onSelectRole(targetRole);
   };
 
@@ -95,19 +93,7 @@ export const Header: React.FC<HeaderProps> = ({
       <header className="hl-topbar">
         {/* Brand & Subtitle */}
         <div className="hl-brand">
-          <div
-            style={{
-              width: '34px',
-              height: '34px',
-              borderRadius: '6px',
-              background: '#FB923C',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              flexShrink: 0,
-            }}
-          >
+          <div className="hl-logo">
             <Sprout size={18} color="#ffffff" strokeWidth={2.4} />
           </div>
           <div className="hl-brand-copy">
@@ -121,55 +107,48 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Role Navigation Segmented Switcher */}
         <nav className="hl-role-nav" aria-label="Role Switcher">
           {isSuperAdmin && (
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0 0.65rem',
-                borderRadius: '4px',
-                background: '#FFF5ED',
-                color: '#21170F',
-                fontSize: '12px',
-                fontWeight: 600,
-                alignSelf: 'center',
-                height: '28px',
-              }}
+            <div className="hl-admin-chip"
             >
               <ShieldCheck size={13} strokeWidth={2.2} />
               <span>Admin</span>
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={() => handleRoleTabClick('farmer')}
-            className={`hl-role-link ${currentRole === 'farmer' ? 'is-active' : ''}`}
-            title="Farmer Terminal"
-          >
-            <Sprout size={15} />
-            <span>Farmer</span>
-          </button>
+          {(!user || isSuperAdmin || user.role === 'farmer') && (
+            <button
+              type="button"
+              onClick={() => handleRoleTabClick('farmer')}
+              className={`hl-role-link ${currentRole === 'farmer' ? 'is-active' : ''}`}
+              title="Farmer Terminal"
+            >
+              <Sprout size={15} />
+              <span>Farmer</span>
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={() => handleRoleTabClick('buyer')}
-            className={`hl-role-link ${currentRole === 'buyer' ? 'is-active' : ''}`}
-            title="Buyer Marketplace"
-          >
-            <Building2 size={15} />
-            <span>Buyer</span>
-          </button>
+          {(!user || isSuperAdmin || user.role === 'buyer') && (
+            <button
+              type="button"
+              onClick={() => handleRoleTabClick('buyer')}
+              className={`hl-role-link ${currentRole === 'buyer' ? 'is-active' : ''}`}
+              title="Buyer Marketplace"
+            >
+              <Building2 size={15} />
+              <span>Buyer</span>
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={() => handleRoleTabClick('fpo')}
-            className={`hl-role-link ${currentRole === 'fpo' ? 'is-active' : ''}`}
-            title="FPO Collective Logistics"
-          >
-            <Truck size={15} />
-            <span>FPO Logistics</span>
-          </button>
+          {(!user || isSuperAdmin || user.role === 'fpo') && (
+            <button
+              type="button"
+              onClick={() => handleRoleTabClick('fpo')}
+              className={`hl-role-link ${currentRole === 'fpo' ? 'is-active' : ''}`}
+              title="FPO Collective Logistics"
+            >
+              <Truck size={15} />
+              <span>FPO Logistics</span>
+            </button>
+          )}
         </nav>
 
         {/* Right Side: Auth User Badge */}
@@ -206,7 +185,7 @@ export const Header: React.FC<HeaderProps> = ({
           ) : (
             <button
               type="button"
-              onClick={() => openAuthModal('login')}
+              onClick={() => router.push('/login')}
               className="hl-signin"
             >
               <User size={15} />
@@ -231,6 +210,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => {
                   setIsUserMenuOpen(false);
                   logout();
+                  router.push('/login');
                 }}
               >
                 <LogOut size={14} />

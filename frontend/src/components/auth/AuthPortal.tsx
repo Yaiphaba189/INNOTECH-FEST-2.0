@@ -55,7 +55,7 @@ export const AuthPortal: React.FC = () => {
     try {
       const user = await login(cleanPhone, loginPassword);
       setSuccessMsg(`Welcome, ${user.full_name}! Entering ${user.role.toUpperCase()} terminal...`);
-      router.push(`/${user.role}`);
+      router.push(user.role === 'buyer' || user.role === 'fpo' ? `/${user.role}` : '/farmer');
     } catch (err: any) {
       setErrorMsg(err.message || 'Login failed. Please check credentials.');
     }
@@ -91,7 +91,7 @@ export const AuthPortal: React.FC = () => {
         preferred_language: regLanguage,
       });
       setSuccessMsg(`Account created for ${user.full_name}! Entering terminal...`);
-      router.push(`/${user.role}`);
+      router.push(user.role === 'buyer' || user.role === 'fpo' ? `/${user.role}` : '/farmer');
     } catch (err: any) {
       setErrorMsg(err.message || 'Registration failed. Phone number may already exist.');
     }
@@ -105,7 +105,7 @@ export const AuthPortal: React.FC = () => {
     try {
       const user = await login(demo.phone, demo.pass);
       setSuccessMsg(`Signed in as ${demo.name} (${user.role.toUpperCase()})`);
-      router.push(`/${user.role}`);
+      router.push(user.role === 'buyer' || user.role === 'fpo' ? `/${user.role}` : '/farmer');
     } catch (err: any) {
       setErrorMsg(err.message || 'Demo sign in failed.');
     }

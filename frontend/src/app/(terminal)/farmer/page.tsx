@@ -1,8 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Header } from '@/components/common/Header';
-import { Footer } from '@/components/common/Footer';
 import { DiseaseScreeningStudio } from '@/components/disease/DiseaseScreeningStudio';
 import { HarvestReadinessRadar } from '@/components/harvest/HarvestReadinessRadar';
 import { MarketLinkageModule } from '@/components/market/MarketLinkageModule';
@@ -21,6 +19,10 @@ import {
   ArrowRight,
   User,
   Sparkles,
+  Sprout,
+  Candy,
+  Thermometer,
+  Hash,
 } from 'lucide-react';
 
 export default function FarmerPage() {
@@ -54,21 +56,13 @@ function FarmerHub() {
 
   return (
     <RoleGuard allowedRoles={['farmer']}>
-      <div className="app-shell" style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
-        <Header
-          currentRole="farmer"
-          onSelectRole={(role) => {
-            if (role === 'buyer') router.push('/buyer');
-            else if (role === 'fpo') router.push('/fpo');
-            else router.push('/farmer');
-          }}
-        />
-
+      <>
         <main className="app-sheet">
           <div className="farmer-workspace">
             {/* Screen Heading */}
             <div className="hl-screen-heading">
               <div>
+                <span className="hl-eyebrow">Farmer terminal</span>
                 <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)' }}>
                   Harvest decisions
                 </h1>
@@ -78,7 +72,10 @@ function FarmerHub() {
                 </p>
               </div>
 
-              <span className="hl-lot-id">{lot.lot_code || 'HL-Q-CCP-089'}</span>
+              <span className="hl-lot-id">
+                <Hash size={13} />
+                {lot.lot_code || 'HL-Q-CCP-089'}
+              </span>
             </div>
 
             {/* Overview Grid: Harvest Window & Field and Lot */}
@@ -152,6 +149,7 @@ function FarmerHub() {
             {/* 4 Essential Farm Telemetry Chips */}
             <div className="hl-metric-strip">
               <div>
+                <i className="hl-metric-icon"><Sprout size={16} /></i>
                 <span>Stand capacity</span>
                 <strong>
                   18,500 <small>plants</small>
@@ -160,6 +158,7 @@ function FarmerHub() {
               </div>
 
               <div>
+                <i className="hl-metric-icon"><Candy size={16} /></i>
                 <span>Fruit sweetness</span>
                 <strong style={{ color: '#F97316' }}>
                   14.8° <small>Brix</small>
@@ -168,6 +167,7 @@ function FarmerHub() {
               </div>
 
               <div>
+                <i className="hl-metric-icon"><Thermometer size={16} /></i>
                 <span>Thermal accumulation</span>
                 <strong style={{ color: '#783f0a' }}>
                   2,478 <small>/ 2,500 GDD</small>
@@ -176,6 +176,7 @@ function FarmerHub() {
               </div>
 
               <div>
+                <i className="hl-metric-icon"><CircleDollarSign size={16} /></i>
                 <span>Net return</span>
                 <strong style={{ color: '#F97316' }}>
                   ₹28.50 <small>/ kg</small>
@@ -231,8 +232,7 @@ function FarmerHub() {
           </div>
         </main>
 
-        <Footer />
-      </div>
+      </>
     </RoleGuard>
   );
 }

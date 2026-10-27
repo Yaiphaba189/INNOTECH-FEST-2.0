@@ -68,7 +68,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setSuccessMsg('Signed in successfully!');
       setTimeout(() => {
         onClose();
-        router.push(`/${user.role}`);
+        router.push(user.role === 'buyer' || user.role === 'fpo' ? `/${user.role}` : '/farmer');
       }, 300);
     } catch (err: any) {
       setErrorMsg(err.message || 'Login failed. Please check credentials.');
@@ -106,7 +106,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setSuccessMsg(`Account created for ${user.full_name}!`);
       setTimeout(() => {
         onClose();
-        router.push(`/${user.role}`);
+        router.push(user.role === 'buyer' || user.role === 'fpo' ? `/${user.role}` : '/farmer');
       }, 300);
     } catch (err: any) {
       setErrorMsg(err.message || 'Registration failed.');
@@ -123,7 +123,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setSuccessMsg(`Signed in as ${demo.name} (${user.role.toUpperCase()})`);
       setTimeout(() => {
         onClose();
-        router.push(`/${user.role}`);
+        router.push(user.role === 'buyer' || user.role === 'fpo' ? `/${user.role}` : '/farmer');
       }, 250);
     } catch (err: any) {
       setErrorMsg(err.message || 'Demo sign in failed.');

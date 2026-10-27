@@ -408,9 +408,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
     };
 
     sampleImg.onerror = () => {
-      ctx.fillStyle = '#0F172A';
+      ctx.fillStyle = '#FFF5ED';
       ctx.fillRect(0, 0, 640, 480);
-      ctx.fillStyle = '#38BDF8';
+      ctx.fillStyle = '#2563EB';
       ctx.font = 'bold 20px system-ui';
       ctx.fillText('Live Field Camera Feed', 180, 240);
       activateStream();
@@ -864,12 +864,12 @@ export const DiseaseScreeningStudio: React.FC = () => {
               position: 'relative',
               height: '280px',
               borderRadius: 'var(--radius-md)',
-              background: '#090D16',
+              background: '#FFF5ED',
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)',
+              border: '1px solid var(--border-subtle)',
             }}
           >
             {/* Live Video Feed - Always mounted so videoRef is never null */}
@@ -905,9 +905,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     left: '10px',
                     padding: '0.25rem 0.6rem',
                     borderRadius: 'var(--radius-full)',
-                    background: 'rgba(15, 23, 42, 0.85)',
+                    background: 'rgba(255, 255, 255, 0.92)',
                     border: '1px solid rgba(254, 215, 170, 0.4)',
-                    color: '#FED7AA',
+                    color: '#9A3412',
                     fontSize: '0.68rem',
                     fontWeight: 700,
                     display: 'flex',
@@ -928,9 +928,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     right: '10px',
                     padding: '0.25rem 0.65rem',
                     borderRadius: 'var(--radius-full)',
-                    background: 'rgba(15, 23, 42, 0.85)',
-                    color: '#FFFFFF',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    background: 'rgba(255, 255, 255, 0.92)',
+                    color: '#21170F',
+                    border: '1px solid var(--border-medium)',
                     fontSize: '0.7rem',
                     fontWeight: 700,
                     cursor: 'pointer',
@@ -957,7 +957,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    background: 'rgba(15, 23, 42, 0.85)',
+                    background: 'rgba(255, 255, 255, 0.92)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -969,7 +969,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                     <Camera size={20} color="#FB923C" />
-                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#FFFFFF' }}>
+                    <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#21170F' }}>
                       Real-Time AI Disease Scanner
                     </span>
                   </div>
@@ -981,7 +981,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                         border: '1px solid rgba(239, 68, 68, 0.45)',
                         borderRadius: 'var(--radius-sm)',
                         padding: '0.5rem 0.8rem',
-                        color: '#FCA5A5',
+                        color: '#B91C1C',
                         fontSize: '0.74rem',
                         maxWidth: '340px',
                         lineHeight: 1.45,
@@ -990,7 +990,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       {cameraError}
                     </div>
                   ) : (
-                    <p style={{ fontSize: '0.74rem', color: '#94A3B8', maxWidth: '300px', margin: 0, lineHeight: 1.4 }}>
+                    <p style={{ fontSize: '0.74rem', color: '#6E5A4A', maxWidth: '300px', margin: 0, lineHeight: 1.4 }}>
                       Point your live camera at Pineapple, Rice, or Orange plants for automatic real-time disease detection.
                     </p>
                   )}
@@ -1023,8 +1023,8 @@ export const DiseaseScreeningStudio: React.FC = () => {
                         padding: '0.45rem 0.85rem',
                         fontSize: '0.78rem',
                         gap: '0.35rem',
-                        background: 'rgba(30, 41, 59, 0.85)',
-                        color: '#38BDF8',
+                        background: 'rgba(255, 255, 255, 0.92)',
+                        color: '#2563EB',
                         border: '1px solid rgba(56, 189, 248, 0.4)',
                       }}
                     >
@@ -1048,9 +1048,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     zIndex: 4,
                     padding: '0.25rem 0.6rem',
                     borderRadius: 'var(--radius-full)',
-                    background: 'rgba(15, 23, 42, 0.85)',
+                    background: 'rgba(255, 255, 255, 0.92)',
                     border: isSimulatedCamera ? '1px solid rgba(56, 189, 248, 0.5)' : '1px solid rgba(251, 146, 60, 0.4)',
-                    color: isSimulatedCamera ? '#38BDF8' : '#FB923C',
+                    color: isSimulatedCamera ? '#2563EB' : '#FB923C',
                     fontSize: '0.68rem',
                     fontWeight: 700,
                     display: 'flex',
@@ -1078,7 +1078,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       style={{
                         padding: '0.25rem 0.6rem',
                         borderRadius: 'var(--radius-full)',
-                        background: 'rgba(15, 23, 42, 0.9)',
+                        background: 'rgba(255, 255, 255, 0.92)',
                         color: '#FB923C',
                         border: '1px solid rgba(74, 222, 128, 0.5)',
                         fontSize: '0.68rem',
@@ -1101,8 +1101,8 @@ export const DiseaseScreeningStudio: React.FC = () => {
                         style={{
                           padding: '0.25rem 0.55rem',
                           borderRadius: 'var(--radius-full)',
-                          background: 'rgba(15, 23, 42, 0.85)',
-                          color: '#38BDF8',
+                          background: 'rgba(255, 255, 255, 0.92)',
+                          color: '#2563EB',
                           border: '1px solid rgba(56, 189, 248, 0.4)',
                           fontSize: '0.68rem',
                           fontWeight: 600,
@@ -1122,9 +1122,9 @@ export const DiseaseScreeningStudio: React.FC = () => {
                         style={{
                           padding: '0.25rem 0.55rem',
                           borderRadius: 'var(--radius-full)',
-                          background: 'rgba(15, 23, 42, 0.85)',
-                          color: '#FFFFFF',
-                          border: '1px solid rgba(255, 255, 255, 0.25)',
+                          background: 'rgba(255, 255, 255, 0.92)',
+                          color: '#21170F',
+                          border: '1px solid var(--border-medium)',
                           fontSize: '0.68rem',
                           fontWeight: 600,
                           cursor: 'pointer',
@@ -1156,7 +1156,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                 >
                   <div
                     style={{
-                      background: 'rgba(15, 23, 42, 0.88)',
+                      background: 'rgba(255, 255, 255, 0.92)',
                       backdropFilter: 'blur(4px)',
                       border: '1px solid rgba(251, 146, 60, 0.4)',
                       borderRadius: 'var(--radius-full)',
@@ -1164,7 +1164,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      color: '#FED7AA',
+                      color: '#9A3412',
                       fontSize: '0.7rem',
                     }}
                   >
@@ -1178,7 +1178,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
 
                   <div
                     style={{
-                      background: 'rgba(15, 23, 42, 0.88)',
+                      background: 'rgba(255, 255, 255, 0.92)',
                       backdropFilter: 'blur(4px)',
                       border: '1px solid rgba(56, 189, 248, 0.35)',
                       borderRadius: 'var(--radius-full)',
@@ -1186,14 +1186,14 @@ export const DiseaseScreeningStudio: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      color: '#BAE6FD',
+                      color: '#1D4ED8',
                       fontSize: '0.68rem',
                     }}
                   >
                     <span>
                       Organ: {detectedOrganLive.name}
                     </span>
-                    <span style={{ color: '#38BDF8', fontWeight: 800 }}>
+                    <span style={{ color: '#2563EB', fontWeight: 800 }}>
                       {detectedOrganLive.confidence}%
                     </span>
                   </div>

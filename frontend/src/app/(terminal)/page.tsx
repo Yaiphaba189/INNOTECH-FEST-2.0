@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import FarmerPage from '@/app/farmer/page';
+import FarmerPage from '@/app/(terminal)/farmer/page';
 
 export default function HomePage() {
   const { user } = useAuth();

@@ -12,32 +12,49 @@ interface RoleGuardProps {
 }
 
 export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) => {
-  const { user, switchDemoRole, openAuthModal } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  const effectiveRole = user?.role || 'farmer';
-  const isDemo = !user || user.id?.startsWith('usr-') || user.phone_number?.startsWith('+91986200000');
-
-  // If in demo mode and visiting an allowed terminal, auto-sync the persona
   useEffect(() => {
-    if (isDemo && !allowedRoles.includes(effectiveRole) && allowedRoles.length > 0) {
-      switchDemoRole(allowedRoles[0]).catch((err) => {
-        console.warn('RoleGuard demo sync fallback:', err);
-      });
-    }
-  }, [isDemo, effectiveRole, allowedRoles, switchDemoRole]);
+    if (!isLoading && !user) router.replace('/login');
+  }, [user, isLoading, router]);
+
+  const effectiveRole = user?.role || 'farmer';
+
+  // Session still being restored from storage after a refresh
+  if (isLoading) return null;
+
+  // Logged out: ask for sign-in (quick demo login lives in the auth modal) instead of auto-logging in
+  if (!user) {
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+        <div style={{ maxWidth: '420px', width: '100%', background: '#FFFFFF', border: '1px solid #F1E4D8', borderRadius: '8px', padding: '2rem', textAlign: 'center' }}>
+          <Lock size={24} style={{ margin: '0 auto 1rem', color: '#21170F' }} />
+          <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#21170F', marginBottom: '0.5rem' }}>Sign in required</h1>
+          <p style={{ fontSize: '13px', color: '#6E5A4A', marginBottom: '1.25rem' }}>Please sign in to open this terminal.</p>
+          <button
+            onClick={() => router.push('/login')}
+            className="tap-target"
+            style={{ padding: '0.75rem 1.5rem', fontSize: '13px', fontWeight: 600, background: '#21170F', color: '#FFFFFF', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Super Admin (Mission Director) has full unrestricted access to all terminals
   if (effectiveRole === 'admin' || effectiveRole === 'superadmin') {
     return <>{children}</>;
   }
 
-  // Demo sessions and authorized roles have immediate terminal access
-  if (isDemo || allowedRoles.includes(effectiveRole)) {
+  // Only the roles listed for this terminal may enter (admins handled above)
+  if (allowedRoles.includes(effectiveRole)) {
     return <>{children}</>;
   }
 
-  // If an authenticated non-demo user role is not authorized for this view
+  // If an authenticated user's role is not authorized for this view
   const roleIcons: Record<string, any> = {
     farmer: Sprout,
     buyer: Building2,
@@ -107,7 +124,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
           <button
-            onClick={() => openAuthModal('login')}
+            onClick={() => router.push('/login')}
             className="tap-target"
             style={{
               padding: '0.75rem',
