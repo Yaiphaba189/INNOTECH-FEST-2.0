@@ -22,7 +22,6 @@ import {
   Sprout,
   Candy,
   Thermometer,
-  Hash,
 } from 'lucide-react';
 
 export default function FarmerPage() {
@@ -73,7 +72,6 @@ function FarmerHub() {
               </div>
 
               <span className="hl-lot-id">
-                <Hash size={13} />
                 {lot.lot_code || 'HL-Q-CCP-089'}
               </span>
             </div>

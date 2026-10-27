@@ -24,7 +24,7 @@ export const Footer: React.FC = () => {
             </p>
             <span className="hl-footer-badge">
               <BadgeCheck size={14} />
-              GI Registered: Manipur Queen Pineapple (#497)
+              GI Registered: Manipur Queen Pineapple (497)
             </span>
           </div>
 
@@ -48,25 +48,22 @@ export const Footer: React.FC = () => {
             <h3>Contact &amp; Helpdesk</h3>
             <div className="hl-footer-line">
               <Phone size={14} />
-              <span>
-                <strong>1800-180-1551</strong>
-                <small>Kisan Call Centre, Toll-Free</small>
-              </span>
+              <a href="tel:+919366137346">+91 93661 37346</a>
             </div>
             <div className="hl-footer-line">
               <Mail size={14} />
-              <a href="mailto:support@harvestlink-ai.in">support@harvestlink-ai.in</a>
+              <a href="mailto:yaiphabasigh189@gmail.com">yaiphabasigh189@gmail.com</a>
             </div>
             <div className="hl-footer-line">
               <MapPin size={14} />
-              <span>Nilakuthi Food Park, Imphal East, Manipur – 795002</span>
+              <span>Awang Potsangbam Khunou</span>
             </div>
           </div>
         </div>
 
         <div className="hl-footer-base">
           <span>
-            © 2026 <strong>HARVESTLINK AI</strong>. All rights reserved.
+            © 2026 <strong>Manzing Tech Pvt. Ltd.</strong> All rights reserved.
           </span>
           <span>Built for INNOTECH FEST 2.0</span>
         </div>

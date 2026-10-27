@@ -36,7 +36,7 @@ interface CropInfo {
 const CROP_METADATA: Record<string, CropInfo> = {
   pineapple: {
     id: 'pineapple',
-    name: 'Manipur Queen Pineapple (GI #497)',
+    name: 'Manipur Queen Pineapple (GI 497)',
     scientificName: 'Ananas comosus var. Queen',
   },
   rice: {
@@ -46,7 +46,7 @@ const CROP_METADATA: Record<string, CropInfo> = {
   },
   orange: {
     id: 'orange',
-    name: 'Tamenglong Mandarin Orange (GI #498)',
+    name: 'Tamenglong Mandarin Orange (GI 498)',
     scientificName: 'Citrus reticulata Blanco',
   },
 };
@@ -158,7 +158,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
     confidence: number;
   }>({
     id: 'pineapple',
-    name: 'Manipur Queen Pineapple (GI #497)',
+    name: 'Manipur Queen Pineapple (GI 497)',
     confidence: 97.4,
   });
   const [detectedOrganLive, setDetectedOrganLive] = useState<{
@@ -1169,7 +1169,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
                     }}
                   >
                     <span style={{ fontWeight: 700 }}>
-                      Crop: {detectedCropLive.name}
+                      Crop: {detectedCropLive.name.replace(/#/g, "")}
                     </span>
                     <span style={{ color: '#FB923C', fontWeight: 800 }}>
                       {detectedCropLive.confidence}%
@@ -1444,7 +1444,7 @@ export const DiseaseScreeningStudio: React.FC = () => {
               >
                 <div>
                   <strong style={{ color: 'var(--text-primary)' }}>
-                    {diagnosis.crop_display_name || detectedCropLive.name}
+                    {(diagnosis.crop_display_name || detectedCropLive.name).replace(/#/g, "")}
                   </strong>
                   <span style={{ color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
                     • {diagnosis.part_display_name || detectedOrganLive.name}
